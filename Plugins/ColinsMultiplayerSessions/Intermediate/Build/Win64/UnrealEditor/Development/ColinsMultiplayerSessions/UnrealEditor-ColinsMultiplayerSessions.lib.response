@@ -1,0 +1,13 @@
+/NOLOGO
+/errorReport:prompt
+/MACHINE:x64
+/SUBSYSTEM:WINDOWS
+/DEF
+/NAME:"UnrealEditor-ColinsMultiplayerSessions.dll"
+/IGNORE:4221
+/NODEFAULTLIB
+"C:\Users\colin\Documents\Unreal Projects\MP_Course\Intermediate\Build\Win64\MP_CourseEditor\Development\Engine\SharedPCH.Engine.ShadowErrors.h.obj"
+"C:\Users\colin\Documents\Unreal Projects\MP_Course\Plugins\ColinsMultiplayerSessions\Intermediate\Build\Win64\UnrealEditor\Development\ColinsMultiplayerSessions\Module.ColinsMultiplayerSessions.cpp.obj"
+"C:\Users\colin\Documents\Unreal Projects\MP_Course\Plugins\ColinsMultiplayerSessions\Intermediate\Build\Win64\UnrealEditor\Development\ColinsMultiplayerSessions\Module.ColinsMultiplayerSessions.gen.cpp.obj"
+"C:\Users\colin\Documents\Unreal Projects\MP_Course\Plugins\ColinsMultiplayerSessions\Intermediate\Build\Win64\UnrealEditor\Development\ColinsMultiplayerSessions\Default.rc2.res"
+/OUT:"C:\Users\colin\Documents\Unreal Projects\MP_Course\Plugins\ColinsMultiplayerSessions\Intermediate\Build\Win64\UnrealEditor\Development\ColinsMultiplayerSessions\UnrealEditor-ColinsMultiplayerSessions.lib"

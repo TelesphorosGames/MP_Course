@@ -1,0 +1,15 @@
+{
+	"RemapUnityFiles": 
+	{
+		"Module.ColinsMultiplayerSessions.cpp.obj": [
+			"ColinsMultiplayerSessions.cpp.obj",
+			"Menu.cpp.obj",
+			"MultiplayerSessionSubsystem.cpp.obj"
+		],
+		"Module.ColinsMultiplayerSessions.gen.cpp.obj": [
+			"ColinsMultiplayerSessions.init.gen.cpp.obj",
+			"Menu.gen.cpp.obj",
+			"MultiplayerSessionSubsystem.gen.cpp.obj"
+		]
+	}
+}
