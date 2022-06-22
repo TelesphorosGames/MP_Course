@@ -12,10 +12,10 @@
 !/Source/**
 !/Config/**
 !/Plugins/**
-Plugins/ColinsMultiplayerSessions/Intermediate/
-Plugins/ColinsMultiplayerSessions/Binaries/
-Plugins/Developer/RiderLink/Intermediate/
-Plugins/Developer/RiderLink/Binaries/
+Plugins/ColinsMultiplayerSessions/Intermediate/**
+Plugins/ColinsMultiplayerSessions/Binaries/**
+Plugins/Developer/RiderLink/Intermediate/**
+Plugins/Developer/RiderLink/Binaries/**
 
 # Only allow .uasset and .umap files from /Content dir.
 # They're tracked by git-lfs, don't forget to track other
