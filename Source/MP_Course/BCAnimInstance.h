@@ -33,7 +33,6 @@ private:
 	UPROPERTY(BlueprintReadOnly, Category="Character | Movement", meta = (AllowPrivateAccess="true"))
 	bool bIsInAir;
 	UPROPERTY(BlueprintReadOnly, Category="Character | Movement", meta = (AllowPrivateAccess="true"))
-	bool bIsAccellerating; 
-	
+	bool bIsAccellerating;
 	
 };
