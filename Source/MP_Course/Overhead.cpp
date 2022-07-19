@@ -36,9 +36,23 @@ void UOverhead::ShowPlayerNetRole(APawn* InPawn)
 		break;
 	default: ;
 	}
-    auto PlayerName = InPawn->GetPlayerState()->GetPlayerName();
-	FString LocalRoleString = FString::Printf(TEXT("Local Role: %s, Player Name : %s"), *Role, *PlayerName);
-	SetDisplayText(LocalRoleString);
+
+	APlayerState* PlayerState = GetOwningPlayerState();
+	if(PlayerState)
+	{
+		  auto PlayerName = PlayerState->GetPlayerName();
+        	
+        	FString LocalRoleString = FString::Printf(TEXT("Local Role: %s, Player Name : %s"), *Role, *PlayerName);
+        
+        	if(DisplayText)
+        	{
+        		SetDisplayText(LocalRoleString);
+        	}
+	}
+  
+       	
+	
+	
 	
 }
 

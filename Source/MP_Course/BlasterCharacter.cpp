@@ -3,10 +3,12 @@
 
 #include "BlasterCharacter.h"
 
+#include "Weapon.h"
 #include "Camera/CameraComponent.h"
 #include "Components/WidgetComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Net/UnrealNetwork.h"
 
 // Sets default values
 ABlasterCharacter::ABlasterCharacter()
@@ -31,58 +33,7 @@ ABlasterCharacter::ABlasterCharacter()
 
 }
 
-// Called when the game starts or when spawned
-void ABlasterCharacter::BeginPlay()
-{
-	Super::BeginPlay();
-	
-}
 
-void ABlasterCharacter::MoveForward(float Value)
-{
-	if (Controller != nullptr && Value !=0.f)
-	{
-		const FRotator YawRotation( 0.f, Controller->GetControlRotation().Yaw, 0.f );
-		const FVector Direction(FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X));
-		AddMovementInput(Direction, Value);
-
-		
-			
-	}
-}
-
-void ABlasterCharacter::MoveRight(float Value)
-{
-	if (Controller != nullptr && Value !=0.f)
-	{
-		const FRotator YawRotation = { 0.f, Controller->GetControlRotation().Yaw, 0.f };
-		const FVector Direction(FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y));
-		AddMovementInput(Direction, Value);
-
-		
-			
-	}
-}
-
-void ABlasterCharacter::Turn(float Value)
-{
-	AddControllerYawInput(Value);
-}
-
-void ABlasterCharacter::LookUp(float Value)
-{
-	AddControllerPitchInput(Value);
-}
-
-
-// Called every frame
-void ABlasterCharacter::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
-}
-
-// Called to bind functionality to input
 void ABlasterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
@@ -97,3 +48,79 @@ void ABlasterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 
 }
 
+void ABlasterCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME_CONDITION(ABlasterCharacter, OverlappingWeapon, COND_OwnerOnly);
+}
+
+void ABlasterCharacter::BeginPlay()
+{
+	Super::BeginPlay();
+	
+}
+
+void ABlasterCharacter::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+}
+void ABlasterCharacter::MoveForward(float Value)
+{
+	if (Controller != nullptr && Value !=0.f)
+	{
+		const FRotator YawRotation( 0.f, Controller->GetControlRotation().Yaw, 0.f );
+		const FVector Direction(FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X));
+		AddMovementInput(Direction, Value);
+	}
+}
+
+void ABlasterCharacter::MoveRight(float Value)
+{
+	if (Controller != nullptr && Value !=0.f)
+	{
+		const FRotator YawRotation = { 0.f, Controller->GetControlRotation().Yaw, 0.f };
+		const FVector Direction(FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y));
+		AddMovementInput(Direction, Value);
+	}
+}
+
+void ABlasterCharacter::Turn(float Value)
+{
+	AddControllerYawInput(Value);
+}
+
+void ABlasterCharacter::LookUp(float Value)
+{
+	AddControllerPitchInput(Value);
+}
+
+void ABlasterCharacter::OnRep_OverlappingWeapon(AWeapon* LastWeapon)
+{
+	if(OverlappingWeapon)
+	{
+		OverlappingWeapon->ShowPickupWidget(true);
+	}
+	if(LastWeapon)
+	{
+		LastWeapon->ShowPickupWidget(false);
+	}
+}
+
+void ABlasterCharacter::SetOverlappingWeapon(AWeapon* Weapon)
+{
+	if(OverlappingWeapon)
+	{
+		OverlappingWeapon->ShowPickupWidget(false);
+	}
+	OverlappingWeapon = Weapon;
+	if(IsLocallyControlled())
+	{
+		if(OverlappingWeapon)
+		{
+			OverlappingWeapon->ShowPickupWidget(true);
+		}
+	}
+	
+}
