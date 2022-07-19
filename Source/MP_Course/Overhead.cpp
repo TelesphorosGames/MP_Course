@@ -50,9 +50,6 @@ void UOverhead::ShowPlayerNetRole(APawn* InPawn)
         	}
 	}
   
-       	
-	
-	
 	
 }
 

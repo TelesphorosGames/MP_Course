@@ -30,9 +30,11 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 
+	/* Public Getters and Setters */
+	
+	FORCEINLINE void SetWeaponState(EWeaponState State) { WeaponState = State ;}
 
-
-	// Public Custom Functions 
+	/* Public Custom Functions */ 
 
 	void ShowPickupWidget(bool bShowWidget);
 
