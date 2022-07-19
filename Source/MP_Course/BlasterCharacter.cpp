@@ -113,7 +113,10 @@ void ABlasterCharacter::LookUp(float Value)
 
 void ABlasterCharacter::EquipButtonPressed()
 {
-	
+	if(CombatComponent && HasAuthority())
+	{
+		CombatComponent->EquipWeapon(OverlappingWeapon);
+	}
 }
 
 void ABlasterCharacter::OnRep_OverlappingWeapon(AWeapon* LastWeapon)
