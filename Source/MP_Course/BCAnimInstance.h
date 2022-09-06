@@ -1,14 +1,10 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
 #include "Animation/AnimInstance.h"
 #include "BCAnimInstance.generated.h"
 
-/**
- * 
- */
+/*  Animation Instance class to parent our character's Anim BP from */
 UCLASS()
 class MP_COURSE_API UBCAnimInstance : public UAnimInstance
 {
