@@ -30,5 +30,14 @@ private:
 	bool bIsInAir;
 	UPROPERTY(BlueprintReadOnly, Category="Character | Movement", meta = (AllowPrivateAccess="true"))
 	bool bIsAccellerating;
+
+	UPROPERTY(BlueprintReadOnly, Category="Character | Movement", meta = (AllowPrivateAccess="true"))
+	bool bIsWeaponEquipped;
+	
+	UPROPERTY(BlueprintReadOnly, Category="Character | Movement", meta = (AllowPrivateAccess="true"))
+	bool bIsCrouched;
+	
+	UPROPERTY(BlueprintReadOnly, Category="Character | Movement", meta = (AllowPrivateAccess="true"))
+	bool bAiming;
 	
 };
