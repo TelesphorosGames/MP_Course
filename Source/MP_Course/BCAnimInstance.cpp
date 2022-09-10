@@ -2,6 +2,7 @@
 
 #include "BlasterCharacter.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Kismet/KismetMathLibrary.h"
 
 void UBCAnimInstance::NativeInitializeAnimation()
 {
@@ -35,5 +36,24 @@ void UBCAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	bIsWeaponEquipped = BlasterCharacter->IsWeaponEquipped();
 	bIsCrouched = BlasterCharacter->bIsCrouched;
 	bAiming = BlasterCharacter->IsAiming();
+
+
+    // Get Yaw Offset, Used for Strafing -- Delta Rotator between character's Base Aim Rotation ( World Space direction camera is facing )
+	// and Movement Rotation -  The direction our character is moving in ( also world space, only >0 when moving ) 
+	FRotator AimRotation = BlasterCharacter->GetBaseAimRotation();
+	FRotator MovementRotation = UKismetMathLibrary::MakeRotFromX(BlasterCharacter->GetVelocity());
+	// YawOffset = UKismetMathLibrary::NormalizedDeltaRotator(MovementRotation, AimRotation).Yaw;
+	FRotator DeltaRot = UKismetMathLibrary::NormalizedDeltaRotator(MovementRotation, AimRotation);
+
+	DeltaRotation = FMath::RInterpTo(DeltaRotation, DeltaRot, DeltaSeconds, 15.f );
+	YawOffset = DeltaRotation.Yaw;
+	
+	CharacterRoationLastFrame = CharacterRotation;
+	CharacterRotation = BlasterCharacter->GetActorRotation();
+	const FRotator DeltaLeanRotation = UKismetMathLibrary::NormalizedDeltaRotator(CharacterRotation, CharacterRoationLastFrame);
+	const float LeanTarget = DeltaLeanRotation.Yaw / DeltaSeconds;
+	const float LeanInterp = FMath::FInterpTo(Lean, LeanTarget, DeltaSeconds, 6.f);
+	Lean = FMath::Clamp(LeanInterp, -180.f, 180.f);
+	
 	
 }
