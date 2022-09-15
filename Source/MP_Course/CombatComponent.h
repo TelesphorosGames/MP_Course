@@ -37,6 +37,7 @@ protected:
 
 private:
 
+	UPROPERTY()
 	ABlasterCharacter* Character;
 
 	UPROPERTY(ReplicatedUsing = OnRep_EquippedWeapon)
@@ -44,7 +45,11 @@ private:
 
 	UPROPERTY(Replicated)
 	bool bAiming;
-
+	
+	UPROPERTY(EditAnywhere)
+	float BaseWalkSpeed;
+	UPROPERTY(EditAnywhere)
+	float AimingWalkSpeed;
 
 public:	
 

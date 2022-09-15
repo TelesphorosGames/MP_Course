@@ -39,15 +39,16 @@ void UBCAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 
 
     // Get Yaw Offset, Used for Strafing -- Delta Rotator between character's Base Aim Rotation ( World Space direction camera is facing )
-	// and Movement Rotation -  The direction our character is moving in ( also world space, only >0 when moving ) 
+	// and Movement Rotation -  The direction our character is moving in ( also world space, only > 0 when moving ) 
 	FRotator AimRotation = BlasterCharacter->GetBaseAimRotation();
 	FRotator MovementRotation = UKismetMathLibrary::MakeRotFromX(BlasterCharacter->GetVelocity());
-	// YawOffset = UKismetMathLibrary::NormalizedDeltaRotator(MovementRotation, AimRotation).Yaw;
 	FRotator DeltaRot = UKismetMathLibrary::NormalizedDeltaRotator(MovementRotation, AimRotation);
-
 	DeltaRotation = FMath::RInterpTo(DeltaRotation, DeltaRot, DeltaSeconds, 15.f );
 	YawOffset = DeltaRotation.Yaw;
-	
+	// Get Lean variable used to lean in running blendspaces -
+	// The Yaw  of a delta rotator between the character's current rotation and last frame rotation,
+	// scaled by delta time and clamped to debug fast input. 
+	// This gives the direction the player is turning. 
 	CharacterRoationLastFrame = CharacterRotation;
 	CharacterRotation = BlasterCharacter->GetActorRotation();
 	const FRotator DeltaLeanRotation = UKismetMathLibrary::NormalizedDeltaRotator(CharacterRotation, CharacterRoationLastFrame);
