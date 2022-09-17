@@ -41,6 +41,8 @@ protected:
 	void AimButtonPressed();
 	void AimButtonReleased();
 
+	void AimOffset(float DeltaTime);
+
 	
 private:
 
@@ -65,12 +67,18 @@ private:
 	UFUNCTION(Server, Reliable)
 	void ServerEquipButtonPressed();
 
+	
+	FRotator StartingAimRotation{};
+
 public:
 	
 	void SetOverlappingWeapon(AWeapon* Weapon);
 
-	bool IsWeaponEquipped();
+	bool IsWeaponEquipped() const;
 
-	bool IsAiming();
+	bool IsAiming() const;
+
+	float AO_Yaw{};
+	float AO_Pitch{};
 	 
 };

@@ -9,6 +9,7 @@
 #include "Components/WidgetComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "Net/UnrealNetwork.h"
 
 // Sets default values
@@ -81,6 +82,8 @@ void ABlasterCharacter::BeginPlay()
 void ABlasterCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	AimOffset(DeltaTime);
 
 }
 void ABlasterCharacter::MoveForward(float Value)
@@ -157,6 +160,40 @@ void ABlasterCharacter::AimButtonReleased()
 	{
 		CombatComponent->SetAiming(false);
 	}
+	
+}
+
+void ABlasterCharacter::AimOffset(float DeltaTime)
+{
+	if(CombatComponent && CombatComponent->EquippedWeapon == nullptr || !CombatComponent) return;
+	FVector Velocity = GetVelocity();
+	Velocity.Z = 0.f;
+	const float Speed = Velocity.Size();
+	const bool bIsInAir = GetCharacterMovement()->IsFalling();
+
+	if(Speed == 0.f && !bIsInAir)
+	{
+		FRotator CurrentAimRotation = {0.f, GetBaseAimRotation().Yaw, 0.f};
+		FRotator DeltaAimRotation = UKismetMathLibrary::NormalizedDeltaRotator(StartingAimRotation, CurrentAimRotation);
+		AO_Yaw = DeltaAimRotation.Yaw;
+		bUseControllerRotationYaw = false;
+	}
+	if(Speed > 0.f || bIsInAir)
+	{
+		StartingAimRotation = {0.f, GetBaseAimRotation().Yaw, 0.f};
+		AO_Yaw = 0.f;
+		bUseControllerRotationYaw = true;
+	}
+
+	AO_Pitch = GetBaseAimRotation().Pitch;
+
+	if(AO_Pitch > 90.f && !IsLocallyControlled())
+	{
+		FVector2D InRange(270.f, 360.f);
+		FVector2D OutRange(-90.f, 0.f);
+		AO_Pitch = FMath::GetMappedRangeValueClamped(InRange, OutRange, AO_Pitch);
+	}
+	
 }
 
 void ABlasterCharacter::OnRep_OverlappingWeapon(AWeapon* LastWeapon)
@@ -196,12 +233,12 @@ void ABlasterCharacter::SetOverlappingWeapon(AWeapon* Weapon)
 	
 }
 
-bool ABlasterCharacter::IsWeaponEquipped()
+bool ABlasterCharacter::IsWeaponEquipped() const
 {
 	return (CombatComponent && CombatComponent->EquippedWeapon);
 }
 
-bool ABlasterCharacter::IsAiming()
+bool ABlasterCharacter::IsAiming() const
 {
 	return(CombatComponent && CombatComponent->bAiming);
 }
