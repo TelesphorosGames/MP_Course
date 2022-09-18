@@ -64,6 +64,12 @@ void ABlasterCharacter::PostInitializeComponents()
 	}
 }
 
+AWeapon* ABlasterCharacter::GetEquippedWeapon()
+{
+	if(CombatComponent == nullptr) return nullptr;
+	return CombatComponent->EquippedWeapon;
+}
+
 void ABlasterCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
@@ -173,27 +179,41 @@ void ABlasterCharacter::AimOffset(float DeltaTime)
 
 	if(Speed == 0.f && !bIsInAir)
 	{
-		FRotator CurrentAimRotation = {0.f, GetBaseAimRotation().Yaw, 0.f};
-		FRotator DeltaAimRotation = UKismetMathLibrary::NormalizedDeltaRotator(StartingAimRotation, CurrentAimRotation);
-		AO_Yaw = DeltaAimRotation.Yaw;
+		const FRotator CurrentAimRotation = {0.f, GetBaseAimRotation().Yaw, 0.f};
+		const FRotator DeltaAimRotation = UKismetMathLibrary::NormalizedDeltaRotator(StartingAimRotation, CurrentAimRotation);
+		SetAO_Yaw(DeltaAimRotation.Yaw);
 		bUseControllerRotationYaw = false;
+		TurnInPlace(DeltaTime);
 	}
 	if(Speed > 0.f || bIsInAir)
 	{
 		StartingAimRotation = {0.f, GetBaseAimRotation().Yaw, 0.f};
 		AO_Yaw = 0.f;
 		bUseControllerRotationYaw = true;
+		TurningInPlace = ETurningInPlace::ETIP_NotTurning;
 	}
 
 	AO_Pitch = GetBaseAimRotation().Pitch;
 
 	if(AO_Pitch > 90.f && !IsLocallyControlled())
 	{
-		FVector2D InRange(270.f, 360.f);
-		FVector2D OutRange(-90.f, 0.f);
+		const FVector2D InRange(270.f, 360.f);
+		const FVector2D OutRange(-90.f, 0.f);
 		AO_Pitch = FMath::GetMappedRangeValueClamped(InRange, OutRange, AO_Pitch);
 	}
 	
+}
+
+void ABlasterCharacter::TurnInPlace(float DeltaTime)
+{
+	if(AO_Yaw > 90.f)
+	{
+		TurningInPlace = ETurningInPlace::ETIP_Right;
+	}
+	if(AO_Yaw < -90.f)
+	{
+		TurningInPlace = ETurningInPlace::ETIP_Left;
+	}
 }
 
 void ABlasterCharacter::OnRep_OverlappingWeapon(AWeapon* LastWeapon)

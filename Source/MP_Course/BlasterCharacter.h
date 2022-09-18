@@ -4,6 +4,9 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "TurnInPlace.h"
+
+
 #include "BlasterCharacter.generated.h"
 
 UCLASS()
@@ -22,9 +25,24 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 	virtual void PostInitializeComponents() override;
+
+	void SetOverlappingWeapon(class AWeapon* Weapon);
+
+	bool IsWeaponEquipped() const;
+
+	bool IsAiming() const;
+
 	
-	// PUBLIC GETTERS AND SETTERS:
 	
+	// GETTERS AND SETTERS:
+
+	AWeapon* GetEquippedWeapon();
+
+	FORCEINLINE void SetAO_Yaw(float inYaw) {AO_Yaw = inYaw; }
+	FORCEINLINE void SetAO_Pitch(float inPitch) {AO_Pitch = inPitch; }
+	FORCEINLINE float GetAO_Yaw() const {return AO_Yaw; }
+	FORCEINLINE float GetAO_Pitch() const {return AO_Pitch; }
+	FORCEINLINE ETurningInPlace GetTurningInPlace() const {return TurningInPlace; }
 
 	
 protected:
@@ -42,6 +60,7 @@ protected:
 	void AimButtonReleased();
 
 	void AimOffset(float DeltaTime);
+	void TurnInPlace(float DeltaTime);
 
 	
 private:
@@ -66,19 +85,12 @@ private:
 
 	UFUNCTION(Server, Reliable)
 	void ServerEquipButtonPressed();
-
 	
 	FRotator StartingAimRotation{};
-
-public:
 	
-	void SetOverlappingWeapon(AWeapon* Weapon);
-
-	bool IsWeaponEquipped() const;
-
-	bool IsAiming() const;
-
 	float AO_Yaw{};
 	float AO_Pitch{};
+
+	ETurningInPlace TurningInPlace{};
 	 
 };

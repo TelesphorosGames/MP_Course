@@ -2,6 +2,9 @@
 
 #include "CoreMinimal.h"
 #include "Animation/AnimInstance.h"
+#include "TurnInPlace.h"
+
+
 #include "BCAnimInstance.generated.h"
 
 /*  Animation Instance class to parent our character's Anim BP from */
@@ -15,6 +18,7 @@ public:
 	virtual void NativeInitializeAnimation() override;
 	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
 
+	
 protected:
 	
 
@@ -33,6 +37,9 @@ private:
 
 	UPROPERTY(BlueprintReadOnly, Category="Character | Movement", meta = (AllowPrivateAccess="true"))
 	bool bIsWeaponEquipped;
+
+	UPROPERTY(BlueprintReadOnly, Category="Character | Movement", meta = (AllowPrivateAccess="true"))
+	class AWeapon* EquippedWeapon;
 	
 	UPROPERTY(BlueprintReadOnly, Category="Character | Movement", meta = (AllowPrivateAccess="true"))
 	bool bIsCrouched;
@@ -57,4 +64,11 @@ private:
     	
     UPROPERTY(BlueprintReadOnly, Category="Character | Movement", meta = (AllowPrivateAccess="true"))
     float AOPitch;
+
+	UPROPERTY(BlueprintReadOnly, Category="Character | Movement", meta = (AllowPrivateAccess="true"))
+	FTransform LeftHandTransform{};
+
+	UPROPERTY(BlueprintReadOnly, Category="Character | Movement", meta = (AllowPrivateAccess="true"))	
+	ETurningInPlace TurningInPlace;
+	
 };

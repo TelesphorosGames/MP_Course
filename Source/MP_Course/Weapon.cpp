@@ -76,6 +76,7 @@ void AWeapon::SetWeaponState(EWeaponState State)
 		ShowPickupWidget(false);
 		AreaSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		break;
+	default: ;
 	}
 	
 	ShowPickupWidget(false);
