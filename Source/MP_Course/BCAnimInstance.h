@@ -56,7 +56,7 @@ private:
 	FRotator CharacterRoationLastFrame;
 	UPROPERTY(BlueprintReadOnly, Category="Character | Movement", meta = (AllowPrivateAccess="true"))
 	FRotator CharacterRotation;
-
+	UPROPERTY(BlueprintReadOnly, Category="Character | Movement", meta = (AllowPrivateAccess="true"))
 	FRotator DeltaRotation;
 	
 	UPROPERTY(BlueprintReadOnly, Category="Character | Movement", meta = (AllowPrivateAccess="true"))

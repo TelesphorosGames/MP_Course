@@ -77,8 +77,6 @@ void ABlasterCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Ou
 	DOREPLIFETIME_CONDITION(ABlasterCharacter, OverlappingWeapon, COND_OwnerOnly);
 }
 
-
-
 void ABlasterCharacter::BeginPlay()
 {
 	Super::BeginPlay();
@@ -134,9 +132,7 @@ void ABlasterCharacter::EquipButtonPressed()
 		{
 			ServerEquipButtonPressed();
 		}
-		
 	}
-	
 }
 
 void ABlasterCharacter::CrouchButtonPressed()
@@ -149,7 +145,6 @@ void ABlasterCharacter::CrouchButtonPressed()
 	{
 		Crouch();
 	}
-	
 }
 
 void ABlasterCharacter::AimButtonPressed()
@@ -166,7 +161,6 @@ void ABlasterCharacter::AimButtonReleased()
 	{
 		CombatComponent->SetAiming(false);
 	}
-	
 }
 
 void ABlasterCharacter::AimOffset(float DeltaTime)
@@ -182,7 +176,11 @@ void ABlasterCharacter::AimOffset(float DeltaTime)
 		const FRotator CurrentAimRotation = {0.f, GetBaseAimRotation().Yaw, 0.f};
 		const FRotator DeltaAimRotation = UKismetMathLibrary::NormalizedDeltaRotator(StartingAimRotation, CurrentAimRotation);
 		SetAO_Yaw(DeltaAimRotation.Yaw);
-		bUseControllerRotationYaw = false;
+		if(TurningInPlace == ETurningInPlace::ETIP_NotTurning)
+		{
+			InterpAO_Yaw = AO_Yaw;
+		}		
+		bUseControllerRotationYaw = true;
 		TurnInPlace(DeltaTime);
 	}
 	if(Speed > 0.f || bIsInAir)
@@ -201,7 +199,6 @@ void ABlasterCharacter::AimOffset(float DeltaTime)
 		const FVector2D OutRange(-90.f, 0.f);
 		AO_Pitch = FMath::GetMappedRangeValueClamped(InRange, OutRange, AO_Pitch);
 	}
-	
 }
 
 void ABlasterCharacter::TurnInPlace(float DeltaTime)
@@ -214,6 +211,17 @@ void ABlasterCharacter::TurnInPlace(float DeltaTime)
 	{
 		TurningInPlace = ETurningInPlace::ETIP_Left;
 	}
+	if(TurningInPlace!=ETurningInPlace::ETIP_NotTurning)
+	{
+		InterpAO_Yaw = FMath::FInterpTo(InterpAO_Yaw, 0, DeltaTime, 5.f);
+		SetAO_Yaw(InterpAO_Yaw);
+		if(FMath::Abs(AO_Yaw) < 25.f)
+		{
+			TurningInPlace = ETurningInPlace::ETIP_NotTurning;
+			StartingAimRotation = {0.f, GetBaseAimRotation().Yaw, 0.f};
+		}
+	}
+	
 }
 
 void ABlasterCharacter::OnRep_OverlappingWeapon(AWeapon* LastWeapon)
@@ -250,7 +258,6 @@ void ABlasterCharacter::SetOverlappingWeapon(AWeapon* Weapon)
 			OverlappingWeapon->ShowPickupWidget(true);
 		}
 	}
-	
 }
 
 bool ABlasterCharacter::IsWeaponEquipped() const
@@ -262,3 +269,4 @@ bool ABlasterCharacter::IsAiming() const
 {
 	return(CombatComponent && CombatComponent->bAiming);
 }
+
