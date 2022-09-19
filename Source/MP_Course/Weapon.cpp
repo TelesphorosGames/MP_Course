@@ -123,8 +123,9 @@ void AWeapon::OnRep_WeaponState()
 
 void AWeapon::ShowPickupWidget(bool bShowWidget)
 {
-	if(PickupWidget)
+	if(PickupWidget) 
 	{
+		
 		PickupWidget->SetVisibility(bShowWidget);
 	}
 }
