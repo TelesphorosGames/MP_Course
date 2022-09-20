@@ -22,6 +22,7 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 	void EquipWeapon(class AWeapon* WeaponToEquip);
+	
 protected:
 
 	virtual void BeginPlay() override;
@@ -34,6 +35,15 @@ protected:
 	UFUNCTION()
 	void OnRep_EquippedWeapon();
 
+	void FireButtonPressed(bool bPressed);
+	
+	UFUNCTION(Server, Reliable)
+	void Server_Fire();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_Fire();
+
+	void TraceUnderCrosshairs(FHitResult& TraceHitResult);
 
 private:
 
@@ -51,7 +61,8 @@ private:
 	UPROPERTY(EditAnywhere)
 	float AimingWalkSpeed;
 
-public:	
+	bool bFireButtonPressed;
 
+	FVector HitTarget;
 
 };

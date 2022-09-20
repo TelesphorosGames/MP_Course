@@ -32,6 +32,9 @@ public:
 
 	bool IsAiming() const;
 
+	void PlayFireMontage(bool bAiming);
+	
+
 	
 	
 	// GETTERS AND SETTERS:
@@ -61,6 +64,9 @@ protected:
 
 	void AimOffset(float DeltaTime);
 	void TurnInPlace(float DeltaTime);
+
+	void FireButtonPressed();
+	void FireButtonReleased();
 
 	
 private:
@@ -93,5 +99,8 @@ private:
 	float AO_Pitch{};
 
 	ETurningInPlace TurningInPlace{};
+
+	UPROPERTY(EditAnywhere, Category= Combat, meta=(AllowPrivateAccess = "true"))
+	class UAnimMontage* FireWeaponMontage;
 	 
 };
