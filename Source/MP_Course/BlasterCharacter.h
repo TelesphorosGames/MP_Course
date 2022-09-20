@@ -34,8 +34,6 @@ public:
 
 	void PlayFireMontage(bool bAiming);
 	
-
-	
 	
 	// GETTERS AND SETTERS:
 

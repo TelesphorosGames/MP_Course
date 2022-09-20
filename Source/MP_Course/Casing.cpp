@@ -24,7 +24,7 @@ ACasing::ACasing()
 	
 	
 	
-	CasingVelocity = {5.f};
+	CasingVelocity = {50.f};
 
 	
 
@@ -35,14 +35,17 @@ void ACasing::BeginPlay()
 	Super::BeginPlay();
 
 	CasingMesh->OnComponentHit.AddDynamic(this, &ACasing::OnHit);		
-
-
-	const float RandomFloat = FMath::RandRange(0,360);
-	const FRotator RandomRotation = {FRotator(RandomFloat, RandomFloat, RandomFloat)};
-	SetActorRotation(RandomRotation);
 	
-	CasingMesh->AddImpulse((GetActorForwardVector()* CasingVelocity));
 
+	FVector CasingEjectionDirection = GetActorForwardVector();
+		CasingEjectionDirection.X += FMath::RandRange(-3.f,3.f);
+	
+	CasingMesh->AddTorqueInRadians(GetActorRightVector() * 100'000);
+	
+	CasingMesh->AddImpulse((CasingEjectionDirection * CasingVelocity));
+	
+	
+	
 	
 }
 
@@ -50,12 +53,13 @@ void ACasing::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitive
 	FVector NormalImpulse, const FHitResult& Hit)
 {
 	
-	if(ShellSound && bSoundPlayed==false)
+	if(ShellSound && !bSoundPlayed)
 		{
 			bSoundPlayed=true;
 			UGameplayStatics::PlaySoundAtLocation(this, ShellSound, GetActorLocation());
-		}	
+		}
 	
+	SetLifeSpan(2.f);
 }
 
 

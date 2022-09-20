@@ -37,8 +37,12 @@ public:
 	/* Public Getters and Setters */
 	
 	FORCEINLINE USphereComponent* GetAreaSphere() const { return AreaSphere; }
-
 	FORCEINLINE USkeletalMeshComponent* GetWeaponMesh() const { return WeaponMesh; }
+	FORCEINLINE UTexture2D* GetCrosshairsCenter() const {return CrosshairsCenter ; }
+	FORCEINLINE UTexture2D* GetCrosshairsLeft() const {return CrosshairsLeft ; }
+	FORCEINLINE UTexture2D* GetCrosshairsRight() const {return CrosshairsRight ; }
+	FORCEINLINE UTexture2D* GetCrosshairsTop() const {return CrosshairsTop ; }
+	FORCEINLINE UTexture2D* GetCrosshairsBottom() const {return CrosshairsBottom ; }
 
 	
 	/* Public Custom Functions */ 
@@ -79,4 +83,23 @@ private:
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<class ACasing> CasingClass;
 
+	// Crosshairs Textures :
+
+	UPROPERTY(EditAnywhere, Category=Crosshairs)
+	class UTexture2D* CrosshairsCenter;
+
+	UPROPERTY(EditAnywhere, Category=Crosshairs)
+	class UTexture2D* CrosshairsLeft;
+
+	UPROPERTY(EditAnywhere, Category=Crosshairs)
+	class UTexture2D* CrosshairsRight;
+
+	UPROPERTY(EditAnywhere, Category=Crosshairs)
+	class UTexture2D* CrosshairsTop;
+
+	UPROPERTY(EditAnywhere, Category=Crosshairs)
+	class UTexture2D* CrosshairsBottom;
+
+	
+	
 };

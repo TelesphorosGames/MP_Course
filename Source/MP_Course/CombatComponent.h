@@ -45,10 +45,16 @@ protected:
 
 	void TraceUnderCrosshairs(FHitResult& TraceHitResult);
 
+	void SetHudCrosshairs(float DeltaTime);
+
 private:
 
 	UPROPERTY()
 	ABlasterCharacter* Character;
+	UPROPERTY()
+	class ABlasterPlayerController* BC_Controller;
+	UPROPERTY()
+	class ABlasterHud* BC_Hud;
 
 	UPROPERTY(ReplicatedUsing = OnRep_EquippedWeapon)
 	AWeapon* EquippedWeapon;
@@ -62,6 +68,8 @@ private:
 	float AimingWalkSpeed;
 
 	bool bFireButtonPressed;
+
+	
 
 
 };
