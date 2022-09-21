@@ -43,7 +43,7 @@ public:
 	FORCEINLINE UTexture2D* GetCrosshairsRight() const {return CrosshairsRight ; }
 	FORCEINLINE UTexture2D* GetCrosshairsTop() const {return CrosshairsTop ; }
 	FORCEINLINE UTexture2D* GetCrosshairsBottom() const {return CrosshairsBottom ; }
-
+	
 	
 	/* Public Custom Functions */ 
 
@@ -82,6 +82,7 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<class ACasing> CasingClass;
+
 
 	// Crosshairs Textures :
 

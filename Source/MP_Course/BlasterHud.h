@@ -39,7 +39,7 @@ public:
 	
 private:
 
-	FHudPackage HudPackage;
+	FHudPackage HudPackage{};
 
 	void DrawCrosshairs(UTexture2D* Texture, FVector2D ViewportCenter);
 	

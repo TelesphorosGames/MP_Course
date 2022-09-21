@@ -16,7 +16,7 @@
 
 UCombatComponent::UCombatComponent()
 {
-	PrimaryComponentTick.bCanEverTick = false;
+	PrimaryComponentTick.bCanEverTick = true;
 
 	BaseWalkSpeed= 600.f;
 	AimingWalkSpeed = 450.f;
@@ -149,7 +149,7 @@ void UCombatComponent::SetHudCrosshairs(float DeltaTime)
 {
 	if(Character==nullptr || Character->Controller == nullptr) return;
 
-	if(BC_Controller == nullptr )
+	if(BC_Controller == nullptr)
 	{
 		BC_Controller = Cast<ABlasterPlayerController>(Character->Controller);
 	}
