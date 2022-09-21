@@ -180,6 +180,41 @@ void UCombatComponent::SetHudCrosshairs(float DeltaTime)
 				HUDPackage.CrosshairsTop = nullptr;
 				HUDPackage.CrosshairsBottom = nullptr;
 			}
+
+			const FVector2D WalkSpeedRange = {0.f, Character->GetCharacterMovement()->MaxWalkSpeed};
+			const FVector2D VelocityMultiplierRange(0.f,1.f);
+				FVector Velocity = Character->GetVelocity();
+			Velocity.Z = 0.f;
+
+			CrosshairVelocityFactor = FMath::GetMappedRangeValueClamped(WalkSpeedRange, VelocityMultiplierRange, Velocity.Size());
+
+			if(Character->GetCharacterMovement()->IsFalling())
+			{
+				CrosshairFallingFactor = FMath::FInterpTo(CrosshairFallingFactor, 2.25f, DeltaTime, 2.25f);
+			}
+			else
+			{
+				CrosshairFallingFactor = FMath::FInterpTo(CrosshairFallingFactor, 0.f, DeltaTime, 30.f);
+			}
+			if(bAiming)
+			{
+				CrosshairAimingFactor = FMath::FInterpTo(CrosshairAimingFactor, 2.f, DeltaTime, .5f);
+			}
+			else
+			{
+				CrosshairAimingFactor = FMath::FInterpTo(CrosshairAimingFactor, 0, DeltaTime, 30.f);
+			}
+			if(Character->GetCharacterMovement()->IsCrouching())
+			{
+				CrosshairCrouchingFactor = FMath::FInterpTo(CrosshairCrouchingFactor, 1.f, DeltaTime, 2.5f);
+			}
+			else
+			{
+				CrosshairCrouchingFactor = FMath::FInterpTo(CrosshairCrouchingFactor, 0.f, DeltaTime, 2.5f);
+			}
+
+			HUDPackage.CrosshairSpread = (CrosshairVelocityFactor + CrosshairFallingFactor) - (CrosshairCrouchingFactor+CrosshairAimingFactor);
+			
 			BC_Hud->SetHudPackage(HUDPackage);
 	
 		}

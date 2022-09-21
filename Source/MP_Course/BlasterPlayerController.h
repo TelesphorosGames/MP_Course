@@ -9,6 +9,7 @@
 /**
  * 
  */
+
 UCLASS()
 class MP_COURSE_API ABlasterPlayerController : public APlayerController
 {
