@@ -74,6 +74,8 @@ private:
 	float CrosshairFallingFactor{};
 	float CrosshairCrouchingFactor{};
 
+	FVector HitTargetImpactPoint{};
+
 	
 
 

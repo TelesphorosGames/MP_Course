@@ -80,6 +80,12 @@ void ABlasterCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Ou
 	DOREPLIFETIME_CONDITION(ABlasterCharacter, OverlappingWeapon, COND_OwnerOnly);
 }
 
+FVector ABlasterCharacter::GetHitTarget() const
+{
+	if(CombatComponent==nullptr) return FVector();
+	return CombatComponent->HitTargetImpactPoint;
+}
+
 void ABlasterCharacter::BeginPlay()
 {
 	Super::BeginPlay();
@@ -120,6 +126,11 @@ void ABlasterCharacter::Turn(float Value)
 
 void ABlasterCharacter::LookUp(float Value)
 {
+	if( Value > 0)
+	{
+		if(AO_Pitch < -50.f) return;
+	}
+	
 	AddControllerPitchInput(Value);
 }
 
@@ -206,11 +217,12 @@ void ABlasterCharacter::AimOffset(float DeltaTime)
 
 void ABlasterCharacter::TurnInPlace(float DeltaTime)
 {
-	if(AO_Yaw > 90.f)
+	UE_LOG(LogTemp,Warning,TEXT("AO_YAW: %f"), AO_Yaw);
+	if(AO_Yaw > 75.f || AO_Pitch <= -35.f && AO_Yaw < 45)
 	{
 		TurningInPlace = ETurningInPlace::ETIP_Right;
 	}
-	if(AO_Yaw < -90.f)
+	if(AO_Yaw < -65.f)
 	{
 		TurningInPlace = ETurningInPlace::ETIP_Left;
 	}
@@ -300,6 +312,8 @@ void ABlasterCharacter::PlayFireMontage(bool bAiming)
 		FName SectionName;
 		bAiming ? SectionName = FName("RifleSights") : SectionName = FName("RifleHip") ;
 		AnimInstance->Montage_JumpToSection(SectionName);
+
+		
 	}
 }
 

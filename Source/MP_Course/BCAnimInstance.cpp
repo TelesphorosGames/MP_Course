@@ -4,12 +4,16 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Weapon.h"
+#include "Camera/CameraComponent.h"
 
 void UBCAnimInstance::NativeInitializeAnimation()
 {
 	Super::NativeInitializeAnimation();
 
 	BlasterCharacter=Cast<ABlasterCharacter>(TryGetPawnOwner());
+
+
+	
 	
 	
 }
@@ -19,6 +23,7 @@ void UBCAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 
 	Super::NativeUpdateAnimation(DeltaSeconds);
 
+	
 
 	if(BlasterCharacter== nullptr)
 	{
@@ -64,14 +69,44 @@ void UBCAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 
 	if(bIsWeaponEquipped && EquippedWeapon && EquippedWeapon->GetWeaponMesh() && BlasterCharacter->GetMesh())
 	{
-		LeftHandTransform = EquippedWeapon->GetWeaponMesh()->GetSocketTransform(FName("LeftHandSocket"), ERelativeTransformSpace::RTS_World);
+		
+		
+		
+			LeftHandTransform = EquippedWeapon->GetWeaponMesh()->GetSocketTransform(FName("LeftHandSocket"), ERelativeTransformSpace::RTS_World);
+            		
+            		
+            		FVector OutPosition{};
+            		FRotator OutRotation{};
+            		BlasterCharacter->GetMesh()->TransformToBoneSpace(FName("hand_r"), LeftHandTransform.GetLocation(), FQuat(LeftHandTransform.GetRotation()).Rotator(), OutPosition, OutRotation);
+            		LeftHandTransform.SetLocation(OutPosition);
+            		LeftHandTransform.SetRotation(FQuat(OutRotation));
 
-		FVector OutPosition{};
-		FRotator OutRotation{};
-		BlasterCharacter->GetMesh()->TransformToBoneSpace(FName("hand_r"), LeftHandTransform.GetLocation(), FRotator::ZeroRotator, OutPosition, OutRotation);
-		LeftHandTransform.SetLocation(OutPosition);
-		LeftHandTransform.SetRotation(FQuat(OutRotation));
-	}
+		
+		
+		if(bAiming)
+		{
+			RightShoulderTransform = EquippedWeapon -> GetWeaponMesh()->GetSocketTransform(FName("ShoulderSocket"), ERelativeTransformSpace::RTS_World);
+		
+			FVector ShoulderOutPosition{};
+			FRotator ShoulderOutRotation{};
+			BlasterCharacter->GetMesh()->TransformToBoneSpace(FName("hand_r"), RightShoulderTransform.GetLocation(), RightShoulderTransform.Rotator(), ShoulderOutPosition, ShoulderOutRotation);
+			RightShoulderTransform.SetLocation(ShoulderOutPosition);
+			RightShoulderTransform.SetRotation(FQuat(ShoulderOutRotation));
+            		
+		}
+		
+		if(BlasterCharacter->IsLocallyControlled())
+		{
+			bLocallyControlledCharacter=true;
+			const FTransform RightHandTransform = EquippedWeapon->GetWeaponMesh()->GetSocketTransform(FName("hand_r", ERelativeTransformSpace::RTS_World));
+			RightHandRotation = UKismetMathLibrary::FindLookAtRotation(RightHandTransform.GetLocation(), RightHandTransform.GetLocation() + (RightHandTransform.GetLocation()-BlasterCharacter->GetHitTarget()));
+                                             	
+		}
+
+
+
+
+		}
 	
 	
 }

@@ -37,6 +37,13 @@ void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
 	SetHudCrosshairs(DeltaTime);
+	if(Character && Character->IsLocallyControlled())
+	{
+		FHitResult HitResult;
+		TraceUnderCrosshairs(HitResult);
+		HitTargetImpactPoint = HitResult.ImpactPoint;
+	}
+
 
 }
 
@@ -216,10 +223,8 @@ void UCombatComponent::SetHudCrosshairs(float DeltaTime)
 			HUDPackage.CrosshairSpread = (CrosshairVelocityFactor + CrosshairFallingFactor) - (CrosshairCrouchingFactor+CrosshairAimingFactor);
 			
 			BC_Hud->SetHudPackage(HUDPackage);
-	
 		}
 	}
-	
 }
 
 void UCombatComponent::Multicast_Fire_Implementation(const FVector_NetQuantize& TraceHitTarget)

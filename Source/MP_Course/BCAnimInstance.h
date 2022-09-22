@@ -68,7 +68,16 @@ private:
 	UPROPERTY(BlueprintReadOnly, Category="Character | Movement", meta = (AllowPrivateAccess="true"))
 	FTransform LeftHandTransform{};
 
+	UPROPERTY(BlueprintReadOnly, Category="Character | Movement", meta = (AllowPrivateAccess="true"))
+	FTransform RightShoulderTransform{};
+
 	UPROPERTY(BlueprintReadOnly, Category="Character | Movement", meta = (AllowPrivateAccess="true"))	
-	ETurningInPlace TurningInPlace;
+	ETurningInPlace TurningInPlace{};
+	
+	UPROPERTY(BlueprintReadOnly, Category="Character | Movement", meta = (AllowPrivateAccess="true"))	
+	FRotator RightHandRotation{};
+
+	UPROPERTY(BlueprintReadOnly, Category="Character | Movement", meta = (AllowPrivateAccess="true"))	
+	bool bLocallyControlledCharacter;
 	
 };
