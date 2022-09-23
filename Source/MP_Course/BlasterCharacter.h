@@ -5,12 +5,13 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "TurnInPlace.h"
+#include "IInteractWithCrosshairs.h"
 
 
 #include "BlasterCharacter.generated.h"
 
 UCLASS()
-class MP_COURSE_API ABlasterCharacter : public ACharacter
+class MP_COURSE_API ABlasterCharacter : public ACharacter, public IIInteractWithCrosshairs
 {
 	GENERATED_BODY()
 
@@ -45,7 +46,8 @@ public:
 	FORCEINLINE float GetAO_Pitch() const {return AO_Pitch; }
 	FORCEINLINE ETurningInPlace GetTurningInPlace() const {return TurningInPlace; }
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const {return FollowCamera ; }
-
+	FORCEINLINE float GetMovingGunCrosshairFactor() const {return MovingGunCrosshairsFactor ; }
+	
 	FVector GetHitTarget() const;
 
 	
@@ -68,6 +70,8 @@ protected:
 
 	void FireButtonPressed();
 	void FireButtonReleased();
+
+	void HideCameraForFpp();
 
 	
 private:
@@ -103,5 +107,10 @@ private:
 
 	UPROPERTY(EditAnywhere, Category= Combat, meta=(AllowPrivateAccess = "true"))
 	class UAnimMontage* FireWeaponMontage;
+
+	float MovingGunCrosshairsFactor;
+	UPROPERTY(EditAnywhere, Category= Combat, meta=(AllowPrivateAccess = "true"))
+	float CameraThreshold =200.f;
+	
 	 
 };

@@ -69,44 +69,41 @@ void UBCAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 
 	if(bIsWeaponEquipped && EquippedWeapon && EquippedWeapon->GetWeaponMesh() && BlasterCharacter->GetMesh())
 	{
+		// Correct Left Hand Placement On Weapon in Relation to Right Hand
+		LeftHandTransform = EquippedWeapon->GetWeaponMesh()->GetSocketTransform(FName("LeftHandSocket"), ERelativeTransformSpace::RTS_World);
+		FVector OutPosition{};
+		FRotator OutRotation{};
+		BlasterCharacter->GetMesh()->TransformToBoneSpace(FName("hand_r"), LeftHandTransform.GetLocation(), FQuat(LeftHandTransform.GetRotation()).Rotator(), OutPosition, OutRotation);
+		LeftHandTransform.SetLocation(OutPosition);
+		LeftHandTransform.SetRotation(FQuat(OutRotation));
+		//Correct Left Thumb placement on weapon in relation to left hand
+		LeftThumbTransform = EquippedWeapon -> GetWeaponMesh()->GetSocketTransform(FName("ThumbSocket"), ERelativeTransformSpace::RTS_World);
+		
+		FVector ThumbOutPosition{};
+		FRotator ThumbOutRotation{};
+		BlasterCharacter->GetMesh()->TransformToBoneSpace(FName("thumb_03_l"), LeftThumbTransform.GetLocation(), FRotator::ZeroRotator, ThumbOutPosition, ThumbOutRotation);
+		LeftThumbTransform.SetLocation(ThumbOutPosition);
+		LeftThumbTransform.SetRotation(FQuat(ThumbOutRotation));
+		//Correct Right Hand placement in relation to shoulder to position weapon correctly
 		
 		
-		
-			LeftHandTransform = EquippedWeapon->GetWeaponMesh()->GetSocketTransform(FName("LeftHandSocket"), ERelativeTransformSpace::RTS_World);
-            		
-            		
-            		FVector OutPosition{};
-            		FRotator OutRotation{};
-            		BlasterCharacter->GetMesh()->TransformToBoneSpace(FName("hand_r"), LeftHandTransform.GetLocation(), FQuat(LeftHandTransform.GetRotation()).Rotator(), OutPosition, OutRotation);
-            		LeftHandTransform.SetLocation(OutPosition);
-            		LeftHandTransform.SetRotation(FQuat(OutRotation));
-
-		
-		
-		if(bAiming)
-		{
 			RightShoulderTransform = EquippedWeapon -> GetWeaponMesh()->GetSocketTransform(FName("ShoulderSocket"), ERelativeTransformSpace::RTS_World);
-		
 			FVector ShoulderOutPosition{};
 			FRotator ShoulderOutRotation{};
 			BlasterCharacter->GetMesh()->TransformToBoneSpace(FName("hand_r"), RightShoulderTransform.GetLocation(), RightShoulderTransform.Rotator(), ShoulderOutPosition, ShoulderOutRotation);
 			RightShoulderTransform.SetLocation(ShoulderOutPosition);
 			RightShoulderTransform.SetRotation(FQuat(ShoulderOutRotation));
-            		
-		}
 		
+		// Correct Look At Rotation of equipped weapon to ensure it points towards crosshairs (clients only)
 		if(BlasterCharacter->IsLocallyControlled())
 		{
 			bLocallyControlledCharacter=true;
+			FTransform MuzzleFlashTransform = EquippedWeapon->GetWeaponMesh()->GetSocketTransform(FName("MuzzleFlash"));
 			const FTransform RightHandTransform = EquippedWeapon->GetWeaponMesh()->GetSocketTransform(FName("hand_r", ERelativeTransformSpace::RTS_World));
-			RightHandRotation = UKismetMathLibrary::FindLookAtRotation(RightHandTransform.GetLocation(), RightHandTransform.GetLocation() + (RightHandTransform.GetLocation()-BlasterCharacter->GetHitTarget()));
-                                             	
+            FRotator LookAtRotation = UKismetMathLibrary::FindLookAtRotation(RightHandTransform.GetLocation(), RightHandTransform.GetLocation() + (RightHandTransform.GetLocation()-BlasterCharacter->GetHitTarget()));
+            RightHandRotation = FMath::RInterpTo(RightHandRotation, LookAtRotation, DeltaSeconds, 10.f);    	
 		}
 
-
-
-
 		}
-	
 	
 }

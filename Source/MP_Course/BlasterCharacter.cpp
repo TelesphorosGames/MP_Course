@@ -35,6 +35,9 @@ ABlasterCharacter::ABlasterCharacter()
 	CombatComponent = CreateDefaultSubobject<UCombatComponent>(TEXT("CombatComponent"));
 	CombatComponent->SetIsReplicated(true);
 
+	GetMesh()->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
+	GetMesh()->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
+
 }
 
 
@@ -98,6 +101,7 @@ void ABlasterCharacter::Tick(float DeltaTime)
 
 	AimOffset(DeltaTime);
 
+
 }
 void ABlasterCharacter::MoveForward(float Value)
 {
@@ -106,6 +110,7 @@ void ABlasterCharacter::MoveForward(float Value)
 		const FRotator YawRotation( 0.f, Controller->GetControlRotation().Yaw, 0.f );
 		const FVector Direction(FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X));
 		AddMovementInput(Direction, Value);
+		MovingGunCrosshairsFactor = Value;
 	}
 }
 
@@ -116,21 +121,23 @@ void ABlasterCharacter::MoveRight(float Value)
 		const FRotator YawRotation = { 0.f, Controller->GetControlRotation().Yaw, 0.f };
 		const FVector Direction(FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y));
 		AddMovementInput(Direction, Value);
+		MovingGunCrosshairsFactor = Value;
 	}
 }
 
 void ABlasterCharacter::Turn(float Value)
 {
 	AddControllerYawInput(Value);
+	MovingGunCrosshairsFactor = Value;
 }
 
 void ABlasterCharacter::LookUp(float Value)
 {
 	if( Value > 0)
 	{
-		if(AO_Pitch < -50.f) return;
+		if(AO_Pitch < -80.f) return;
 	}
-	
+	MovingGunCrosshairsFactor=Value;
 	AddControllerPitchInput(Value);
 }
 
@@ -154,10 +161,12 @@ void ABlasterCharacter::CrouchButtonPressed()
 	if(bIsCrouched)
 	{
 		UnCrouch();
+		SpringArm->SocketOffset.Z+=75.f;
 	}
 	else
 	{
 		Crouch();
+		SpringArm->SocketOffset.Z-=75.f;
 	}
 }
 
@@ -218,11 +227,11 @@ void ABlasterCharacter::AimOffset(float DeltaTime)
 void ABlasterCharacter::TurnInPlace(float DeltaTime)
 {
 	UE_LOG(LogTemp,Warning,TEXT("AO_YAW: %f"), AO_Yaw);
-	if(AO_Yaw > 75.f || AO_Pitch <= -35.f && AO_Yaw < 45)
+	if(AO_Yaw > 35.f)
 	{
 		TurningInPlace = ETurningInPlace::ETIP_Right;
 	}
-	if(AO_Yaw < -65.f)
+	if(AO_Yaw < -75.f)
 	{
 		TurningInPlace = ETurningInPlace::ETIP_Left;
 	}
@@ -252,6 +261,19 @@ void ABlasterCharacter::FireButtonReleased()
 	if(CombatComponent)
 	{
 		CombatComponent->FireButtonPressed(false);
+	}
+}
+
+void ABlasterCharacter::HideCameraForFpp()
+{
+	if(!IsLocallyControlled()) return;
+	if((FollowCamera->GetComponentLocation() - GetActorLocation()).Size() < CameraThreshold)
+	{
+		GetMesh()->GetChildComponent(1)->GetChildComponent(2)->SetVisibility(false);
+	}
+	else
+	{
+		GetMesh()->GetChildComponent(1)->GetChildComponent(2)->SetVisibility(true);
 	}
 }
 

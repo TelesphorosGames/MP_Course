@@ -71,6 +71,9 @@ private:
 	UPROPERTY(BlueprintReadOnly, Category="Character | Movement", meta = (AllowPrivateAccess="true"))
 	FTransform RightShoulderTransform{};
 
+	UPROPERTY(BlueprintReadOnly, Category="Character | Movement", meta = (AllowPrivateAccess="true"))
+	FTransform LeftThumbTransform{};
+
 	UPROPERTY(BlueprintReadOnly, Category="Character | Movement", meta = (AllowPrivateAccess="true"))	
 	ETurningInPlace TurningInPlace{};
 	

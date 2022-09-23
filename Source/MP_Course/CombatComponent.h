@@ -3,7 +3,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "BlasterHud.h"
 #include "Components/ActorComponent.h"
+
 #include "CombatComponent.generated.h"
 
 
@@ -56,7 +58,7 @@ private:
 	UPROPERTY()
 	class ABlasterHud* BC_Hud{};
 
-	UPROPERTY(ReplicatedUsing = OnRep_EquippedWeapon)
+	UPROPERTY(ReplicatedUsing= OnRep_EquippedWeapon)
 	AWeapon* EquippedWeapon;
 
 	UPROPERTY(Replicated)
@@ -69,13 +71,33 @@ private:
 
 	bool bFireButtonPressed;
 
+
+	// Hud and Crosshairs
+	
+	FHudPackage HUDPackage;
 	float CrosshairVelocityFactor{};
 	float CrosshairAimingFactor{};
 	float CrosshairFallingFactor{};
 	float CrosshairCrouchingFactor{};
+	float CrosshairShootingFactor{};
+	float CrosshairMovingFactor{};
 
 	FVector HitTargetImpactPoint{};
 
+	// Aiming and FOV
+
+	// Base camera FOV
+	float DefaultFOV{};
+
+	float CurrentFOV{};
+	
+	// varies per weapon
+	UPROPERTY(EditAnywhere)
+	float ZoomedFOV{30.f};
+	UPROPERTY(EditAnywhere)
+	float ZoomInterpSpeed{20.f};
+
+	void InterpFOV(float DeltaTime);
 	
 
 

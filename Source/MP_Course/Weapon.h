@@ -37,13 +37,14 @@ public:
 	/* Public Getters and Setters */
 	
 	FORCEINLINE USphereComponent* GetAreaSphere() const { return AreaSphere; }
-	FORCEINLINE USkeletalMeshComponent* GetWeaponMesh() const { return WeaponMesh; }
+	FORCEINLINE USkeletalMeshComponent* GetWeaponMesh() const { return WeaponMesh ; }
 	FORCEINLINE UTexture2D* GetCrosshairsCenter() const {return CrosshairsCenter ; }
 	FORCEINLINE UTexture2D* GetCrosshairsLeft() const {return CrosshairsLeft ; }
 	FORCEINLINE UTexture2D* GetCrosshairsRight() const {return CrosshairsRight ; }
 	FORCEINLINE UTexture2D* GetCrosshairsTop() const {return CrosshairsTop ; }
 	FORCEINLINE UTexture2D* GetCrosshairsBottom() const {return CrosshairsBottom ; }
-	
+	FORCEINLINE float GetZoomedFOV() const {return ZoomedFOV ; }
+	FORCEINLINE float GetZoomedInterpSpeed() const {return ZoomInterpSpeed ; }
 	
 	/* Public Custom Functions */ 
 
@@ -101,6 +102,11 @@ private:
 	UPROPERTY(EditAnywhere, Category=Crosshairs)
 	class UTexture2D* CrosshairsBottom;
 
-	
+	// Zoomed field of view while aiming
+
+	UPROPERTY(EditAnywhere)
+	float ZoomedFOV{30.f};
+	UPROPERTY(EditAnywhere)
+	float ZoomInterpSpeed{20.f};
 	
 };
