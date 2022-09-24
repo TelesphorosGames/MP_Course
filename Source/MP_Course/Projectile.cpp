@@ -3,6 +3,7 @@
 
 #include "Projectile.h"
 
+#include "BlasterCharacter.h"
 #include "Components/BoxComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
@@ -22,9 +23,11 @@ AProjectile::AProjectile()
 	CollisionBox->SetCollisionResponseToAllChannels(ECR_Ignore);
 	CollisionBox->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECR_Block);
 	CollisionBox->SetCollisionResponseToChannel(ECollisionChannel::ECC_WorldStatic, ECR_Block);
-
+	CollisionBox->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECR_Block);
+	
 	ProjectileMovementComponent = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileMovementComponent"));
 	ProjectileMovementComponent->bRotationFollowsVelocity=true;
+	
 	
 }
 
@@ -37,6 +40,7 @@ void AProjectile::BeginPlay()
 	{
 		CollisionBox->OnComponentHit.AddDynamic(this, &AProjectile::OnHit);
 	}
+		
 
 	if(Tracer)
 	{
@@ -47,8 +51,6 @@ void AProjectile::BeginPlay()
 			GetActorLocation(),
 			GetActorRotation(),
 			EAttachLocation::KeepWorldPosition
-			
-
 		);
 	}
 	
@@ -57,8 +59,32 @@ void AProjectile::BeginPlay()
 void AProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp,
 	FVector NormalImpulse, const FHitResult& Hit)
 {
+	ABlasterCharacter* HitBlasterCharacter = Cast<ABlasterCharacter>(OtherActor);
+    		if(HitBlasterCharacter)
+    		{
+    			HitBlasterCharacter->Multicast_OnHit();
+    		}
+	if(HasAuthority())
+	{
+		
+		
+		Multicast_OnHit();
+	}
+
 	
 	Destroy();
+}
+
+void AProjectile::Multicast_OnHit_Implementation()
+{
+	if(ImpactParticles)
+    {
+    	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactParticles, GetActorTransform());
+    }
+    if(ImpactSound)
+    {
+    	UGameplayStatics::PlaySoundAtLocation(this, ImpactSound, GetActorLocation());
+    }
 }
 
 // Called every frame
@@ -71,14 +97,7 @@ void AProjectile::Tick(float DeltaTime)
 void AProjectile::Destroyed()
 {
 	Super::Destroyed();
-	if(ImpactParticles)
-	{
-		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactParticles, GetActorTransform());
-	}
-	if(ImpactSound)
-	{
-		UGameplayStatics::PlaySoundAtLocation(this, ImpactSound, GetActorLocation());
-	}
+	
 
 	
 }

@@ -34,7 +34,9 @@ public:
 	bool IsAiming() const;
 
 	void PlayFireMontage(bool bAiming);
-	
+
+	UFUNCTION(NetMulticast, Unreliable)
+	void Multicast_OnHit();
 	
 	// GETTERS AND SETTERS:
 
@@ -73,6 +75,7 @@ protected:
 
 	void HideCameraForFpp();
 
+	void PlayOnHitMontage();
 	
 private:
 
@@ -108,7 +111,11 @@ private:
 	UPROPERTY(EditAnywhere, Category= Combat, meta=(AllowPrivateAccess = "true"))
 	class UAnimMontage* FireWeaponMontage;
 
+	UPROPERTY(EditAnywhere, Category= Combat, meta=(AllowPrivateAccess = "true"))
+	class UAnimMontage* OnHitMontage;
+
 	float MovingGunCrosshairsFactor;
+	
 	UPROPERTY(EditAnywhere, Category= Combat, meta=(AllowPrivateAccess = "true"))
 	float CameraThreshold =200.f;
 	

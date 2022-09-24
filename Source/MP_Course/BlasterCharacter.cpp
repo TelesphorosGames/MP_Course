@@ -339,3 +339,41 @@ void ABlasterCharacter::PlayFireMontage(bool bAiming)
 	}
 }
 
+void ABlasterCharacter::Multicast_OnHit_Implementation()
+{
+	if(CombatComponent == nullptr || CombatComponent->EquippedWeapon == nullptr) return;
+
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if(AnimInstance && OnHitMontage)
+	{
+		AnimInstance->Montage_Play(OnHitMontage);
+		const int32 SwitchSection = FMath::RandRange(0,3);
+		FName SectionName{};
+		switch (SwitchSection)
+		{
+		case 0:
+			SectionName ="FromRight";
+			break;
+		case 1:
+			SectionName ="FromLeft";
+			break;
+		case 2:
+			SectionName ="FromFront";
+			break;
+		case 3:
+			SectionName ="FromBack";
+			break;
+		default: ;
+		}
+	
+		AnimInstance->Montage_JumpToSection(SectionName);
+
+		
+	}
+}
+
+void ABlasterCharacter::PlayOnHitMontage()
+{
+	
+}
+

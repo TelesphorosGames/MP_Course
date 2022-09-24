@@ -24,7 +24,7 @@ ACasing::ACasing()
 	
 	
 	
-	CasingVelocity = {50.f};
+	CasingVelocity = {3.f};
 
 	
 
@@ -38,9 +38,9 @@ void ACasing::BeginPlay()
 	
 
 	FVector CasingEjectionDirection = GetActorForwardVector();
-		CasingEjectionDirection.X += FMath::RandRange(-3.f,3.f);
+		CasingEjectionDirection.X += FMath::RandRange(-1.f,1.3f);
 	
-	CasingMesh->AddTorqueInRadians(GetActorRightVector() * 100'000);
+	CasingMesh->AddTorqueInRadians(GetActorRightVector() * 50'000);
 	
 	CasingMesh->AddImpulse((CasingEjectionDirection * CasingVelocity));
 	
