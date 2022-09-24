@@ -48,7 +48,7 @@ public:
 	FORCEINLINE float GetAO_Pitch() const {return AO_Pitch; }
 	FORCEINLINE ETurningInPlace GetTurningInPlace() const {return TurningInPlace; }
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const {return FollowCamera ; }
-	FORCEINLINE float GetMovingGunCrosshairFactor() const {return MovingGunCrosshairsFactor ; }
+
 	
 	FVector GetHitTarget() const;
 
@@ -67,7 +67,7 @@ protected:
 	void AimButtonPressed();
 	void AimButtonReleased();
 
-	void AimOffset(float DeltaTime);
+	void AimOffset(float DeltaTime);	
 	void TurnInPlace(float DeltaTime);
 
 	void FireButtonPressed();
@@ -113,11 +113,8 @@ private:
 
 	UPROPERTY(EditAnywhere, Category= Combat, meta=(AllowPrivateAccess = "true"))
 	class UAnimMontage* OnHitMontage;
-
-	float MovingGunCrosshairsFactor;
 	
 	UPROPERTY(EditAnywhere, Category= Combat, meta=(AllowPrivateAccess = "true"))
 	float CameraThreshold =200.f;
-	
-	 
+
 };

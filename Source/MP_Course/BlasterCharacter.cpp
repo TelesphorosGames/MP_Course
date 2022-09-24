@@ -11,6 +11,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Net/UnrealNetwork.h"
+#include "MP_Course.h"
 
 // Sets default values
 ABlasterCharacter::ABlasterCharacter()
@@ -37,6 +38,7 @@ ABlasterCharacter::ABlasterCharacter()
 
 	GetMesh()->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
 	GetMesh()->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
+	GetMesh()->SetCollisionObjectType(ECC_SkeletalMesh);
 
 }
 
@@ -100,8 +102,7 @@ void ABlasterCharacter::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	AimOffset(DeltaTime);
-
-
+	
 }
 void ABlasterCharacter::MoveForward(float Value)
 {
@@ -110,7 +111,7 @@ void ABlasterCharacter::MoveForward(float Value)
 		const FRotator YawRotation( 0.f, Controller->GetControlRotation().Yaw, 0.f );
 		const FVector Direction(FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X));
 		AddMovementInput(Direction, Value);
-		MovingGunCrosshairsFactor = Value;
+		
 	}
 }
 
@@ -121,14 +122,14 @@ void ABlasterCharacter::MoveRight(float Value)
 		const FRotator YawRotation = { 0.f, Controller->GetControlRotation().Yaw, 0.f };
 		const FVector Direction(FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y));
 		AddMovementInput(Direction, Value);
-		MovingGunCrosshairsFactor = Value;
+		
 	}
 }
 
 void ABlasterCharacter::Turn(float Value)
 {
 	AddControllerYawInput(Value);
-	MovingGunCrosshairsFactor = Value;
+	
 }
 
 void ABlasterCharacter::LookUp(float Value)
@@ -137,7 +138,7 @@ void ABlasterCharacter::LookUp(float Value)
 	{
 		if(AO_Pitch < -80.f) return;
 	}
-	MovingGunCrosshairsFactor=Value;
+
 	AddControllerPitchInput(Value);
 }
 
@@ -196,6 +197,7 @@ void ABlasterCharacter::AimOffset(float DeltaTime)
 
 	if(Speed == 0.f && !bIsInAir)
 	{
+		
 		const FRotator CurrentAimRotation = {0.f, GetBaseAimRotation().Yaw, 0.f};
 		const FRotator DeltaAimRotation = UKismetMathLibrary::NormalizedDeltaRotator(StartingAimRotation, CurrentAimRotation);
 		SetAO_Yaw(DeltaAimRotation.Yaw);
@@ -208,6 +210,7 @@ void ABlasterCharacter::AimOffset(float DeltaTime)
 	}
 	if(Speed > 0.f || bIsInAir)
 	{
+		
 		StartingAimRotation = {0.f, GetBaseAimRotation().Yaw, 0.f};
 		AO_Yaw = 0.f;
 		bUseControllerRotationYaw = true;
@@ -226,15 +229,16 @@ void ABlasterCharacter::AimOffset(float DeltaTime)
 
 void ABlasterCharacter::TurnInPlace(float DeltaTime)
 {
-	UE_LOG(LogTemp,Warning,TEXT("AO_YAW: %f"), AO_Yaw);
-	if(AO_Yaw > 35.f)
+	
+	if( AO_Yaw > 90.f)
 	{
 		TurningInPlace = ETurningInPlace::ETIP_Right;
 	}
-	if(AO_Yaw < -75.f)
+	if( AO_Yaw < -90.f)
 	{
 		TurningInPlace = ETurningInPlace::ETIP_Left;
 	}
+	
 	if(TurningInPlace!=ETurningInPlace::ETIP_NotTurning)
 	{
 		InterpAO_Yaw = FMath::FInterpTo(InterpAO_Yaw, 0, DeltaTime, 5.f);
@@ -341,6 +345,13 @@ void ABlasterCharacter::PlayFireMontage(bool bAiming)
 
 void ABlasterCharacter::Multicast_OnHit_Implementation()
 {
+	
+		PlayOnHitMontage();
+	
+}
+
+void ABlasterCharacter::PlayOnHitMontage()
+{
 	if(CombatComponent == nullptr || CombatComponent->EquippedWeapon == nullptr) return;
 
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
@@ -367,13 +378,6 @@ void ABlasterCharacter::Multicast_OnHit_Implementation()
 		}
 	
 		AnimInstance->Montage_JumpToSection(SectionName);
-
-		
 	}
-}
-
-void ABlasterCharacter::PlayOnHitMontage()
-{
-	
 }
 

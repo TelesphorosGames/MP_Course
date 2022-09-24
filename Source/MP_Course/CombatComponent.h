@@ -36,6 +36,7 @@ protected:
 
 	UFUNCTION()
 	void OnRep_EquippedWeapon();
+	void Fire();
 
 	void FireButtonPressed(bool bPressed);
 	
@@ -81,6 +82,7 @@ private:
 	float CrosshairCrouchingFactor{};
 	float CrosshairShootingFactor{};
 	float CrosshairMovingFactor{};
+	float CrosshairTargetFactor{};
 
 	FVector HitTargetImpactPoint{};
 
@@ -98,7 +100,11 @@ private:
 	float ZoomInterpSpeed{20.f};
 
 	void InterpFOV(float DeltaTime);
+
+	bool bCanFire = true;
+	FTimerHandle AutoFireHandle;
 	
-
-
+	void FireTimerFinished();
+	void StartFireTimer();
+	
 };

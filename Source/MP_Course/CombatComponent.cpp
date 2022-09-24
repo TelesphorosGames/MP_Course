@@ -92,19 +92,29 @@ void UCombatComponent::OnRep_EquippedWeapon()
 	
 }
 
+void UCombatComponent::Fire()
+{
+	if(bCanFire)
+	{
+		bCanFire=false;
+		Server_Fire(HitTargetImpactPoint);
+        
+        	if(EquippedWeapon)
+        	{
+        		CrosshairShootingFactor = -1.5f;
+        	}
+        	StartFireTimer();
+	}
+	
+}
+
 void UCombatComponent::FireButtonPressed(bool bPressed)
 {
 	bFireButtonPressed = bPressed;
 	if(bFireButtonPressed)
 	{
-		FHitResult HitResult;
-		TraceUnderCrosshairs(HitResult);
-		Server_Fire(HitResult.ImpactPoint);
-
-		if(EquippedWeapon)
-		{
-			CrosshairShootingFactor = -1.5f;
-		}
+		
+		Fire();
 		
 	}
 	
@@ -154,10 +164,12 @@ void UCombatComponent::TraceUnderCrosshairs(FHitResult& TraceHitResult)
 		if(TraceHitResult.GetActor() && TraceHitResult.GetActor()->Implements<UIInteractWithCrosshairs>())
 		{
 			HUDPackage.CrosshairsColor = FLinearColor::Red;
+			CrosshairTargetFactor = .5f;
 		}
 		else
 		{
 			HUDPackage.CrosshairsColor = FLinearColor::White;
+			CrosshairTargetFactor = 0.f;
 		}
 
 		if (!TraceHitResult.bBlockingHit)
@@ -214,7 +226,7 @@ void UCombatComponent::SetHudCrosshairs(float DeltaTime)
 			Velocity.Z = 0.f;
 
 			CrosshairVelocityFactor = FMath::GetMappedRangeValueClamped(WalkSpeedRange, VelocityMultiplierRange, Velocity.Size());
-			CrosshairMovingFactor = Character->GetMovingGunCrosshairFactor();
+			
 			
 			if(Character->GetCharacterMovement()->IsFalling())
 			{
@@ -249,7 +261,7 @@ void UCombatComponent::SetHudCrosshairs(float DeltaTime)
 			CrosshairShootingFactor = FMath::FInterpTo(CrosshairShootingFactor, 0.f, DeltaTime, 2.f);
 			
 			
-			HUDPackage.CrosshairSpread = (CrosshairVelocityFactor + CrosshairFallingFactor ) - (CrosshairMovingFactor + CrosshairCrouchingFactor+CrosshairAimingFactor + CrosshairShootingFactor);
+			HUDPackage.CrosshairSpread = (CrosshairVelocityFactor + CrosshairFallingFactor ) - (CrosshairTargetFactor + CrosshairCrouchingFactor+CrosshairAimingFactor + CrosshairShootingFactor);
 			
 			BC_Hud->SetHudPackage(HUDPackage);
 		}
@@ -274,6 +286,21 @@ void UCombatComponent::InterpFOV(float DeltaTime)
 	}
 }
 
+void UCombatComponent::FireTimerFinished()
+{
+	if(EquippedWeapon == nullptr) return;
+	bCanFire = true;
+	if(bFireButtonPressed && EquippedWeapon->GetAutomaticWeapon())
+	{
+		Fire();
+	}
+}
+
+void UCombatComponent::StartFireTimer()
+{
+	Character->GetWorldTimerManager().SetTimer(AutoFireHandle, this, &UCombatComponent::FireTimerFinished, EquippedWeapon->GetFireDelay());
+}
+
 void UCombatComponent::Multicast_Fire_Implementation(const FVector_NetQuantize& TraceHitTarget)
 {
 	if(EquippedWeapon == nullptr) return;
@@ -288,7 +315,6 @@ void UCombatComponent::Multicast_Fire_Implementation(const FVector_NetQuantize& 
 void UCombatComponent::Server_Fire_Implementation(const FVector_NetQuantize& TraceHitTarget)
 {
 	Multicast_Fire(TraceHitTarget);
-	
 }
 
 

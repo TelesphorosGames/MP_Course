@@ -45,7 +45,9 @@ public:
 	FORCEINLINE UTexture2D* GetCrosshairsBottom() const {return CrosshairsBottom ; }
 	FORCEINLINE float GetZoomedFOV() const {return ZoomedFOV ; }
 	FORCEINLINE float GetZoomedInterpSpeed() const {return ZoomInterpSpeed ; }
-	
+	FORCEINLINE float GetFireDelay() const {return FireDelay ; }
+	FORCEINLINE	bool GetAutomaticWeapon() const {return bAutomaticWeapon ; }
+
 	/* Public Custom Functions */ 
 
 	void ShowPickupWidget(bool bShowWidget);
@@ -103,10 +105,15 @@ private:
 	class UTexture2D* CrosshairsBottom;
 
 	// Zoomed field of view while aiming
-
 	UPROPERTY(EditAnywhere)
 	float ZoomedFOV{30.f};
 	UPROPERTY(EditAnywhere)
 	float ZoomInterpSpeed{20.f};
+
+	UPROPERTY(EditAnywhere)
+	float FireDelay =.15f;
+	
+	UPROPERTY(EditAnywhere)
+	bool bAutomaticWeapon = true;
 	
 };

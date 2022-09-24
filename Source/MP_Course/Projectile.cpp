@@ -8,6 +8,7 @@
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Sound/SoundCue.h"
+#include "MP_Course.h"
 
 // Sets default values
 AProjectile::AProjectile()
@@ -24,6 +25,7 @@ AProjectile::AProjectile()
 	CollisionBox->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECR_Block);
 	CollisionBox->SetCollisionResponseToChannel(ECollisionChannel::ECC_WorldStatic, ECR_Block);
 	CollisionBox->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECR_Block);
+	CollisionBox->SetCollisionResponseToChannel(ECC_SkeletalMesh, ECR_Block);
 	
 	ProjectileMovementComponent = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileMovementComponent"));
 	ProjectileMovementComponent->bRotationFollowsVelocity=true;
@@ -39,6 +41,7 @@ void AProjectile::BeginPlay()
 	if(HasAuthority())
 	{
 		CollisionBox->OnComponentHit.AddDynamic(this, &AProjectile::OnHit);
+		Debug("Successful");
 	}
 		
 
@@ -66,21 +69,30 @@ void AProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimi
     		}
 	if(HasAuthority())
 	{
+		Multicast_OnHit(OtherComp->GetCollisionObjectType());
 		
-		
-		Multicast_OnHit();
 	}
 
 	
 	Destroy();
 }
 
-void AProjectile::Multicast_OnHit_Implementation()
+void AProjectile::Multicast_OnHit_Implementation(ECollisionChannel CollisionChannel)
 {
-	if(ImpactParticles)
+	if(ImpactParticles && HitPlayerParticles)
     {
-    	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactParticles, GetActorTransform());
+		if(CollisionChannel == ECC_SkeletalMesh)
+		{
+			Debug("EC_SkeletalMesh");
+			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), HitPlayerParticles, GetActorTransform());
+		}
+		else
+		{
+			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactParticles, GetActorTransform());
+		}
+    	
     }
+	
     if(ImpactSound)
     {
     	UGameplayStatics::PlaySoundAtLocation(this, ImpactSound, GetActorLocation());
