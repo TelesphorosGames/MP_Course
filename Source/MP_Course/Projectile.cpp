@@ -3,7 +3,7 @@
 
 #include "Projectile.h"
 
-#include "BlasterCharacter.h"
+// #include "BlasterCharacter.h"
 #include "Components/BoxComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
@@ -62,18 +62,10 @@ void AProjectile::BeginPlay()
 void AProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp,
 	FVector NormalImpulse, const FHitResult& Hit)
 {
-	ABlasterCharacter* HitBlasterCharacter = Cast<ABlasterCharacter>(OtherActor);
-    		if(HitBlasterCharacter)
-    		{
-    			HitBlasterCharacter->Multicast_OnHit();
-    		}
 	if(HasAuthority())
 	{
 		Multicast_OnHit(OtherComp->GetCollisionObjectType());
-		
 	}
-
-	
 	Destroy();
 }
 

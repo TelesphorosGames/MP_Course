@@ -28,6 +28,9 @@ protected:
 
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_OnHit(ECollisionChannel CollisionChannel);
+
+	UPROPERTY(EditAnywhere)
+	float Damage{40.f};
 	
 private:
 
@@ -51,4 +54,5 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	UParticleSystem* HitPlayerParticles;
+	
 };

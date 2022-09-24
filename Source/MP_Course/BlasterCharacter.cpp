@@ -3,6 +3,8 @@
 
 #include "BlasterCharacter.h"
 
+#include "BlasterGameMode.h"
+#include "BlasterPlayerController.h"
 #include "CombatComponent.h"
 #include "Weapon.h"
 #include "Camera/CameraComponent.h"
@@ -12,6 +14,7 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "Net/UnrealNetwork.h"
 #include "MP_Course.h"
+
 
 // Sets default values
 ABlasterCharacter::ABlasterCharacter()
@@ -63,19 +66,27 @@ void ABlasterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	
 }
 
-void ABlasterCharacter::PostInitializeComponents()
+void ABlasterCharacter::UpdateHudHealth()
 {
-	Super::PostInitializeComponents();
-	if(CombatComponent)
-	{
-		CombatComponent->Character = this;
-	}
+	if(BlasterPlayerController == nullptr)
+		BlasterPlayerController = Cast<ABlasterPlayerController>(Controller);
+
+	if(BlasterPlayerController)
+		BlasterPlayerController->SetHudHealth(Health, MaxHealth);
 }
 
-AWeapon* ABlasterCharacter::GetEquippedWeapon()
+void ABlasterCharacter::BeginPlay()
 {
-	if(CombatComponent == nullptr) return nullptr;
-	return CombatComponent->EquippedWeapon;
+	Super::BeginPlay();
+
+	BlasterPlayerController = Cast<ABlasterPlayerController>(Controller);
+		
+	UpdateHudHealth();
+	if(HasAuthority())
+	{
+		OnTakeAnyDamage.AddDynamic(this, &ABlasterCharacter::ReceiveDamage);
+	}
+	
 }
 
 void ABlasterCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -83,18 +94,7 @@ void ABlasterCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Ou
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME_CONDITION(ABlasterCharacter, OverlappingWeapon, COND_OwnerOnly);
-}
-
-FVector ABlasterCharacter::GetHitTarget() const
-{
-	if(CombatComponent==nullptr) return FVector();
-	return CombatComponent->HitTargetImpactPoint;
-}
-
-void ABlasterCharacter::BeginPlay()
-{
-	Super::BeginPlay();
-	
+	DOREPLIFETIME(ABlasterCharacter, Health);
 }
 
 void ABlasterCharacter::Tick(float DeltaTime)
@@ -104,6 +104,34 @@ void ABlasterCharacter::Tick(float DeltaTime)
 	AimOffset(DeltaTime);
 	
 }
+
+void ABlasterCharacter::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+	if(CombatComponent)
+	{
+		CombatComponent->Character = this;
+	}
+}
+
+void ABlasterCharacter::Elim()
+{
+}
+
+AWeapon* ABlasterCharacter::GetEquippedWeapon()
+{
+	if(CombatComponent == nullptr) return nullptr;
+	return CombatComponent->EquippedWeapon;
+}
+
+
+FVector ABlasterCharacter::GetHitTarget() const
+{
+	if(CombatComponent==nullptr) return FVector();
+	return CombatComponent->HitTargetImpactPoint;
+}
+
+
 void ABlasterCharacter::MoveForward(float Value)
 {
 	if (Controller != nullptr && Value !=0.f)
@@ -293,6 +321,12 @@ void ABlasterCharacter::OnRep_OverlappingWeapon(AWeapon* LastWeapon)
 	}
 }
 
+void ABlasterCharacter::OnRep_Health()
+{
+	UpdateHudHealth();
+	PlayOnHitMontage();
+}
+
 void ABlasterCharacter::ServerEquipButtonPressed_Implementation()
 {
 	if(CombatComponent)
@@ -343,12 +377,6 @@ void ABlasterCharacter::PlayFireMontage(bool bAiming)
 	}
 }
 
-void ABlasterCharacter::Multicast_OnHit_Implementation()
-{
-	
-		PlayOnHitMontage();
-	
-}
 
 void ABlasterCharacter::PlayOnHitMontage()
 {
@@ -379,5 +407,31 @@ void ABlasterCharacter::PlayOnHitMontage()
 	
 		AnimInstance->Montage_JumpToSection(SectionName);
 	}
+}
+
+void ABlasterCharacter::ReceiveDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType,
+	AController* InstigatorController, AActor* DamageCauser)
+{
+	Health=FMath::Clamp(Health-Damage,0.f, MaxHealth);
+	UpdateHudHealth();
+	PlayOnHitMontage();
+
+	if(Health==0.f)
+	{
+		ABlasterGameMode* GameMode = GetWorld()->GetAuthGameMode<ABlasterGameMode>();
+		if(GameMode)
+		{
+			if(BlasterPlayerController == nullptr) BlasterPlayerController=Cast<ABlasterPlayerController>(Controller);
+			if(BlasterPlayerController)
+			{
+				ABlasterPlayerController* InsigatingPC = Cast<ABlasterPlayerController>(InstigatorController);
+				if(InsigatingPC)GameMode->PlayerEliminated(this, BlasterPlayerController, InsigatingPC);
+			}
+			
+		}
+	}
+	
+	
+	
 }
 

@@ -94,18 +94,16 @@ void UCombatComponent::OnRep_EquippedWeapon()
 
 void UCombatComponent::Fire()
 {
-	if(bCanFire)
+	if(EquippedWeapon)
 	{
-		bCanFire=false;
-		Server_Fire(HitTargetImpactPoint);
-        
-        	if(EquippedWeapon)
-        	{
-        		CrosshairShootingFactor = -1.5f;
-        	}
-        	StartFireTimer();
+		if(bCanFire)
+		{
+			bCanFire=false;
+			Server_Fire(HitTargetImpactPoint);
+	        CrosshairShootingFactor = -1.5f;
+	        StartFireTimer();
+        }
 	}
-	
 }
 
 void UCombatComponent::FireButtonPressed(bool bPressed)
@@ -298,6 +296,7 @@ void UCombatComponent::FireTimerFinished()
 
 void UCombatComponent::StartFireTimer()
 {
+    if(Character)
 	Character->GetWorldTimerManager().SetTimer(AutoFireHandle, this, &UCombatComponent::FireTimerFinished, EquippedWeapon->GetFireDelay());
 }
 

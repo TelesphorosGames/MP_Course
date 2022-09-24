@@ -18,30 +18,23 @@ class MP_COURSE_API ABlasterCharacter : public ACharacter, public IIInteractWith
 public:
 	
 	ABlasterCharacter();
-
 	virtual void Tick(float DeltaTime) override;
-
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-
+	void UpdateHudHealth();
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
-
 	virtual void PostInitializeComponents() override;
+	void Elim();
 
+	/* PUBLIC FUNCTIONS */
+	
 	void SetOverlappingWeapon(class AWeapon* Weapon);
-
 	bool IsWeaponEquipped() const;
-
 	bool IsAiming() const;
-
 	void PlayFireMontage(bool bAiming);
 
-	UFUNCTION(NetMulticast, Unreliable)
-	void Multicast_OnHit();
 	
-	// GETTERS AND SETTERS:
-
-	AWeapon* GetEquippedWeapon();
-
+	/* GETTERS AND SETTERS: */
+	
 	FORCEINLINE void SetAO_Yaw(float inYaw) {AO_Yaw = inYaw; }
 	FORCEINLINE void SetAO_Pitch(float inPitch) {AO_Pitch = inPitch; }
 	FORCEINLINE float GetAO_Yaw() const {return AO_Yaw; }
@@ -49,7 +42,7 @@ public:
 	FORCEINLINE ETurningInPlace GetTurningInPlace() const {return TurningInPlace; }
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const {return FollowCamera ; }
 
-	
+	AWeapon* GetEquippedWeapon();
 	FVector GetHitTarget() const;
 
 	
@@ -76,6 +69,9 @@ protected:
 	void HideCameraForFpp();
 
 	void PlayOnHitMontage();
+
+	UFUNCTION()
+	void ReceiveDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatorController, AActor* DamageCauser);
 	
 private:
 
@@ -116,5 +112,12 @@ private:
 	
 	UPROPERTY(EditAnywhere, Category= Combat, meta=(AllowPrivateAccess = "true"))
 	float CameraThreshold =200.f;
-
+	UPROPERTY(EditAnywhere, Category= Stats, meta=(AllowPrivateAccess = "true"))
+	float MaxHealth = 100.f;
+	UPROPERTY(EditAnywhere, Category= Stats, meta=(AllowPrivateAccess = "true"), ReplicatedUsing=OnRep_Health)
+	float Health = 100.f;
+	UFUNCTION()
+	void OnRep_Health();
+	UPROPERTY()
+	class ABlasterPlayerController* BlasterPlayerController;
 };

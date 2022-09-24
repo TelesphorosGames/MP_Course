@@ -6,6 +6,7 @@
 #include "GameFramework/HUD.h"
 #include "BlasterHud.generated.h"
 
+
 USTRUCT(BlueprintType)
 struct FHudPackage
 {
@@ -39,6 +40,17 @@ public:
 
 
 	FORCEINLINE void SetHudPackage(const FHudPackage& Package) {HudPackage = Package ; }
+
+	UPROPERTY(EditAnywhere,Category=Stats)
+	TSubclassOf<class UUserWidget> CharacterOverlayClass;
+	UPROPERTY()
+	class UCharacterOverlay* CharacterOverlay;
+
+protected:
+
+	virtual void BeginPlay() override;;
+
+	void AddCharacterOverlay();
 	
 private:
 
