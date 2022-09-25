@@ -5,6 +5,7 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "Weapon.h"
 #include "Camera/CameraComponent.h"
+#include "MP_Course.h"
 
 void UBCAnimInstance::NativeInitializeAnimation()
 {
@@ -44,6 +45,7 @@ void UBCAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	bIsCrouched = BlasterCharacter->bIsCrouched;
 	bAiming = BlasterCharacter->IsAiming();
 	TurningInPlace = BlasterCharacter->GetTurningInPlace();
+	bElimmed= BlasterCharacter->GetIsElimmed();
 
 
     // Get Yaw Offset, Used for Strafing -- Delta Rotator between character's Base Aim Rotation ( World Space direction camera is facing )

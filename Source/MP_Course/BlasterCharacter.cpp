@@ -116,6 +116,23 @@ void ABlasterCharacter::PostInitializeComponents()
 
 void ABlasterCharacter::Elim()
 {
+	Multicast_Elim();
+	GetWorldTimerManager().SetTimer(ElimTimer, this, &ABlasterCharacter::ElimTimerFinished, ElimDelay);
+}
+
+void ABlasterCharacter::Multicast_Elim_Implementation()
+{
+	bElimmed=true;
+	PlayElimMontage();
+}
+
+void ABlasterCharacter::ElimTimerFinished()
+{
+	ABlasterGameMode* BlasterGameMode = GetWorld()->GetAuthGameMode<ABlasterGameMode>();
+	if(BlasterGameMode)
+	{
+		BlasterGameMode->RequestRespawn(this, Controller);
+	}
 }
 
 AWeapon* ABlasterCharacter::GetEquippedWeapon()
@@ -327,6 +344,8 @@ void ABlasterCharacter::OnRep_Health()
 	PlayOnHitMontage();
 }
 
+
+
 void ABlasterCharacter::ServerEquipButtonPressed_Implementation()
 {
 	if(CombatComponent)
@@ -372,6 +391,18 @@ void ABlasterCharacter::PlayFireMontage(bool bAiming)
 		FName SectionName;
 		bAiming ? SectionName = FName("RifleSights") : SectionName = FName("RifleHip") ;
 		AnimInstance->Montage_JumpToSection(SectionName);
+
+		
+	}
+}
+
+void ABlasterCharacter::PlayElimMontage()
+{
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if(AnimInstance && OnElimMontage)
+	{
+		AnimInstance->Montage_Play(OnElimMontage);
+		AnimInstance->Montage_JumpToSection(FName("Elim"));
 
 		
 	}
@@ -425,7 +456,10 @@ void ABlasterCharacter::ReceiveDamage(AActor* DamagedActor, float Damage, const 
 			if(BlasterPlayerController)
 			{
 				ABlasterPlayerController* InsigatingPC = Cast<ABlasterPlayerController>(InstigatorController);
-				if(InsigatingPC)GameMode->PlayerEliminated(this, BlasterPlayerController, InsigatingPC);
+				if(InsigatingPC)
+				{
+					GameMode->PlayerEliminated(this, BlasterPlayerController, InsigatingPC);
+				}
 			}
 			
 		}

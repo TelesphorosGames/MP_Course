@@ -17,16 +17,25 @@ void ABullet::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitive
 	// 	if(OController)
 	// 	{
 	// if(OtherActor == GetOwner() || Hit.Distance < 10.f) return;
-	if(OtherActor)
-		UGameplayStatics::ApplyDamage(OtherActor, Damage, GetOwner()->GetInstigatorController(), this, UDamageType::StaticClass());
+	
 	// // 	}
 	// // }
 
-	
+	if(OtherActor)
+	{
+		Multicast_OnHit(OtherActor);
+	}
 	
 	Super::OnHit(HitComp, OtherActor, OtherComp, NormalImpulse, Hit);
 	
 	
 	
+	
+}
+
+void ABullet::Multicast_OnHit(AActor* OtherActor)
+{
+	if(OtherActor)
+		UGameplayStatics::ApplyDamage(OtherActor, Damage, GetOwner()->GetInstigatorController(), this, UDamageType::StaticClass());
 	
 }

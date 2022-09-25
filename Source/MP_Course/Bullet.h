@@ -18,7 +18,7 @@ public:
 
 protected:
 	virtual void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
-
+	void Multicast_OnHit(AActor* OtherActor);
 private:
 	
 };

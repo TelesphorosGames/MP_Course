@@ -24,6 +24,8 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void PostInitializeComponents() override;
 	void Elim();
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_Elim();
 
 	/* PUBLIC FUNCTIONS */
 	
@@ -31,7 +33,7 @@ public:
 	bool IsWeaponEquipped() const;
 	bool IsAiming() const;
 	void PlayFireMontage(bool bAiming);
-
+	void PlayElimMontage();
 	
 	/* GETTERS AND SETTERS: */
 	
@@ -41,6 +43,7 @@ public:
 	FORCEINLINE float GetAO_Pitch() const {return AO_Pitch; }
 	FORCEINLINE ETurningInPlace GetTurningInPlace() const {return TurningInPlace; }
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const {return FollowCamera ; }
+	FORCEINLINE bool GetIsElimmed() const {return bElimmed ; }
 
 	AWeapon* GetEquippedWeapon();
 	FVector GetHitTarget() const;
@@ -108,7 +111,10 @@ private:
 	class UAnimMontage* FireWeaponMontage;
 
 	UPROPERTY(EditAnywhere, Category= Combat, meta=(AllowPrivateAccess = "true"))
-	class UAnimMontage* OnHitMontage;
+	UAnimMontage* OnHitMontage;
+
+	UPROPERTY(EditAnywhere, Category= Combat, meta=(AllowPrivateAccess = "true"))
+	UAnimMontage* OnElimMontage;
 	
 	UPROPERTY(EditAnywhere, Category= Combat, meta=(AllowPrivateAccess = "true"))
 	float CameraThreshold =200.f;
@@ -120,4 +126,14 @@ private:
 	void OnRep_Health();
 	UPROPERTY()
 	class ABlasterPlayerController* BlasterPlayerController;
+
+	bool bElimmed = false;
+
+	FTimerHandle ElimTimer;
+	void ElimTimerFinished();
+	UPROPERTY(EditDefaultsOnly)
+	float ElimDelay={3.f};
+	
+	
+	
 };
