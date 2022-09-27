@@ -37,13 +37,14 @@ public:
 	
 	/* GETTERS AND SETTERS: */
 	
-	FORCEINLINE void SetAO_Yaw(float inYaw) {AO_Yaw = inYaw; }
-	FORCEINLINE void SetAO_Pitch(float inPitch) {AO_Pitch = inPitch; }
+	FORCEINLINE void SetAO_Yaw(const float InYaw) {AO_Yaw = InYaw; }
+	FORCEINLINE void SetAO_Pitch(const float InPitch) {AO_Pitch = InPitch; }
 	FORCEINLINE float GetAO_Yaw() const {return AO_Yaw; }
 	FORCEINLINE float GetAO_Pitch() const {return AO_Pitch; }
 	FORCEINLINE ETurningInPlace GetTurningInPlace() const {return TurningInPlace; }
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const {return FollowCamera ; }
-	FORCEINLINE bool GetIsElimmed() const {return bElimmed ; }
+	FORCEINLINE bool GetIsElimmed() const { return bElimmed ; }
+	FORCEINLINE void SetIsElimmed(const bool Elimmed) {bElimmed = Elimmed ;}
 
 	AWeapon* GetEquippedWeapon();
 	FVector GetHitTarget() const;
@@ -126,10 +127,11 @@ private:
 	void OnRep_Health();
 	UPROPERTY()
 	class ABlasterPlayerController* BlasterPlayerController;
-
+	UPROPERTY()
 	bool bElimmed = false;
 
 	FTimerHandle ElimTimer;
+	UFUNCTION()
 	void ElimTimerFinished();
 	UPROPERTY(EditDefaultsOnly)
 	float ElimDelay={3.f};

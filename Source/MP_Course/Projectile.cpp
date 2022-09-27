@@ -69,6 +69,10 @@ void AProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimi
 	Destroy();
 }
 
+void AProjectile::Multicast_OnHit(AActor* OtherActor)
+{
+}
+
 void AProjectile::Multicast_OnHit_Implementation(ECollisionChannel CollisionChannel)
 {
 	if(ImpactParticles && HitPlayerParticles)

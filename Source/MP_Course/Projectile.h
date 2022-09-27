@@ -28,7 +28,7 @@ protected:
 
 	UFUNCTION(NetMulticast, Reliable)
 	virtual void Multicast_OnHit(ECollisionChannel CollisionChannel);
-
+	virtual void Multicast_OnHit(AActor* OtherActor);
 	UPROPERTY(EditAnywhere)
 	float Damage{40.f};
 	

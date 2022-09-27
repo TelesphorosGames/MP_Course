@@ -15,11 +15,6 @@ void ABullet::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitive
 	// {
 	// 	AController* OController = OwnerMan->Controller;
 	// 	if(OController)
-	// 	{
-	// if(OtherActor == GetOwner() || Hit.Distance < 10.f) return;
-	
-	// // 	}
-	// // }
 
 	if(OtherActor)
 	{

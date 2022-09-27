@@ -26,7 +26,6 @@ void ABlasterPlayerController::SetHudHealth(float Health, float MaxHealth)
 		BlasterHud->CharacterOverlay->HealthBar->SetPercent(HealthPercent);
 		FString HealthText = FString::Printf(TEXT("%d/%d"), FMath::CeilToInt(Health), FMath::CeilToInt(MaxHealth));
 		BlasterHud->CharacterOverlay->HealthText->SetText(FText::FromString(HealthText));
-		Debug("Nope");
 	}
 	else
 	{

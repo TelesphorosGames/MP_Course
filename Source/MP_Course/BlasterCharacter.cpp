@@ -82,6 +82,7 @@ void ABlasterCharacter::BeginPlay()
 	BlasterPlayerController = Cast<ABlasterPlayerController>(Controller);
 		
 	UpdateHudHealth();
+	
 	if(HasAuthority())
 	{
 		OnTakeAnyDamage.AddDynamic(this, &ABlasterCharacter::ReceiveDamage);
@@ -95,6 +96,7 @@ void ABlasterCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Ou
 
 	DOREPLIFETIME_CONDITION(ABlasterCharacter, OverlappingWeapon, COND_OwnerOnly);
 	DOREPLIFETIME(ABlasterCharacter, Health);
+
 }
 
 void ABlasterCharacter::Tick(float DeltaTime)
@@ -122,7 +124,7 @@ void ABlasterCharacter::Elim()
 
 void ABlasterCharacter::Multicast_Elim_Implementation()
 {
-	bElimmed=true;
+	SetIsElimmed(true);
 	PlayElimMontage();
 }
 
@@ -403,8 +405,6 @@ void ABlasterCharacter::PlayElimMontage()
 	{
 		AnimInstance->Montage_Play(OnElimMontage);
 		AnimInstance->Montage_JumpToSection(FName("Elim"));
-
-		
 	}
 }
 
@@ -447,7 +447,7 @@ void ABlasterCharacter::ReceiveDamage(AActor* DamagedActor, float Damage, const 
 	UpdateHudHealth();
 	PlayOnHitMontage();
 
-	if(Health==0.f)
+	if(Health==0.f && !bElimmed)
 	{
 		ABlasterGameMode* GameMode = GetWorld()->GetAuthGameMode<ABlasterGameMode>();
 		if(GameMode)
@@ -461,11 +461,7 @@ void ABlasterCharacter::ReceiveDamage(AActor* DamagedActor, float Damage, const 
 					GameMode->PlayerEliminated(this, BlasterPlayerController, InsigatingPC);
 				}
 			}
-			
 		}
 	}
-	
-	
-	
 }
 
