@@ -18,6 +18,7 @@ class MP_COURSE_API ABlasterPlayerController : public APlayerController
 public:
 
 	void SetHudHealth(float Health, float MaxHealth);
+	void OnPossess(APawn* InPawn) override;
 
 protected:
 

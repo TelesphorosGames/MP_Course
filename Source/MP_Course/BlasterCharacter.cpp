@@ -14,6 +14,7 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "Net/UnrealNetwork.h"
 #include "MP_Course.h"
+#include "Components/CapsuleComponent.h"
 
 
 // Sets default values
@@ -118,14 +119,29 @@ void ABlasterCharacter::PostInitializeComponents()
 
 void ABlasterCharacter::Elim()
 {
+	if(CombatComponent && CombatComponent->EquippedWeapon)
+	{
+		GetEquippedWeapon()->Dropped();
+	}
 	Multicast_Elim();
 	GetWorldTimerManager().SetTimer(ElimTimer, this, &ABlasterCharacter::ElimTimerFinished, ElimDelay);
 }
 
 void ABlasterCharacter::Multicast_Elim_Implementation()
 {
+	
 	SetIsElimmed(true);
 	PlayElimMontage();
+
+	GetCharacterMovement()->DisableMovement();
+	GetCharacterMovement()->StopMovementImmediately();
+	if(BlasterPlayerController)
+	{
+		DisableInput(BlasterPlayerController);
+	}
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		
 }
 
 void ABlasterCharacter::ElimTimerFinished()

@@ -45,6 +45,8 @@ public:
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const {return FollowCamera ; }
 	FORCEINLINE bool GetIsElimmed() const { return bElimmed ; }
 	FORCEINLINE void SetIsElimmed(const bool Elimmed) {bElimmed = Elimmed ;}
+	FORCEINLINE float GetHealth() const {return Health ; }
+	FORCEINLINE float GetMaxHealth() const {return MaxHealth ; }
 
 	AWeapon* GetEquippedWeapon();
 	FVector GetHitTarget() const;

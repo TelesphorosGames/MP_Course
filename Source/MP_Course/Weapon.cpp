@@ -16,17 +16,18 @@ AWeapon::AWeapon()
 	PrimaryActorTick.bCanEverTick = false;
 	bReplicates = true;
 	
-	AreaSphere = CreateDefaultSubobject<USphereComponent>(TEXT("AreaSphere"));
-	AreaSphere->SetupAttachment(RootComponent);
-	AreaSphere->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
-	AreaSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	SetRootComponent(AreaSphere);
-	
 	WeaponMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("WeaponMesh"));
 	WeaponMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
 	WeaponMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Ignore);
 	WeaponMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	WeaponMesh->SetupAttachment(RootComponent);
+	SetRootComponent(WeaponMesh);
+	
+	AreaSphere = CreateDefaultSubobject<USphereComponent>(TEXT("AreaSphere"));
+	AreaSphere->SetupAttachment(RootComponent);
+	AreaSphere->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+	AreaSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	
+	
 	
 	PickupWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("Pickup Widget"));
 	PickupWidget->SetupAttachment(RootComponent);
@@ -76,15 +77,27 @@ void AWeapon::SetWeaponState(EWeaponState State)
 	case EWeaponState::EWS_Equipped :
 
 		ShowPickupWidget(false);
+
 		AreaSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		WeaponMesh->SetSimulatePhysics(false);
+		WeaponMesh->SetEnableGravity(false);
+		WeaponMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		
+		break;
+		
+	case EWeaponState::EWS_Dropped :
+		
+		if(HasAuthority())
+		{
+			AreaSphere->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+		}
+		WeaponMesh->SetSimulatePhysics(true);
+		WeaponMesh->SetEnableGravity(true);
+		WeaponMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	
 		break;
 	default: ;
 	}
-	
-	ShowPickupWidget(false);
-	GetAreaSphere()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-
-	
 	
 }
 
@@ -96,6 +109,7 @@ void AWeapon::OnAreaSphereOverlap(UPrimitiveComponent* OverlappedComponent, AAct
 	{
 		BlasterCharacter->SetOverlappingWeapon(this);
 	}
+	
 }
 
 void AWeapon::OnAreaSphereEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
@@ -109,6 +123,17 @@ void AWeapon::OnAreaSphereEndOverlap(UPrimitiveComponent* OverlappedComponent, A
 	
 }
 
+void AWeapon::Dropped()
+{
+	SetWeaponState(EWeaponState::EWS_Dropped);
+	FDetachmentTransformRules FDR(EDetachmentRule::KeepRelative, true);
+	
+	WeaponMesh->DetachFromComponent(FDR);
+	
+	SetOwner(nullptr);
+	
+}
+
 void AWeapon::OnRep_WeaponState()
 {
 	switch(WeaponState)
@@ -116,7 +141,19 @@ void AWeapon::OnRep_WeaponState()
 	case EWeaponState::EWS_Equipped :
 
 		ShowPickupWidget(false);
-		AreaSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		
+		WeaponMesh->SetSimulatePhysics(false);
+		WeaponMesh->SetEnableGravity(false);
+		WeaponMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		
+		break;
+
+	case EWeaponState::EWS_Dropped :
+		
+		WeaponMesh->SetSimulatePhysics(true);
+		WeaponMesh->SetEnableGravity(true);
+		WeaponMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+		
 		break;
 		
 	default: ;
@@ -127,7 +164,6 @@ void AWeapon::ShowPickupWidget(bool bShowWidget)
 {
 	if(PickupWidget) 
 	{
-		
 		PickupWidget->SetVisibility(bShowWidget);
 	}
 }

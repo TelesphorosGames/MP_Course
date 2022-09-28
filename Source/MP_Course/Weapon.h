@@ -32,7 +32,7 @@ public:
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
-	void SetWeaponState(EWeaponState State); 
+	
 
 	/* Public Getters and Setters */
 	
@@ -53,7 +53,9 @@ public:
 	void ShowPickupWidget(bool bShowWidget);
 	virtual void Fire(const FVector& HitTarget);
 
-
+	void Dropped();
+	void SetWeaponState(EWeaponState State);
+	
 protected:
 	
 	virtual void BeginPlay() override;
@@ -62,6 +64,10 @@ protected:
 	virtual void OnAreaSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 	UFUNCTION()
 	void OnAreaSphereEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+
+
+
+
 private:
 
 	UPROPERTY(VisibleAnywhere, Category  ="Weapon Properties")

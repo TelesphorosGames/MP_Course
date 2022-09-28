@@ -86,10 +86,19 @@ void UCombatComponent::OnRep_EquippedWeapon()
 {
 	if(EquippedWeapon && Character)
 	{
+		
+		EquippedWeapon->SetWeaponState(EWeaponState::EWS_Equipped);
+		
+		const USkeletalMeshSocket* RightHandSocket = Character->GetMesh()->GetSocketByName(FName("RightHandSocket"));
+		if(RightHandSocket)
+		{
+			RightHandSocket->AttachActor(EquippedWeapon, Character->GetMesh());
+		}
+
+		
 		Character->GetCharacterMovement()->bOrientRotationToMovement = false;
 		Character->bUseControllerRotationYaw = true;
 	}
-	
 }
 
 void UCombatComponent::Fire()
@@ -323,16 +332,17 @@ void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
 	if(Character == nullptr || WeaponToEquip == nullptr) return;
 
 	EquippedWeapon = WeaponToEquip;
+	
 	EquippedWeapon->SetWeaponState(EWeaponState::EWS_Equipped);
 	
-
 	const USkeletalMeshSocket* RightHandSocket = Character->GetMesh()->GetSocketByName(FName("RightHandSocket"));
-
-	if(RightHandSocket)
-	{
-		RightHandSocket->AttachActor(EquippedWeapon, Character->GetMesh());
-	}
+     
+     	if(RightHandSocket)
+     	{
+     		RightHandSocket->AttachActor(EquippedWeapon, Character->GetMesh());
+     	}
 	EquippedWeapon->SetOwner(Character);
+	
 	Character->GetCharacterMovement()->bOrientRotationToMovement = false;
 	Character->bUseControllerRotationYaw = true;
 	
