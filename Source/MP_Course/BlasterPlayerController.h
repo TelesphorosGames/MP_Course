@@ -18,6 +18,10 @@ class MP_COURSE_API ABlasterPlayerController : public APlayerController
 public:
 
 	void SetHudHealth(float Health, float MaxHealth);
+	void SetHudScore(float Score);
+	void SetHudDefeats(int32 Defeats);
+
+	
 	void OnPossess(APawn* InPawn) override;
 
 protected:
@@ -26,6 +30,6 @@ protected:
 	
 private:
 	UPROPERTY()
-    	class ABlasterHud* BlasterHud;
+    	class ABlasterHud* BlasterHud{};
 	
 };

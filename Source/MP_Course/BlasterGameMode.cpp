@@ -4,12 +4,22 @@
 #include "BlasterGameMode.h"
 #include "BlasterCharacter.h"
 #include "BlasterPlayerController.h"
+#include "BlasterPlayerState.h"
 #include "GameFramework/PlayerStart.h"
 #include "Kismet/GameplayStatics.h"
 
 void ABlasterGameMode::PlayerEliminated(ABlasterCharacter* ElimPlayer, ABlasterPlayerController* ElimController,
-                                        ABlasterPlayerController* InsigController)
+                                        ABlasterPlayerController* InstigController)
 {
+	ABlasterPlayerState* AttackerPlayerState = InstigController ? Cast<ABlasterPlayerState>(InstigController->PlayerState) : nullptr;
+	ABlasterPlayerState* VictimPlayerState = ElimController ? Cast<ABlasterPlayerState>(ElimController->PlayerState) : nullptr ;
+
+	if(AttackerPlayerState && VictimPlayerState && AttackerPlayerState != VictimPlayerState)
+	{
+		AttackerPlayerState->AddToScore(1);
+		VictimPlayerState->AddToDefeats(1);
+	}
+	
 	if(ElimPlayer)
 	{
 		ElimPlayer->Elim();
@@ -22,7 +32,7 @@ void ABlasterGameMode::FindFurthestPlayerStart(ACharacter* ElimmedCharacter, AAc
 	UGameplayStatics::GetAllActorsOfClass(this, APlayerStart::StaticClass(), PlayerStarts);
 	FurthestPlayerStart = {};
 	float LongestDistance{};
-	for (AActor* PlayerStart : PlayerStarts)
+	for (AActor*& PlayerStart : PlayerStarts)
 	{
 		const float DistanceToStart = FVector::Distance(ElimmedCharacter->GetActorLocation(), PlayerStart->GetActorLocation());
 		if(DistanceToStart>LongestDistance)
@@ -36,6 +46,7 @@ void ABlasterGameMode::FindFurthestPlayerStart(ACharacter* ElimmedCharacter, AAc
 void ABlasterGameMode::RequestRespawn(ACharacter* ElimmedCharacter, AController* ElimmedController)
 {
 
+	
 	if(ElimmedController && ElimmedCharacter)
 	{
 		ElimmedCharacter->Reset();

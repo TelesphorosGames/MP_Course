@@ -24,6 +24,8 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void PostInitializeComponents() override;
 	void Elim();
+	void HideElimText();
+	void ShowElimText();
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_Elim();
 
@@ -91,7 +93,7 @@ private:
 	class UWidgetComponent* OverheadWidget;
 
 	UPROPERTY(ReplicatedUsing = OnRep_OverlappingWeapon)
-	class AWeapon* OverlappingWeapon;
+	class AWeapon* OverlappingWeapon{};
 
 	UFUNCTION()
 	void OnRep_OverlappingWeapon(AWeapon* LastWeapon);
@@ -128,7 +130,7 @@ private:
 	UFUNCTION()
 	void OnRep_Health();
 	UPROPERTY()
-	class ABlasterPlayerController* BlasterPlayerController;
+	class ABlasterPlayerController* BlasterPlayerController{};
 	UPROPERTY()
 	bool bElimmed = false;
 
@@ -137,6 +139,7 @@ private:
 	void ElimTimerFinished();
 	UPROPERTY(EditDefaultsOnly)
 	float ElimDelay={3.f};
+	
 	
 	
 	

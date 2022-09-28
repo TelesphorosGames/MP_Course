@@ -5,6 +5,7 @@
 
 #include "BlasterGameMode.h"
 #include "BlasterPlayerController.h"
+#include "CharacterOverlay.h"
 #include "CombatComponent.h"
 #include "Weapon.h"
 #include "Camera/CameraComponent.h"
@@ -15,6 +16,7 @@
 #include "Net/UnrealNetwork.h"
 #include "MP_Course.h"
 #include "Components/CapsuleComponent.h"
+#include "Components/TextBlock.h"
 
 
 // Sets default values
@@ -89,6 +91,8 @@ void ABlasterCharacter::BeginPlay()
 		OnTakeAnyDamage.AddDynamic(this, &ABlasterCharacter::ReceiveDamage);
 	}
 	
+	HideElimText();
+	
 }
 
 void ABlasterCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -125,20 +129,49 @@ void ABlasterCharacter::Elim()
 	}
 	Multicast_Elim();
 	GetWorldTimerManager().SetTimer(ElimTimer, this, &ABlasterCharacter::ElimTimerFinished, ElimDelay);
+		
+}
+
+void ABlasterCharacter::HideElimText()
+{
+	if(BlasterPlayerController)
+	{
+		ABlasterHud* BlasterHud = Cast<ABlasterHud>(BlasterPlayerController->GetHUD());
+		if(BlasterHud &&
+			BlasterHud->CharacterOverlay&&
+			BlasterHud->CharacterOverlay->ElimText)
+		{
+			BlasterHud->CharacterOverlay->ElimText->SetVisibility(ESlateVisibility::Hidden);
+		}
+	}
+}
+
+void ABlasterCharacter::ShowElimText()
+{
+	if(BlasterPlayerController)
+	{
+		ABlasterHud* BlasterHud = Cast<ABlasterHud>(BlasterPlayerController->GetHUD());
+		if(BlasterHud &&
+			BlasterHud->CharacterOverlay&&
+			BlasterHud->CharacterOverlay->ElimText)
+		{
+			BlasterHud->CharacterOverlay->ElimText->SetVisibility(ESlateVisibility::Visible);
+		}
+	}
 }
 
 void ABlasterCharacter::Multicast_Elim_Implementation()
 {
-	
 	SetIsElimmed(true);
 	PlayElimMontage();
-
-	GetCharacterMovement()->DisableMovement();
-	GetCharacterMovement()->StopMovementImmediately();
 	if(BlasterPlayerController)
 	{
 		DisableInput(BlasterPlayerController);
 	}
+	ShowElimText();
+	GetCharacterMovement()->DisableMovement();
+	GetCharacterMovement()->StopMovementImmediately();
+	
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		
@@ -151,6 +184,7 @@ void ABlasterCharacter::ElimTimerFinished()
 	{
 		BlasterGameMode->RequestRespawn(this, Controller);
 	}
+	HideElimText();
 }
 
 AWeapon* ABlasterCharacter::GetEquippedWeapon()

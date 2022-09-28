@@ -17,7 +17,7 @@ class MP_COURSE_API ABlasterGameMode : public AGameMode
 
 public:
 
-	virtual void PlayerEliminated(ABlasterCharacter* ElimPlayer, class ABlasterPlayerController* ElimController, ABlasterPlayerController* InsigController);
+	virtual void PlayerEliminated(ABlasterCharacter* ElimPlayer, class ABlasterPlayerController* ElimController, ABlasterPlayerController* InstigController);
 	void FindFurthestPlayerStart(ACharacter* ElimmedCharacter, AActor*& FurthestPlayerStart);
 
 	virtual void RequestRespawn(class ACharacter* ElimmedCharacter, AController* ElimmedController);
