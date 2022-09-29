@@ -4,7 +4,9 @@
 #include "Weapon.h"
 
 #include "BlasterCharacter.h"
+#include "BlasterPlayerController.h"
 #include "Casing.h"
+#include "../../Plugins/Developer/RiderLink/Source/RD/thirdparty/spdlog/include/spdlog/fmt/bundled/chrono.h"
 #include "Components/SphereComponent.h"
 #include "Components/WidgetComponent.h"
 #include "Engine/SkeletalMeshSocket.h"
@@ -51,7 +53,10 @@ void AWeapon::BeginPlay()
 	{
 		PickupWidget->SetVisibility(false);
 	}
-	
+	if(BlasterOwnerCharacter == nullptr)
+	{
+		BlasterOwnerCharacter = Cast<ABlasterCharacter>(GetOwner());
+	}
 }
 
 void AWeapon::Tick(float DeltaTime)
@@ -65,6 +70,21 @@ void AWeapon::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeP
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(AWeapon, WeaponState);
+	DOREPLIFETIME(AWeapon, Ammo);
+	
+}
+
+void AWeapon::OnRep_Owner()
+{
+	Super::OnRep_Owner();
+
+	if(Owner==nullptr)
+	{
+		BlasterOwnerCharacter=nullptr;
+		BlasterPlayerController=nullptr;
+	}
+	SetHUDWeaponAmmo();
+
 	
 }
 
@@ -127,10 +147,10 @@ void AWeapon::Dropped()
 {
 	SetWeaponState(EWeaponState::EWS_Dropped);
 	FDetachmentTransformRules FDR(EDetachmentRule::KeepRelative, true);
-	
 	WeaponMesh->DetachFromComponent(FDR);
-	
 	SetOwner(nullptr);
+	BlasterOwnerCharacter = nullptr;
+	BlasterPlayerController = nullptr;
 	
 }
 
@@ -158,6 +178,49 @@ void AWeapon::OnRep_WeaponState()
 		
 	default: ;
 	}
+}
+
+void AWeapon::OnRep_Ammo()
+{
+	SetHUDWeaponAmmo();
+	
+}
+
+void AWeapon::SetHUDWeaponAmmo()
+{
+	if(BlasterOwnerCharacter == nullptr)
+	{
+		BlasterOwnerCharacter = Cast<ABlasterCharacter>(GetOwner());
+	}
+	if(BlasterOwnerCharacter)
+	{
+		if(BlasterPlayerController == nullptr)
+        {
+            BlasterPlayerController = Cast<ABlasterPlayerController>(BlasterOwnerCharacter->GetController());
+        }
+        if(BlasterPlayerController)
+        {
+            BlasterPlayerController->SetHudWeaponAmmo(Ammo);
+        }
+	}
+}
+
+bool AWeapon::IsEmpty()
+{
+	if(Ammo <=0)
+	{
+		return true;
+	}
+	return false;
+}
+
+void AWeapon::SpendRound()
+{
+	Ammo = FMath::Clamp(Ammo - 1, 0, MagCapacity);
+	
+	SetHUDWeaponAmmo();
+		
+	
 }
 
 void AWeapon::ShowPickupWidget(bool bShowWidget)
@@ -194,6 +257,7 @@ void AWeapon::Fire(const FVector& HitTarget)
 			}
 		
 		}
+	SpendRound();
 	
 }
 

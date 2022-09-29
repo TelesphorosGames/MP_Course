@@ -20,6 +20,7 @@ public:
 	void SetHudHealth(float Health, float MaxHealth);
 	void SetHudScore(float Score);
 	void SetHudDefeats(int32 Defeats);
+	void SetHudWeaponAmmo(int32 Ammo);
 
 	
 	void OnPossess(APawn* InPawn) override;

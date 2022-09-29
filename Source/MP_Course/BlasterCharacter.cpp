@@ -153,9 +153,11 @@ void ABlasterCharacter::ShowElimText()
 		ABlasterHud* BlasterHud = Cast<ABlasterHud>(BlasterPlayerController->GetHUD());
 		if(BlasterHud &&
 			BlasterHud->CharacterOverlay&&
-			BlasterHud->CharacterOverlay->ElimText)
+			BlasterHud->CharacterOverlay->ElimText
+			)
 		{
 			BlasterHud->CharacterOverlay->ElimText->SetVisibility(ESlateVisibility::Visible);
+			
 		}
 	}
 }
@@ -167,6 +169,7 @@ void ABlasterCharacter::Multicast_Elim_Implementation()
 	if(BlasterPlayerController)
 	{
 		DisableInput(BlasterPlayerController);
+		BlasterPlayerController->SetHudWeaponAmmo(0);
 	}
 	ShowElimText();
 	GetCharacterMovement()->DisableMovement();

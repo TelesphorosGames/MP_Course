@@ -31,7 +31,7 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
-
+	virtual void OnRep_Owner() override;
 	
 
 	/* Public Getters and Setters */
@@ -55,6 +55,8 @@ public:
 
 	void Dropped();
 	void SetWeaponState(EWeaponState State);
+	void SetHUDWeaponAmmo();
+	bool IsEmpty();
 	
 protected:
 	
@@ -121,5 +123,23 @@ private:
 	
 	UPROPERTY(EditAnywhere)
 	bool bAutomaticWeapon = true;
+
+	UPROPERTY(EditAnywhere, ReplicatedUsing=OnRep_Ammo)
+	int32 Ammo;
+
+	UPROPERTY(EditAnywhere)
+	int32 MagCapacity;
+	
+	UFUNCTION()
+	void OnRep_Ammo();
+	
+
+	UFUNCTION()
+	void SpendRound();
+
+	class ABlasterCharacter* BlasterOwnerCharacter{};
+	class ABlasterPlayerController* BlasterPlayerController{};
+
+	
 	
 };

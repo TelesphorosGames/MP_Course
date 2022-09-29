@@ -49,6 +49,7 @@ protected:
 	void TraceUnderCrosshairs(FHitResult& TraceHitResult);
 
 	void SetHudCrosshairs(float DeltaTime);
+	
 
 private:
 
@@ -106,5 +107,7 @@ private:
 	
 	void FireTimerFinished();
 	void StartFireTimer();
+
+	bool CanFire();
 	
 };
