@@ -84,6 +84,8 @@ private:
 	bool bLocallyControlledCharacter;
 	UPROPERTY(BlueprintReadOnly, Category="Character | Movement", meta = (AllowPrivateAccess="true"))
 	bool bElimmed;
+	UPROPERTY(BlueprintReadOnly, Category="Character | Movement", meta = (AllowPrivateAccess="true"))
+	bool bUseFabrik;
 
 	
 };

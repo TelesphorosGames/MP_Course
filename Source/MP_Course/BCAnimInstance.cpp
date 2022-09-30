@@ -6,6 +6,7 @@
 #include "Weapon.h"
 #include "Camera/CameraComponent.h"
 #include "MP_Course.h"
+#include "CombatState.h"
 
 void UBCAnimInstance::NativeInitializeAnimation()
 {
@@ -23,16 +24,12 @@ void UBCAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 {
 
 	Super::NativeUpdateAnimation(DeltaSeconds);
-
 	
-
 	if(BlasterCharacter== nullptr)
 	{
 		BlasterCharacter=Cast<ABlasterCharacter>(TryGetPawnOwner());
 	}
 	if(BlasterCharacter == nullptr) return;
-
-	
 	
 	FVector Velocity = BlasterCharacter->GetVelocity();
 	Velocity.Z = 0.f;
@@ -88,7 +85,6 @@ void UBCAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 		LeftThumbTransform.SetRotation(FQuat(ThumbOutRotation));
 		//Correct Right Hand placement in relation to shoulder to position weapon correctly
 		
-		
 			RightShoulderTransform = EquippedWeapon -> GetWeaponMesh()->GetSocketTransform(FName("ShoulderSocket"), ERelativeTransformSpace::RTS_World);
 			FVector ShoulderOutPosition{};
 			FRotator ShoulderOutRotation{};
@@ -96,16 +92,20 @@ void UBCAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 			RightShoulderTransform.SetLocation(ShoulderOutPosition);
 			RightShoulderTransform.SetRotation(FQuat(ShoulderOutRotation));
 		
-		// Correct Look At Rotation of equipped weapon to ensure it points towards crosshairs (clients only)
+		// Correct Look At Rotation of equipped weapon to ensure it points towards crosshairs (clients only!!!)
+		
+		// FTransform MuzzleFlashTransform = EquippedWeapon->GetWeaponMesh()->GetSocketTransform(FName("MuzzleFlash"));
 		if(BlasterCharacter->IsLocallyControlled())
 		{
-			bLocallyControlledCharacter=true;
-			// FTransform MuzzleFlashTransform = EquippedWeapon->GetWeaponMesh()->GetSocketTransform(FName("MuzzleFlash"));
+			bLocallyControlledCharacter=true;	
+		
 			const FTransform RightHandTransform = EquippedWeapon->GetWeaponMesh()->GetSocketTransform(FName("hand_r", ERelativeTransformSpace::RTS_World));
             FRotator LookAtRotation = UKismetMathLibrary::FindLookAtRotation(RightHandTransform.GetLocation(), RightHandTransform.GetLocation() + (RightHandTransform.GetLocation()-BlasterCharacter->GetHitTarget()));
-            RightHandRotation = FMath::RInterpTo(RightHandRotation, LookAtRotation, DeltaSeconds, 10.f);    	
+            RightHandRotation = FMath::RInterpTo(RightHandRotation, LookAtRotation, DeltaSeconds, 10.f);    
 		}
 
-		}
+	}
+
+	bUseFabrik = BlasterCharacter->GetCombatState() != ECombatState::ECS_Reloading ; 
 	
 }

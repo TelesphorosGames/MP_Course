@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "WeaponTypes.h"
 #include "GameFramework/Actor.h"
 #include "Weapon.generated.h"
 
@@ -22,8 +23,6 @@ class MP_COURSE_API AWeapon : public AActor
 {
 	GENERATED_BODY()
 
-	
-	
 public:	
 
 	AWeapon();
@@ -47,6 +46,8 @@ public:
 	FORCEINLINE float GetZoomedInterpSpeed() const {return ZoomInterpSpeed ; }
 	FORCEINLINE float GetFireDelay() const {return FireDelay ; }
 	FORCEINLINE	bool GetAutomaticWeapon() const {return bAutomaticWeapon ; }
+	FORCEINLINE EWeaponType GetWeaponType() const{return WeaponType ; }
+	FORCEINLINE	void SetWeaponType(EWeaponType Type){ WeaponType = Type; }
 
 	/* Public Custom Functions */ 
 
@@ -140,6 +141,7 @@ private:
 	class ABlasterCharacter* BlasterOwnerCharacter{};
 	class ABlasterPlayerController* BlasterPlayerController{};
 
-	
-	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(AllowPrivateAccess = "true"))
+	EWeaponType WeaponType{};
+
 };

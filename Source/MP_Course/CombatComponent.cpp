@@ -35,7 +35,15 @@ void UCombatComponent::BeginPlay()
 			DefaultFOV = Character->GetFollowCamera()->FieldOfView;
 			CurrentFOV = DefaultFOV;
 		}
+
+		if(Character->HasAuthority())
+        {
+        	InitializeCarriedAmmo();
+        }
 	}
+
+
+	
 }
 
 void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -58,6 +66,8 @@ void UCombatComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 
 	DOREPLIFETIME(UCombatComponent, EquippedWeapon);
 	DOREPLIFETIME(UCombatComponent, bAiming);
+	DOREPLIFETIME(UCombatComponent, CombatState);
+	DOREPLIFETIME_CONDITION(UCombatComponent, CarriedAmmo,COND_OwnerOnly);
 }
 
 void UCombatComponent::SetAiming(bool bIsAiming)
@@ -99,12 +109,23 @@ void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
 	}
 	EquippedWeapon->SetOwner(Character);
 	EquippedWeapon->SetHUDWeaponAmmo();
+
+	if(CarriedAmmoMap.Contains(EquippedWeapon->GetWeaponType()))
+	{
+		CarriedAmmo = CarriedAmmoMap[EquippedWeapon->GetWeaponType()];
+	}
+	
+	BC_Controller = BC_Controller == nullptr ? Cast<ABlasterPlayerController>(Character->GetController()) : BC_Controller ;
+	if(BC_Controller)
+	{
+		BC_Controller->SetHudCarriedAmmo(CarriedAmmo);
+	}
+	
 	Character->GetCharacterMovement()->bOrientRotationToMovement = false;
 	Character->bUseControllerRotationYaw = true;
 	
-	
-	
 }
+
 
 void UCombatComponent::OnRep_EquippedWeapon()
 {
@@ -122,6 +143,43 @@ void UCombatComponent::OnRep_EquippedWeapon()
 		
 		Character->GetCharacterMovement()->bOrientRotationToMovement = false;
 		Character->bUseControllerRotationYaw = true;
+	}
+}
+
+void UCombatComponent::ReloadWeapon()
+{
+	if(CarriedAmmo<=0) return;
+
+	if(CarriedAmmo>0 && CombatState != ECombatState::ECS_Reloading)
+	{
+		Server_Reload();
+	}
+	
+
+}
+
+
+void UCombatComponent::Server_Reload_Implementation()
+{
+	if(Character == nullptr) return;
+	CombatState=ECombatState::ECS_Reloading;
+	HandleReload();
+}
+
+void UCombatComponent::HandleReload()
+{
+	Character->PlayReloadMontage();
+}
+
+
+void UCombatComponent::OnRep_CombatState()
+{
+	switch(CombatState)
+	{
+	case ECombatState::ECS_Reloading :
+		HandleReload();
+		break;
+	default: ;
 	}
 }
 
@@ -144,11 +202,8 @@ void UCombatComponent::FireButtonPressed(bool bPressed)
 	bFireButtonPressed = bPressed;
 	if(bFireButtonPressed)
 	{
-		
 		Fire();
-		
 	}
-	
 }
 
 void UCombatComponent::TraceUnderCrosshairs(FHitResult& TraceHitResult)
@@ -358,3 +413,16 @@ bool UCombatComponent::CanFire()
 	return !EquippedWeapon->IsEmpty() || !bCanFire;
 }
 
+void UCombatComponent::OnRep_CarriedAmmo()
+{
+	BC_Controller = BC_Controller == nullptr ? Cast<ABlasterPlayerController>(Character->GetController()) : BC_Controller ;
+	if(BC_Controller)
+	{
+		BC_Controller->SetHudCarriedAmmo(CarriedAmmo);
+	}
+}
+
+void UCombatComponent::InitializeCarriedAmmo()
+{
+	CarriedAmmoMap.Emplace(EWeaponType::EWT_AssaultRifle, StartingAmmo);
+}

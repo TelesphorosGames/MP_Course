@@ -28,6 +28,7 @@ public:
 	UTextBlock* ElimText;
 	UPROPERTY(meta=(BindWidget))
 	UTextBlock* AmmoCount;
-	
+	UPROPERTY(meta=(BindWidget))
+	UTextBlock* CarriedAmmo;
 	
 };

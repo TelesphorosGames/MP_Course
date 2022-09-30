@@ -17,6 +17,7 @@
 #include "MP_Course.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/TextBlock.h"
+#include "CombatState.h"
 
 
 // Sets default values
@@ -66,7 +67,7 @@ void ABlasterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	PlayerInputComponent->BindAction("Aim", IE_Released, this, &ABlasterCharacter::AimButtonReleased);
 	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &ABlasterCharacter::FireButtonPressed);
 	PlayerInputComponent->BindAction("Fire", IE_Released, this, &ABlasterCharacter::FireButtonReleased);
-	
+	PlayerInputComponent->BindAction("Reload", IE_Pressed, this, &ABlasterCharacter::ReloadButtonPressed);
 }
 
 void ABlasterCharacter::UpdateHudHealth()
@@ -203,6 +204,15 @@ FVector ABlasterCharacter::GetHitTarget() const
 	return CombatComponent->HitTargetImpactPoint;
 }
 
+ECombatState ABlasterCharacter::GetCombatState() const
+{
+	if(CombatComponent==nullptr)
+	{
+		return ECombatState::ECS_MAX;
+	}
+	return CombatComponent->CombatState;
+}
+
 
 void ABlasterCharacter::MoveForward(float Value)
 {
@@ -284,6 +294,14 @@ void ABlasterCharacter::AimButtonReleased()
 	if(CombatComponent)
 	{
 		CombatComponent->SetAiming(false);
+	}
+}
+
+void ABlasterCharacter::ReloadButtonPressed()
+{
+	if(CombatComponent)
+	{
+		CombatComponent->ReloadWeapon();
 	}
 }
 
@@ -446,8 +464,6 @@ void ABlasterCharacter::PlayFireMontage(bool bAiming)
 		FName SectionName;
 		bAiming ? SectionName = FName("RifleSights") : SectionName = FName("RifleHip") ;
 		AnimInstance->Montage_JumpToSection(SectionName);
-
-		
 	}
 }
 
@@ -458,6 +474,26 @@ void ABlasterCharacter::PlayElimMontage()
 	{
 		AnimInstance->Montage_Play(OnElimMontage);
 		AnimInstance->Montage_JumpToSection(FName("Elim"));
+	}
+}
+
+void ABlasterCharacter::PlayReloadMontage()
+{
+	if(CombatComponent == nullptr || CombatComponent->EquippedWeapon == nullptr) return;
+
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if(AnimInstance && ReloadMontage)
+	{
+		AnimInstance->Montage_Play(ReloadMontage);
+		FName SectionName;
+		switch (GetEquippedWeapon()->GetWeaponType())
+		{
+		case EWeaponType::EWT_AssaultRifle :
+			SectionName = FName("Rifle");
+			break;
+		default: ;
+		}
+		AnimInstance->Montage_JumpToSection(SectionName);
 	}
 }
 

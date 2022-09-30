@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 #include "TurnInPlace.h"
 #include "IInteractWithCrosshairs.h"
+#include "CombatState.h"
 
 
 #include "BlasterCharacter.generated.h"
@@ -36,6 +37,7 @@ public:
 	bool IsAiming() const;
 	void PlayFireMontage(bool bAiming);
 	void PlayElimMontage();
+	void PlayReloadMontage();
 	
 	/* GETTERS AND SETTERS: */
 	
@@ -49,9 +51,10 @@ public:
 	FORCEINLINE void SetIsElimmed(const bool Elimmed) {bElimmed = Elimmed ;}
 	FORCEINLINE float GetHealth() const {return Health ; }
 	FORCEINLINE float GetMaxHealth() const {return MaxHealth ; }
-
+	
 	AWeapon* GetEquippedWeapon();
 	FVector GetHitTarget() const;
+	ECombatState GetCombatState() const;
 
 	
 protected:
@@ -67,6 +70,9 @@ protected:
 	void CrouchButtonPressed();
 	void AimButtonPressed();
 	void AimButtonReleased();
+
+	void ReloadButtonPressed();
+	
 
 	void AimOffset(float DeltaTime);	
 	void TurnInPlace(float DeltaTime);
@@ -120,6 +126,9 @@ private:
 
 	UPROPERTY(EditAnywhere, Category= Combat, meta=(AllowPrivateAccess = "true"))
 	UAnimMontage* OnElimMontage;
+
+	UPROPERTY(EditAnywhere, Category= Combat, meta=(AllowPrivateAccess = "true"))
+	UAnimMontage* ReloadMontage;
 	
 	UPROPERTY(EditAnywhere, Category= Combat, meta=(AllowPrivateAccess = "true"))
 	float CameraThreshold =200.f;

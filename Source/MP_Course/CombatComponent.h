@@ -5,6 +5,9 @@
 #include "CoreMinimal.h"
 #include "BlasterHud.h"
 #include "Components/ActorComponent.h"
+#include "WeaponTypes.h"
+#include "CombatState.h"
+
 
 #include "CombatComponent.generated.h"
 
@@ -24,6 +27,7 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 	void EquipWeapon(class AWeapon* WeaponToEquip);
+	void ReloadWeapon();
 	
 protected:
 
@@ -37,6 +41,11 @@ protected:
 	UFUNCTION()
 	void OnRep_EquippedWeapon();
 	void Fire();
+
+	UFUNCTION(Server,Reliable)
+	void Server_Reload();
+
+	void HandleReload();
 
 	void FireButtonPressed(bool bPressed);
 	
@@ -109,5 +118,21 @@ private:
 	void StartFireTimer();
 
 	bool CanFire();
+	UPROPERTY(ReplicatedUsing=OnRep_CarriedAmmo)
+	int32 CarriedAmmo;
+	UFUNCTION()
+	void OnRep_CarriedAmmo();
+
+	TMap<EWeaponType, int32> CarriedAmmoMap;
+
+	UPROPERTY(EditAnywhere)
+	int32 StartingAmmo = 30;
 	
+	void InitializeCarriedAmmo();
+
+	UPROPERTY(ReplicatedUsing=OnRep_CombatState)
+	ECombatState CombatState = ECombatState::ECS_Unoccupied;
+	
+	UFUNCTION()
+	void OnRep_CombatState();
 };
