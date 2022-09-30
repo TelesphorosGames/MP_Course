@@ -47,6 +47,9 @@ public:
 	FORCEINLINE float GetFireDelay() const {return FireDelay ; }
 	FORCEINLINE	bool GetAutomaticWeapon() const {return bAutomaticWeapon ; }
 	FORCEINLINE EWeaponType GetWeaponType() const{return WeaponType ; }
+	FORCEINLINE int32 GetAmmo() const {return Ammo ; }
+	FORCEINLINE int32 GetMagazineCapacity() const {return MagCapacity ; }
+	
 	FORCEINLINE	void SetWeaponType(EWeaponType Type){ WeaponType = Type; }
 
 	/* Public Custom Functions */ 
@@ -58,6 +61,7 @@ public:
 	void SetWeaponState(EWeaponState State);
 	void SetHUDWeaponAmmo();
 	bool IsEmpty();
+	void AddAmmo(int32 AmmoToAdd);
 	
 protected:
 	

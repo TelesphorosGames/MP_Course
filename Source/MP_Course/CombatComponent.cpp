@@ -41,6 +41,7 @@ void UCombatComponent::BeginPlay()
         	InitializeCarriedAmmo();
         }
 	}
+	
 
 
 	
@@ -158,10 +159,46 @@ void UCombatComponent::ReloadWeapon()
 
 }
 
+void UCombatComponent::FinishReloading()
+{
+	if(Character == nullptr) return;
+	if(Character->HasAuthority())
+	{
+		CombatState= ECombatState::ECS_Unoccupied;
+		UpdateAmmoValues();
+	}
+	if(bFireButtonPressed)
+	{
+		Fire();
+	}
+		
+	
+}
+
+
+void UCombatComponent::UpdateAmmoValues()
+{
+	const int32 ReloadAmount = AmountToReload();
+	if(CarriedAmmoMap.Contains(EquippedWeapon->GetWeaponType()))
+	{
+		CarriedAmmoMap[EquippedWeapon->GetWeaponType()] -= ReloadAmount;
+		CarriedAmmo = CarriedAmmoMap[EquippedWeapon->GetWeaponType()];
+	}
+	
+	
+	BC_Controller = BC_Controller == nullptr ? Cast<ABlasterPlayerController>(Character->GetController()) : BC_Controller ;
+	if(BC_Controller)
+	{
+		BC_Controller->SetHudCarriedAmmo(CarriedAmmo);
+	}
+	
+	EquippedWeapon->AddAmmo(-ReloadAmount);
+}
 
 void UCombatComponent::Server_Reload_Implementation()
 {
-	if(Character == nullptr) return;
+	if(Character == nullptr || EquippedWeapon == nullptr) return;
+	
 	CombatState=ECombatState::ECS_Reloading;
 	HandleReload();
 }
@@ -169,6 +206,20 @@ void UCombatComponent::Server_Reload_Implementation()
 void UCombatComponent::HandleReload()
 {
 	Character->PlayReloadMontage();
+}
+
+int32 UCombatComponent::AmountToReload()
+{
+	if(EquippedWeapon == nullptr) return 0;
+
+	int32 RoomInMagazine = EquippedWeapon->GetMagazineCapacity() - EquippedWeapon->GetAmmo();
+	if(CarriedAmmoMap.Contains(EquippedWeapon->GetWeaponType()))
+	{
+		int32 AmountCarried = CarriedAmmoMap[EquippedWeapon->GetWeaponType()];
+		int32 Least = FMath::Min(RoomInMagazine, AmountCarried);
+		return FMath::Clamp(RoomInMagazine, 0, Least);
+	}	
+	return 0;
 }
 
 
@@ -179,6 +230,11 @@ void UCombatComponent::OnRep_CombatState()
 	case ECombatState::ECS_Reloading :
 		HandleReload();
 		break;
+	case ECombatState::ECS_Unoccupied :
+		if(bFireButtonPressed)
+		{
+			Fire();
+		}
 	default: ;
 	}
 }
@@ -380,6 +436,10 @@ void UCombatComponent::FireTimerFinished()
 	{
 		Fire();
 	}
+	if(EquippedWeapon->IsEmpty())
+	{
+		ReloadWeapon();
+	}
 }
 
 void UCombatComponent::StartFireTimer()
@@ -391,7 +451,7 @@ void UCombatComponent::StartFireTimer()
 void UCombatComponent::Multicast_Fire_Implementation(const FVector_NetQuantize& TraceHitTarget)
 {
 	if(EquippedWeapon == nullptr) return;
-	if(Character)
+	if(Character && CombatState == ECombatState::ECS_Unoccupied)
 	{
 		Character->PlayFireMontage(bAiming);
 		EquippedWeapon->Fire(TraceHitTarget);
@@ -410,7 +470,7 @@ bool UCombatComponent::CanFire()
 	{
 		return false;
 	}
-	return !EquippedWeapon->IsEmpty() || !bCanFire;
+	return !EquippedWeapon->IsEmpty() && bCanFire && CombatState==ECombatState::ECS_Unoccupied;
 }
 
 void UCombatComponent::OnRep_CarriedAmmo()

@@ -103,9 +103,9 @@ void UBCAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
             FRotator LookAtRotation = UKismetMathLibrary::FindLookAtRotation(RightHandTransform.GetLocation(), RightHandTransform.GetLocation() + (RightHandTransform.GetLocation()-BlasterCharacter->GetHitTarget()));
             RightHandRotation = FMath::RInterpTo(RightHandRotation, LookAtRotation, DeltaSeconds, 10.f);    
 		}
-
 	}
 
-	bUseFabrik = BlasterCharacter->GetCombatState() != ECombatState::ECS_Reloading ; 
+	bUseFabrik = BlasterCharacter->GetCombatState() != ECombatState::ECS_Reloading ;
+	bUseAimOffsets = BlasterCharacter->GetCombatState() == ECombatState::ECS_Unoccupied;
 	
 }

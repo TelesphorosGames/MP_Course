@@ -86,6 +86,8 @@ private:
 	bool bElimmed;
 	UPROPERTY(BlueprintReadOnly, Category="Character | Movement", meta = (AllowPrivateAccess="true"))
 	bool bUseFabrik;
+	UPROPERTY(BlueprintReadOnly, Category="Character | Movement", meta = (AllowPrivateAccess="true"))
+	bool bUseAimOffsets;
 
 	
 };

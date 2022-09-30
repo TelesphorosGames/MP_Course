@@ -28,7 +28,10 @@ public:
 
 	void EquipWeapon(class AWeapon* WeaponToEquip);
 	void ReloadWeapon();
-	
+	UFUNCTION(BlueprintCallable)
+	void FinishReloading();
+	void UpdateAmmoValues();
+
 protected:
 
 	virtual void BeginPlay() override;
@@ -46,6 +49,8 @@ protected:
 	void Server_Reload();
 
 	void HandleReload();
+
+	int32 AmountToReload();
 
 	void FireButtonPressed(bool bPressed);
 	
