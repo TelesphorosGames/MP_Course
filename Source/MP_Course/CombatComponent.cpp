@@ -215,8 +215,8 @@ int32 UCombatComponent::AmountToReload()
 	int32 RoomInMagazine = EquippedWeapon->GetMagazineCapacity() - EquippedWeapon->GetAmmo();
 	if(CarriedAmmoMap.Contains(EquippedWeapon->GetWeaponType()))
 	{
-		int32 AmountCarried = CarriedAmmoMap[EquippedWeapon->GetWeaponType()];
-		int32 Least = FMath::Min(RoomInMagazine, AmountCarried);
+		const int32 AmountCarried = CarriedAmmoMap[EquippedWeapon->GetWeaponType()];
+		const int32 Least = FMath::Min(RoomInMagazine, AmountCarried);
 		return FMath::Clamp(RoomInMagazine, 0, Least);
 	}	
 	return 0;
@@ -288,7 +288,7 @@ void UCombatComponent::TraceUnderCrosshairs(FHitResult& TraceHitResult)
 
 		if(Character)
 		{
-			float DistanceToCharacter = (Character->GetActorLocation() - Start).Size();
+			const float DistanceToCharacter = (Character->GetActorLocation() - Start).Size();
 			Start+=CrosshairWorldDirection * (DistanceToCharacter + 30.f);
 			DrawDebugSphere(GetWorld(),Start, 16.f, 12, FColor::Red);
 		}

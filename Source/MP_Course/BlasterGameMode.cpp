@@ -8,6 +8,25 @@
 #include "GameFramework/PlayerStart.h"
 #include "Kismet/GameplayStatics.h"
 
+ABlasterGameMode::ABlasterGameMode()
+{
+	bDelayedStart = true;
+}
+
+void ABlasterGameMode::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+
+	if(MatchState == MatchState::WaitingToStart)
+	{
+		CountDownTime = WarmupTime - GetWorld()->GetTimeSeconds() + LevelStartingTime;
+		if(CountDownTime <= 0.f)
+		{
+			StartMatch();
+		}
+	}
+}
+
 void ABlasterGameMode::PlayerEliminated(ABlasterCharacter* ElimPlayer, ABlasterPlayerController* ElimController,
                                         ABlasterPlayerController* InstigController)
 {
@@ -41,6 +60,14 @@ void ABlasterGameMode::FindFurthestPlayerStart(ACharacter* ElimmedCharacter, AAc
 			FurthestPlayerStart = PlayerStart;
 		}
 	}
+}
+
+void ABlasterGameMode::BeginPlay()
+{
+	Super::BeginPlay();
+
+	LevelStartingTime = GetWorld()->GetTimeSeconds();
+
 }
 
 void ABlasterGameMode::RequestRespawn(ACharacter* ElimmedCharacter, AController* ElimmedController)
