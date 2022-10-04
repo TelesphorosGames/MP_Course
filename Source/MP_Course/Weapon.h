@@ -35,20 +35,21 @@ public:
 
 	/* Public Getters and Setters */
 	
-	FORCEINLINE USphereComponent* GetAreaSphere() const { return AreaSphere; }
-	FORCEINLINE USkeletalMeshComponent* GetWeaponMesh() const { return WeaponMesh ; }
-	FORCEINLINE UTexture2D* GetCrosshairsCenter() const {return CrosshairsCenter ; }
-	FORCEINLINE UTexture2D* GetCrosshairsLeft() const {return CrosshairsLeft ; }
-	FORCEINLINE UTexture2D* GetCrosshairsRight() const {return CrosshairsRight ; }
-	FORCEINLINE UTexture2D* GetCrosshairsTop() const {return CrosshairsTop ; }
-	FORCEINLINE UTexture2D* GetCrosshairsBottom() const {return CrosshairsBottom ; }
-	FORCEINLINE float GetZoomedFOV() const {return ZoomedFOV ; }
-	FORCEINLINE float GetZoomedInterpSpeed() const {return ZoomInterpSpeed ; }
-	FORCEINLINE float GetFireDelay() const {return FireDelay ; }
-	FORCEINLINE	bool GetAutomaticWeapon() const {return bAutomaticWeapon ; }
-	FORCEINLINE EWeaponType GetWeaponType() const{return WeaponType ; }
-	FORCEINLINE int32 GetAmmo() const {return Ammo ; }
-	FORCEINLINE int32 GetMagazineCapacity() const {return MagCapacity ; }
+	FORCEINLINE USphereComponent* GetAreaSphere() const { return AreaSphere ;}
+	FORCEINLINE USkeletalMeshComponent* GetWeaponMesh() const { return WeaponMesh ;}
+	FORCEINLINE UTexture2D* GetCrosshairsCenter() const {return CrosshairsCenter ;}
+	FORCEINLINE UTexture2D* GetCrosshairsLeft() const {return CrosshairsLeft ;}
+	FORCEINLINE UTexture2D* GetCrosshairsRight() const {return CrosshairsRight ;}
+	FORCEINLINE UTexture2D* GetCrosshairsTop() const {return CrosshairsTop ;}
+	FORCEINLINE UTexture2D* GetCrosshairsBottom() const {return CrosshairsBottom ;}
+	FORCEINLINE float GetZoomedFOV() const {return ZoomedFOV ;}
+	FORCEINLINE float GetZoomedInterpSpeed() const {return ZoomInterpSpeed ;}
+	FORCEINLINE float GetFireDelay() const {return FireDelay ;}
+	FORCEINLINE	bool GetAutomaticWeapon() const {return bAutomaticWeapon ;}
+	FORCEINLINE EWeaponType GetWeaponType() const{return WeaponType ;}
+	FORCEINLINE int32 GetAmmo() const {return Ammo ;}
+	FORCEINLINE int32 GetMagazineCapacity() const {return MagCapacity ;}
+	FORCEINLINE class USoundCue* GetEquipSound() const {return EquipSound ;}
 	
 	FORCEINLINE	void SetWeaponType(EWeaponType Type){ WeaponType = Type; }
 
@@ -92,6 +93,9 @@ private:
 
 	UPROPERTY(VisibleAnywhere, Category  ="Weapon Properties")
 	class UWidgetComponent* PickupWidget;
+
+	UPROPERTY(EditAnywhere, Category  ="Weapon Properties")
+	class USoundCue* EquipSound{};
 
 	UPROPERTY(EditAnywhere, Category= "Weapon Properties")
 	class UAnimationAsset* FireAnimation;
@@ -137,12 +141,13 @@ private:
 	
 	UFUNCTION()
 	void OnRep_Ammo();
-	
 
 	UFUNCTION()
 	void SpendRound();
 
+	UPROPERTY()
 	class ABlasterCharacter* BlasterOwnerCharacter{};
+	UPROPERTY()
 	class ABlasterPlayerController* BlasterPlayerController{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(AllowPrivateAccess = "true"))

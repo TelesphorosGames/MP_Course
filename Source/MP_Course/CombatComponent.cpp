@@ -14,6 +14,7 @@
 #include "Net/UnrealNetwork.h"
 // #include "DrawDebugHelpers.h"
 #include "Camera/CameraComponent.h"
+#include "Sound/SoundCue.h"
 
 UCombatComponent::UCombatComponent()
 {
@@ -101,6 +102,10 @@ void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
 	EquippedWeapon = WeaponToEquip;
 	
 	EquippedWeapon->SetWeaponState(EWeaponState::EWS_Equipped);
+	if(EquippedWeapon->GetEquipSound())
+	{
+		UGameplayStatics::PlaySoundAtLocation(this, EquippedWeapon->GetEquipSound(), EquippedWeapon->GetActorLocation(), FRotator());
+	}
 	
 	const USkeletalMeshSocket* RightHandSocket = Character->GetMesh()->GetSocketByName(FName("RightHandSocket"));
      
@@ -485,4 +490,5 @@ void UCombatComponent::OnRep_CarriedAmmo()
 void UCombatComponent::InitializeCarriedAmmo()
 {
 	CarriedAmmoMap.Emplace(EWeaponType::EWT_AssaultRifle, StartingAmmo);
+	CarriedAmmoMap.Emplace(EWeaponType::EWT_RocketLauncher, StartingAmmo);
 }
