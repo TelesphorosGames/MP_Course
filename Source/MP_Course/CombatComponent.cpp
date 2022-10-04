@@ -361,14 +361,13 @@ void UCombatComponent::SetHudCrosshairs(float DeltaTime)
 				HUDPackage.CrosshairsTop = nullptr;
 				HUDPackage.CrosshairsBottom = nullptr;
 			}
-
+			
 			const FVector2D WalkSpeedRange = {0.f, Character->GetCharacterMovement()->MaxWalkSpeed};
 			const FVector2D VelocityMultiplierRange(0.f,1.f);
 				FVector Velocity = Character->GetVelocity();
 			Velocity.Z = 0.f;
 
 			CrosshairVelocityFactor = FMath::GetMappedRangeValueClamped(WalkSpeedRange, VelocityMultiplierRange, Velocity.Size());
-			
 			
 			if(Character->GetCharacterMovement()->IsFalling())
 			{

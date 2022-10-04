@@ -13,10 +13,6 @@ void UBCAnimInstance::NativeInitializeAnimation()
 	Super::NativeInitializeAnimation();
 
 	BlasterCharacter=Cast<ABlasterCharacter>(TryGetPawnOwner());
-
-
-	
-	
 	
 }
 

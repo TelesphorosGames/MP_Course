@@ -2,6 +2,7 @@
 
 #pragma once
 
+
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
 #include "BlasterPlayerController.generated.h"
@@ -17,7 +18,12 @@ class MP_COURSE_API ABlasterPlayerController : public APlayerController
 
 public:
 
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+	
 	virtual void ReceivedPlayer() override;
+
+	FORCEINLINE float GetWarmupTime() const	{return WarmupTime ;}
+
 
 	void SetHudHealth(float Health, float MaxHealth);
 	void SetHudScore(float Score);
@@ -25,8 +31,14 @@ public:
 	void SetHudWeaponAmmo(int32 Ammo);
 	void SetHudCarriedAmmo(int32 Ammo);
 	void SetHuDCountdownTime(float CountdownTime);
+	void SetHUDAnnouncementCountdown(float Time);
 	void OnPossess(APawn* InPawn) override;
 
+	void OnMatchStateSet(FName State);
+	void HandleMatchHasStarted();
+	void HandleCooldown();
+
+	
 	// Synced with server world clock
 	virtual float GetServerTime();
 
@@ -36,7 +48,8 @@ protected:
 	virtual void Tick(float DeltaSeconds) override;
 	
 	void SetHudTime();
-
+	void PollInit();
+	
 	// Sync time between Client and Server :
 
 	// Requests Current server time, passing in client's time when request was sent 
@@ -54,16 +67,42 @@ protected:
 
 	void CheckTimeSync(float DeltaTime);
 	
-
 	
+	UFUNCTION(Server, Reliable)
+	void Server_CheckMatchState();
+	UFUNCTION(Client, Reliable)
+	void Client_JoinMidGame(FName StateOfMatch, float Warmup, float Match, float StartingTime, float Cooldown);
+
 	
 	
 private:
 	UPROPERTY()
     	class ABlasterHud* BlasterHud{};
 
-	float MatchTime = 120.f;
+	float MatchTime = 0.f;
+	float WarmupTime = 0.f;
+	float LevelStartingTime = 0.f;
+	float CoolDownTime = 0.f;
 
 	uint32 CountDownInt=0;
 	
+	UPROPERTY(ReplicatedUsing=OnRep_MatchState)
+	FName BlasterMatchState;
+	
+	UFUNCTION()
+	void OnRep_MatchState();
+
+	UPROPERTY()
+	class UCharacterOverlay* CharacterOverlay;
+
+	bool bInitializeCharacterOverlay = false;
+
+	float HudHealth;
+	float HudMaxHealth;
+	float HudScore;
+	int32 HudDefeats;
+
+	UPROPERTY()
+	class ABlasterGameMode* BlasterGameMode{};
+
 };
