@@ -31,6 +31,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void FinishReloading();
 	void UpdateAmmoValues();
+	void FireButtonPressed(bool bPressed);
 
 protected:
 
@@ -52,7 +53,7 @@ protected:
 
 	int32 AmountToReload();
 
-	void FireButtonPressed(bool bPressed);
+	
 	
 	UFUNCTION(Server, Reliable)
 	void Server_Fire(const FVector_NetQuantize& TraceHitTarget);

@@ -255,6 +255,7 @@ void UCombatComponent::Fire()
 
 void UCombatComponent::FireButtonPressed(bool bPressed)
 {
+	if(Character->GetDisableGameplay()) return;
 	bFireButtonPressed = bPressed;
 	if(bFireButtonPressed)
 	{

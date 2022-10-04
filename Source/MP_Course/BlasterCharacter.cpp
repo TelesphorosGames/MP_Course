@@ -18,6 +18,7 @@
 #include "Components/CapsuleComponent.h"
 #include "Components/TextBlock.h"
 #include "CombatState.h"
+#include "Kismet/GameplayStatics.h"
 
 
 // Sets default values
@@ -60,6 +61,7 @@ void ABlasterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	PlayerInputComponent->BindAxis("MoveRight", this, &ABlasterCharacter::MoveRight);
 	PlayerInputComponent->BindAxis("Turn", this, &ABlasterCharacter::Turn);
 	PlayerInputComponent->BindAxis("LookUp", this, &ABlasterCharacter::LookUp);
+	//TODO : OVERRIDE JUMP AND CHECK IF GAME IS OVER 
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
 	PlayerInputComponent->BindAction("Equip", IE_Pressed, this, &ABlasterCharacter::EquipButtonPressed);
 	PlayerInputComponent->BindAction("Crouch", IE_Pressed, this, &ABlasterCharacter::CrouchButtonPressed);
@@ -102,6 +104,7 @@ void ABlasterCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Ou
 
 	DOREPLIFETIME_CONDITION(ABlasterCharacter, OverlappingWeapon, COND_OwnerOnly);
 	DOREPLIFETIME(ABlasterCharacter, Health);
+	DOREPLIFETIME(ABlasterCharacter, bDisableGameplay);
 
 }
 
@@ -109,6 +112,12 @@ void ABlasterCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	if(bDisableGameplay)
+	{
+		bUseControllerRotationYaw = false;
+		TurningInPlace = ETurningInPlace::ETIP_NotTurning;
+		return;
+	}
 	AimOffset(DeltaTime);
 	
 }
@@ -120,6 +129,21 @@ void ABlasterCharacter::PostInitializeComponents()
 	{
 		CombatComponent->Character = this;
 	}
+}
+
+void ABlasterCharacter::Destroyed()
+{
+	Super::Destroyed();
+	ABlasterGameMode* BlasterGameMode = Cast<ABlasterGameMode>(UGameplayStatics::GetGameMode(this));
+	bool bMatchNotInProgress = BlasterGameMode && BlasterGameMode->GetMatchState() != MatchState::InProgress;
+	if(CombatComponent && CombatComponent->EquippedWeapon && bMatchNotInProgress)
+	{
+		CombatComponent->EquippedWeapon->Destroy();
+	}
+	
+
+
+	
 }
 
 void ABlasterCharacter::Elim()
@@ -169,8 +193,12 @@ void ABlasterCharacter::Multicast_Elim_Implementation()
 	PlayElimMontage();
 	if(BlasterPlayerController)
 	{
-		DisableInput(BlasterPlayerController);
+		SetDisableGameplay(true);
 		BlasterPlayerController->SetHudWeaponAmmo(0);
+	}
+	if(CombatComponent)
+	{
+		CombatComponent->FireButtonPressed(false);
 	}
 	ShowElimText();
 	GetCharacterMovement()->DisableMovement();
@@ -216,6 +244,7 @@ ECombatState ABlasterCharacter::GetCombatState() const
 
 void ABlasterCharacter::MoveForward(float Value)
 {
+	if(bDisableGameplay) return;
 	if (Controller != nullptr && Value !=0.f)
 	{
 		const FRotator YawRotation( 0.f, Controller->GetControlRotation().Yaw, 0.f );
@@ -227,6 +256,7 @@ void ABlasterCharacter::MoveForward(float Value)
 
 void ABlasterCharacter::MoveRight(float Value)
 {
+	if(bDisableGameplay) return;
 	if (Controller != nullptr && Value !=0.f)
 	{
 		const FRotator YawRotation = { 0.f, Controller->GetControlRotation().Yaw, 0.f };
@@ -238,6 +268,7 @@ void ABlasterCharacter::MoveRight(float Value)
 
 void ABlasterCharacter::Turn(float Value)
 {
+	
 	AddControllerYawInput(Value);
 	
 }
@@ -254,6 +285,7 @@ void ABlasterCharacter::LookUp(float Value)
 
 void ABlasterCharacter::EquipButtonPressed()
 {
+	if(bDisableGameplay) return;
 	if(CombatComponent)
 	{
 		if(HasAuthority())
@@ -269,6 +301,7 @@ void ABlasterCharacter::EquipButtonPressed()
 
 void ABlasterCharacter::CrouchButtonPressed()
 {
+	if(bDisableGameplay) return;
 	if(bIsCrouched)
 	{
 		UnCrouch();
@@ -283,6 +316,7 @@ void ABlasterCharacter::CrouchButtonPressed()
 
 void ABlasterCharacter::AimButtonPressed()
 {
+	if(bDisableGameplay) return;
 	if(CombatComponent)
 	{
 		CombatComponent->SetAiming(true);
@@ -291,6 +325,7 @@ void ABlasterCharacter::AimButtonPressed()
 
 void ABlasterCharacter::AimButtonReleased()
 {
+	if(bDisableGameplay) return;
 	if(CombatComponent)
 	{
 		CombatComponent->SetAiming(false);
@@ -299,6 +334,7 @@ void ABlasterCharacter::AimButtonReleased()
 
 void ABlasterCharacter::ReloadButtonPressed()
 {
+	if(bDisableGameplay) return;
 	if(CombatComponent)
 	{
 		CombatComponent->ReloadWeapon();
@@ -372,6 +408,7 @@ void ABlasterCharacter::TurnInPlace(float DeltaTime)
 
 void ABlasterCharacter::FireButtonPressed()
 {
+	if(bDisableGameplay) return;
 	if(CombatComponent)
 	{
 		CombatComponent->FireButtonPressed(true);
@@ -380,6 +417,7 @@ void ABlasterCharacter::FireButtonPressed()
 
 void ABlasterCharacter::FireButtonReleased()
 {
+	if(bDisableGameplay) return;
 	if(CombatComponent)
 	{
 		CombatComponent->FireButtonPressed(false);

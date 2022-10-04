@@ -93,7 +93,8 @@ void UBCAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 		// FTransform MuzzleFlashTransform = EquippedWeapon->GetWeaponMesh()->GetSocketTransform(FName("MuzzleFlash"));
 		if(BlasterCharacter->IsLocallyControlled())
 		{
-			bLocallyControlledCharacter=true;	
+			bLocallyControlledCharacter=true;
+			if(BlasterCharacter->GetDisableGameplay()) return;
 		
 			const FTransform RightHandTransform = EquippedWeapon->GetWeaponMesh()->GetSocketTransform(FName("hand_r", ERelativeTransformSpace::RTS_World));
             FRotator LookAtRotation = UKismetMathLibrary::FindLookAtRotation(RightHandTransform.GetLocation(), RightHandTransform.GetLocation() + (RightHandTransform.GetLocation()-BlasterCharacter->GetHitTarget()));
@@ -101,7 +102,7 @@ void UBCAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 		}
 	}
 
-	bUseFabrik = BlasterCharacter->GetCombatState() != ECombatState::ECS_Reloading ;
-	bUseAimOffsets = BlasterCharacter->GetCombatState() == ECombatState::ECS_Unoccupied;
+	bUseFabrik = BlasterCharacter->GetCombatState() != ECombatState::ECS_Reloading  && !BlasterCharacter->GetDisableGameplay();
+	bUseAimOffsets = BlasterCharacter->GetCombatState() == ECombatState::ECS_Unoccupied && !BlasterCharacter->GetDisableGameplay();
 	
 }

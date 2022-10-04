@@ -11,6 +11,7 @@
 
 #include "BlasterCharacter.generated.h"
 
+class UCombatComponent;
 UCLASS()
 class MP_COURSE_API ABlasterCharacter : public ACharacter, public IIInteractWithCrosshairs
 {
@@ -24,6 +25,7 @@ public:
 	void UpdateHudHealth();
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void PostInitializeComponents() override;
+	virtual void Destroyed() override;
 	void Elim();
 	void HideElimText();
 	void ShowElimText();
@@ -41,21 +43,24 @@ public:
 	
 	/* GETTERS AND SETTERS: */
 	
-	FORCEINLINE void SetAO_Yaw(const float InYaw) {AO_Yaw = InYaw; }
-	FORCEINLINE void SetAO_Pitch(const float InPitch) {AO_Pitch = InPitch; }
-	FORCEINLINE float GetAO_Yaw() const {return AO_Yaw; }
-	FORCEINLINE float GetAO_Pitch() const {return AO_Pitch; }
-	FORCEINLINE ETurningInPlace GetTurningInPlace() const {return TurningInPlace; }
-	FORCEINLINE class UCameraComponent* GetFollowCamera() const {return FollowCamera ; }
-	FORCEINLINE bool GetIsElimmed() const { return bElimmed ; }
+	FORCEINLINE void SetAO_Yaw(const float InYaw) {AO_Yaw = InYaw ;}
+	FORCEINLINE void SetAO_Pitch(const float InPitch) {AO_Pitch = InPitch ;}
+	FORCEINLINE float GetAO_Yaw() const {return AO_Yaw ;}
+	FORCEINLINE float GetAO_Pitch() const {return AO_Pitch ;}
+	FORCEINLINE ETurningInPlace GetTurningInPlace() const {return TurningInPlace ;}
+	FORCEINLINE class UCameraComponent* GetFollowCamera() const {return FollowCamera ;}
+	FORCEINLINE bool GetIsElimmed() const { return bElimmed ;}
 	FORCEINLINE void SetIsElimmed(const bool Elimmed) {bElimmed = Elimmed ;}
-	FORCEINLINE float GetHealth() const {return Health ; }
-	FORCEINLINE float GetMaxHealth() const {return MaxHealth ; }
+	FORCEINLINE float GetHealth() const {return Health ;}
+	FORCEINLINE float GetMaxHealth() const {return MaxHealth ;}
+	FORCEINLINE bool GetDisableGameplay() const {return bDisableGameplay ;}
+	FORCEINLINE void SetDisableGameplay(const bool bDisable) { bDisableGameplay = bDisable ;}
+	FORCEINLINE UCombatComponent* GetCombatComponent() const {return CombatComponent ;}
 	
 	AWeapon* GetEquippedWeapon();
 	FVector GetHitTarget() const;
 	ECombatState GetCombatState() const;
-
+	void FireButtonPressed();
 	
 protected:
 
@@ -77,8 +82,8 @@ protected:
 	void AimOffset(float DeltaTime);	
 	void TurnInPlace(float DeltaTime);
 
-	void FireButtonPressed();
 	void FireButtonReleased();
+
 
 	void HideCameraForFpp();
 
@@ -148,6 +153,9 @@ private:
 	void ElimTimerFinished();
 	UPROPERTY(EditDefaultsOnly)
 	float ElimDelay={3.f};
+
+	UPROPERTY(Replicated)
+	bool bDisableGameplay{};
 	
 	
 	

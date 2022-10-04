@@ -32,5 +32,7 @@ public:
 	UTextBlock* CarriedAmmo;
 	UPROPERTY(meta=(BindWidget))
 	UTextBlock* CDText;
+	UPROPERTY(Transient, meta=(BindWidgetAnim))
+	UWidgetAnimation* UrgentText;
 	
 };
