@@ -253,7 +253,7 @@ void ABlasterPlayerController::HandleMatchHasStarted()
 	{
 		BlasterHud = Cast<ABlasterHud>(GetHUD());
 	}
-	if(BlasterHud)
+	if(BlasterHud && BlasterHud->CharacterOverlay == nullptr)
 	{
 		BlasterHud->AddCharacterOverlay();
 		if(BlasterHud->AnnouncementWidget)

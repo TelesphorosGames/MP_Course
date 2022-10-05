@@ -31,11 +31,22 @@ protected:
 	virtual void Multicast_OnHit(AActor* OtherActor);
 	UPROPERTY(EditAnywhere)
 	float Damage{40.f};
+
+	
+	UPROPERTY(EditAnywhere)
+	class UParticleSystem* ImpactParticles;
+
+	UPROPERTY(EditAnywhere)
+	class USoundCue* ImpactSound;
+
+	UPROPERTY(EditAnywhere)
+	UParticleSystem* HitPlayerParticles;
+	
+	UPROPERTY(EditAnywhere)
+	class UBoxComponent* CollisionBox;
 	
 private:
 
-	UPROPERTY(EditAnywhere)
-	class UBoxComponent* CollisionBox;
 
 	UPROPERTY(VisibleAnywhere)
 	class UProjectileMovementComponent* ProjectileMovementComponent;
@@ -46,13 +57,5 @@ private:
 	UPROPERTY(EditAnywhere)
 	class UParticleSystemComponent* TracerComponent;
 
-	UPROPERTY(EditAnywhere)
-	UParticleSystem* ImpactParticles;
-
-	UPROPERTY(EditAnywhere)
-	class USoundCue* ImpactSound;
-
-	UPROPERTY(EditAnywhere)
-	UParticleSystem* HitPlayerParticles;
 	
 };

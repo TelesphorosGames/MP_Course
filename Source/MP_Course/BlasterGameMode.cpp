@@ -57,9 +57,12 @@ void ABlasterGameMode::PlayerEliminated(ABlasterCharacter* ElimPlayer, ABlasterP
 
 	ABlasterGameState* BlasterGameState = GetGameState<ABlasterGameState>();
 	
-	if(AttackerPlayerState && VictimPlayerState && AttackerPlayerState != VictimPlayerState)
+	if(AttackerPlayerState && VictimPlayerState)
 	{
-		AttackerPlayerState->AddToScore(1);
+		if(AttackerPlayerState != VictimPlayerState)
+		{
+			AttackerPlayerState->AddToScore(1);
+		}
 		if(BlasterGameState)
 		{
 			BlasterGameState->UpdateTopScore(AttackerPlayerState);
