@@ -13,8 +13,9 @@ class MP_COURSE_API AProjectile : public AActor
 	
 public:	
 
+	/* Be sure to construct your projectile movement component in any classes that are derived from AProjectile!!!*/
 	AProjectile();
-
+ 
 	
 	virtual void Tick(float DeltaTime) override;
 	virtual void Destroyed() override;
@@ -44,12 +45,11 @@ protected:
 	
 	UPROPERTY(EditAnywhere)
 	class UBoxComponent* CollisionBox;
-	
-private:
-
 
 	UPROPERTY(VisibleAnywhere)
 	class UProjectileMovementComponent* ProjectileMovementComponent;
+	
+private:
 
 	UPROPERTY(EditAnywhere)
 	class UParticleSystem* Tracer;

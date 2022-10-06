@@ -105,4 +105,5 @@ private:
 	UPROPERTY()
 	class ABlasterGameMode* BlasterGameMode{};
 
+	
 };

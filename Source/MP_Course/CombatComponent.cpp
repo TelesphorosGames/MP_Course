@@ -246,6 +246,7 @@ void UCombatComponent::OnRep_CombatState()
 
 void UCombatComponent::Fire()
 {
+	if(Character->GetDisableGameplay()) return;
 	if(EquippedWeapon)
 	{
 		if(CanFire())
@@ -490,4 +491,6 @@ void UCombatComponent::InitializeCarriedAmmo()
 {
 	CarriedAmmoMap.Emplace(EWeaponType::EWT_AssaultRifle, StartingAmmo);
 	CarriedAmmoMap.Emplace(EWeaponType::EWT_RocketLauncher, StartingAmmo);
+	CarriedAmmoMap.Emplace(EWeaponType::EWT_Pistol, StartingAmmo);
+	CarriedAmmoMap.Emplace(EWeaponType::EWT_SubMachineGun, StartingAmmo);
 }

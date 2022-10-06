@@ -4,10 +4,18 @@
 #include "Bullet.h"
 
 #include "BlasterCharacter.h"
+#include "GameFramework/ProjectileMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 
+ABullet::ABullet()
+{
+	ProjectileMovementComponent = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileMovementComponent"));
+	ProjectileMovementComponent->bRotationFollowsVelocity=true;
+	bReplicates=true;
+}
+
 void ABullet::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp,
-	FVector NormalImpulse, const FHitResult& Hit)
+                    FVector NormalImpulse, const FHitResult& Hit)
 {
 
 	// ABlasterCharacter* OwnerMan = Cast<ABlasterCharacter>(GetOwner());

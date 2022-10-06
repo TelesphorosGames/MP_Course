@@ -16,6 +16,8 @@ class MP_COURSE_API ABullet : public AProjectile
 
 public:
 
+	ABullet();
+
 protected:
 	virtual void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit) override;
 	virtual void Multicast_OnHit(AActor* OtherActor) override;
