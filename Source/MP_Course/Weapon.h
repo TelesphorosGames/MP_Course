@@ -73,6 +73,11 @@ protected:
 	UFUNCTION()
 	void OnAreaSphereEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
+	UPROPERTY(EditAnywhere, Category= "Weapon Properties")
+	class UAnimationAsset* FireAnimation;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class ACasing> CasingClass;
 
 
 
@@ -97,11 +102,6 @@ private:
 	UPROPERTY(EditAnywhere, Category  ="Weapon Properties")
 	class USoundCue* EquipSound{};
 
-	UPROPERTY(EditAnywhere, Category= "Weapon Properties")
-	class UAnimationAsset* FireAnimation;
-
-	UPROPERTY(EditAnywhere)
-	TSubclassOf<class ACasing> CasingClass;
 
 
 	// Crosshairs Textures :

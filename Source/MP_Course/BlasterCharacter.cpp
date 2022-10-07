@@ -199,6 +199,10 @@ void ABlasterCharacter::Multicast_Elim_Implementation()
 	if(CombatComponent)
 	{
 		CombatComponent->FireButtonPressed(false);
+		if(IsLocallyControlled() && CombatComponent->EquippedWeapon->GetWeaponType() == EWeaponType::EWT_SniperRifle && CombatComponent->bAiming)
+		{
+			ShowSniperScopeWidget(false);
+		}
 	}
 	ShowElimText();
 	GetCharacterMovement()->DisableMovement();
@@ -206,6 +210,7 @@ void ABlasterCharacter::Multicast_Elim_Implementation()
 	
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
 		
 }
 
@@ -538,12 +543,17 @@ void ABlasterCharacter::PlayReloadMontage()
 		case EWeaponType::EWT_SubMachineGun :
 			SectionName = FName("Rifle");
 			break;
+		case EWeaponType::EWT_Shotgun :
+			SectionName = FName("Shotgun");
+			break;
+		case EWeaponType::EWT_SniperRifle :
+			SectionName = FName("Shotgun");
+			break;
 		default: ;
 		}
 		AnimInstance->Montage_JumpToSection(SectionName);
 	}
 }
-
 
 void ABlasterCharacter::PlayOnHitMontage()
 {

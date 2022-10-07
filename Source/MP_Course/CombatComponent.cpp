@@ -74,11 +74,21 @@ void UCombatComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 
 void UCombatComponent::SetAiming(bool bIsAiming)
 {
+	if(Character == nullptr || EquippedWeapon == nullptr) return;
+	
 	bAiming = bIsAiming;
 	ServerSetAiming(bIsAiming);
 	if(Character)
 	{
 		Character->GetCharacterMovement()->MaxWalkSpeed = bIsAiming ? AimingWalkSpeed : BaseWalkSpeed ;
+	}
+	if(Character->IsLocallyControlled() && EquippedWeapon->GetWeaponType() == EWeaponType::EWT_SniperRifle && bAiming)
+	{
+		Character->ShowSniperScopeWidget(true);
+	}
+	else if(Character->IsLocallyControlled() && EquippedWeapon->GetWeaponType() == EWeaponType::EWT_SniperRifle && !bAiming)
+	{
+		Character->ShowSniperScopeWidget(false);
 	}
 }
 
@@ -129,15 +139,12 @@ void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
 	
 	Character->GetCharacterMovement()->bOrientRotationToMovement = false;
 	Character->bUseControllerRotationYaw = true;
-	
 }
-
 
 void UCombatComponent::OnRep_EquippedWeapon()
 {
 	if(EquippedWeapon && Character)
 	{
-		
 		EquippedWeapon->SetWeaponState(EWeaponState::EWS_Equipped);
 		
 		const USkeletalMeshSocket* RightHandSocket = Character->GetMesh()->GetSocketByName(FName("RightHandSocket"));
@@ -145,8 +152,6 @@ void UCombatComponent::OnRep_EquippedWeapon()
 		{
 			RightHandSocket->AttachActor(EquippedWeapon, Character->GetMesh());
 		}
-
-		
 		Character->GetCharacterMovement()->bOrientRotationToMovement = false;
 		Character->bUseControllerRotationYaw = true;
 	}
@@ -160,8 +165,6 @@ void UCombatComponent::ReloadWeapon()
 	{
 		Server_Reload();
 	}
-	
-
 }
 
 void UCombatComponent::FinishReloading()
@@ -176,10 +179,7 @@ void UCombatComponent::FinishReloading()
 	{
 		Fire();
 	}
-		
-	
 }
-
 
 void UCombatComponent::UpdateAmmoValues()
 {
@@ -425,7 +425,7 @@ void UCombatComponent::InterpFOV(float DeltaTime)
 	}
 	else
 	{
-		CurrentFOV = FMath::FInterpTo(CurrentFOV, DefaultFOV, DeltaTime, ZoomInterpSpeed);
+		CurrentFOV = FMath::FInterpTo(CurrentFOV, DefaultFOV, DeltaTime, 4);
 	}
 	if(Character && Character->GetFollowCamera())
 	{
@@ -489,8 +489,12 @@ void UCombatComponent::OnRep_CarriedAmmo()
 
 void UCombatComponent::InitializeCarriedAmmo()
 {
+	
 	CarriedAmmoMap.Emplace(EWeaponType::EWT_AssaultRifle, StartingAmmo);
 	CarriedAmmoMap.Emplace(EWeaponType::EWT_RocketLauncher, StartingAmmo);
 	CarriedAmmoMap.Emplace(EWeaponType::EWT_Pistol, StartingAmmo);
 	CarriedAmmoMap.Emplace(EWeaponType::EWT_SubMachineGun, StartingAmmo);
+	CarriedAmmoMap.Emplace(EWeaponType::EWT_Shotgun, StartingAmmo);
+	CarriedAmmoMap.Emplace(EWeaponType::EWT_SniperRifle, StartingAmmo);
+	
 }
