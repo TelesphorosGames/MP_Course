@@ -9,6 +9,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Sound/SoundCue.h"
 #include "MP_Course.h"
+#include "NiagaraFunctionLibrary.h"
 
 // Sets default values
 AProjectile::AProjectile()
@@ -27,9 +28,6 @@ AProjectile::AProjectile()
 	CollisionBox->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECR_Block);
 	CollisionBox->SetCollisionResponseToChannel(ECC_SkeletalMesh, ECR_Block);
 	
-
-	
-	
 }
 
 // Called when the game starts or when spawned
@@ -40,10 +38,8 @@ void AProjectile::BeginPlay()
 	if(HasAuthority())
 	{
 		CollisionBox->OnComponentHit.AddDynamic(this, &AProjectile::OnHit);
-		
 	}
 	
-
 	if(Tracer)
 	{
 		TracerComponent = UGameplayStatics::SpawnEmitterAttached(
@@ -55,14 +51,18 @@ void AProjectile::BeginPlay()
 			EAttachLocation::KeepWorldPosition
 		);
 	}
-	
+}
+
+// Called every frame
+void AProjectile::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
 }
 
 void AProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp,
 	FVector NormalImpulse, const FHitResult& Hit)
 {
-
-	
 	if(HasAuthority())
 	{
 		Multicast_OnHit(OtherComp->GetCollisionObjectType());
@@ -72,6 +72,41 @@ void AProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimi
 
 void AProjectile::Multicast_OnHit(AActor* OtherActor)
 {
+	 
+}
+
+void AProjectile::ExplodeDamage()
+{
+	APawn* FiringPawn = GetInstigator();
+	if(FiringPawn && HasAuthority())
+	{
+		AController* FiringController = FiringPawn->GetController();
+		if(FiringController)
+		{
+			UGameplayStatics::ApplyRadialDamageWithFalloff(
+				this,
+				Damage,
+				4.f,
+				GetActorLocation(),
+				DamageInnerRadius,
+				DamageOuterRadius,
+				1.f,
+				UDamageType::StaticClass(),
+				TArray<AActor*>(),
+				this,
+				FiringController
+				);
+		}
+	}
+
+}
+
+void AProjectile::SpawnTrailSystem()
+{
+	if(TrailSystem)
+	{
+		TrailSystemComponent = UNiagaraFunctionLibrary::SpawnSystemAttached(TrailSystem, GetRootComponent(), FName(), GetActorLocation(), GetActorRotation(), EAttachLocation::KeepWorldPosition, false);
+	}
 }
 
 void AProjectile::Multicast_OnHit_Implementation(ECollisionChannel CollisionChannel)
@@ -96,18 +131,18 @@ void AProjectile::Multicast_OnHit_Implementation(ECollisionChannel CollisionChan
     }
 }
 
-// Called every frame
-void AProjectile::Tick(float DeltaTime)
+void AProjectile::StartDestroyTimer()
 {
-	Super::Tick(DeltaTime);
+	GetWorldTimerManager().SetTimer(DestroyHandle, this, &AProjectile::DestroyTimerFinished, DestroyTime);
+}
 
+void AProjectile::DestroyTimerFinished()
+{
+	Destroy();
 }
 
 void AProjectile::Destroyed()
 {
 	Super::Destroyed();
-	
-
-	
 }
 

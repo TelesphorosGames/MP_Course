@@ -117,7 +117,7 @@ void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
 		UGameplayStatics::PlaySoundAtLocation(this, EquippedWeapon->GetEquipSound(), EquippedWeapon->GetActorLocation(), FRotator());
 	}
 	
-	const USkeletalMeshSocket* RightHandSocket = Character->GetMesh()->GetSocketByName(FName("RightHandSocket"));
+	const USkeletalMeshSocket* RightHandSocket = GetEquipSocket();
      
 	if(RightHandSocket)
 	{
@@ -141,13 +141,48 @@ void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
 	Character->bUseControllerRotationYaw = true;
 }
 
+const USkeletalMeshSocket* UCombatComponent::GetEquipSocket()
+{
+	const USkeletalMeshSocket* RightHandSocket{};
+	switch (EquippedWeapon->GetWeaponType())
+	{
+		case EWeaponType::EWT_AssaultRifle:
+			RightHandSocket = Character->GetMesh()->GetSocketByName(FName("ARSocket"));
+		break;
+		case EWeaponType::EWT_RocketLauncher:
+			RightHandSocket = Character->GetMesh()->GetSocketByName(FName("RocketSocket"));
+			break;
+		case EWeaponType::EWT_Pistol:
+			RightHandSocket = Character->GetMesh()->GetSocketByName(FName("PistolSocket"));
+			break;
+		case EWeaponType::EWT_SubMachineGun:
+			RightHandSocket = Character->GetMesh()->GetSocketByName(FName("SMGSocket"));
+			break;
+		case EWeaponType::EWT_Shotgun:
+			RightHandSocket = Character->GetMesh()->GetSocketByName(FName("ShotgunSocket"));
+			break;
+		case EWeaponType::EWT_SniperRifle:
+			RightHandSocket = Character->GetMesh()->GetSocketByName(FName("PistolSocket"));
+			break;
+		case EWeaponType::EWT_GrenadeLauncher:
+			RightHandSocket = Character->GetMesh()->GetSocketByName(FName("GrenadeLauncherSocket"));
+			break;
+		case EWeaponType::EWT_MAX:
+			break;
+		default: ;
+	}
+
+
+	return RightHandSocket;
+}
+
 void UCombatComponent::OnRep_EquippedWeapon()
 {
 	if(EquippedWeapon && Character)
 	{
 		EquippedWeapon->SetWeaponState(EWeaponState::EWS_Equipped);
 		
-		const USkeletalMeshSocket* RightHandSocket = Character->GetMesh()->GetSocketByName(FName("RightHandSocket"));
+		const USkeletalMeshSocket* RightHandSocket = GetEquipSocket();
 		if(RightHandSocket)
 		{
 			RightHandSocket->AttachActor(EquippedWeapon, Character->GetMesh());
@@ -496,5 +531,6 @@ void UCombatComponent::InitializeCarriedAmmo()
 	CarriedAmmoMap.Emplace(EWeaponType::EWT_SubMachineGun, StartingAmmo);
 	CarriedAmmoMap.Emplace(EWeaponType::EWT_Shotgun, StartingAmmo);
 	CarriedAmmoMap.Emplace(EWeaponType::EWT_SniperRifle, StartingAmmo);
+	CarriedAmmoMap.Emplace(EWeaponType::EWT_GrenadeLauncher, StartingAmmo);
 	
 }

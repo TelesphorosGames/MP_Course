@@ -27,6 +27,7 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 	void EquipWeapon(class AWeapon* WeaponToEquip);
+	const USkeletalMeshSocket* GetEquipSocket();
 	void ReloadWeapon();
 	UFUNCTION(BlueprintCallable)
 	void FinishReloading();

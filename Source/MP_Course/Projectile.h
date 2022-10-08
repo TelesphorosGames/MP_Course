@@ -15,6 +15,8 @@ public:
 
 	/* Be sure to construct your projectile movement component in any classes that are derived from AProjectile!!!*/
 	AProjectile();
+
+	FORCEINLINE UStaticMeshComponent* GetProjectileMesh() const {return ProjectileMesh ;}
  
 	
 	virtual void Tick(float DeltaTime) override;
@@ -30,9 +32,16 @@ protected:
 	UFUNCTION(NetMulticast, Reliable)
 	virtual void Multicast_OnHit(ECollisionChannel CollisionChannel);
 	virtual void Multicast_OnHit(AActor* OtherActor);
+
+	void ExplodeDamage();
+	
 	UPROPERTY(EditAnywhere)
 	float Damage{40.f};
 
+	UPROPERTY(EditAnywhere)
+	float DamageInnerRadius = 200.f;
+	UPROPERTY(EditAnywhere)
+	float DamageOuterRadius = 500.f;
 	
 	UPROPERTY(EditAnywhere)
 	class UParticleSystem* ImpactParticles;
@@ -45,11 +54,33 @@ protected:
 	
 	UPROPERTY(EditAnywhere)
 	class UBoxComponent* CollisionBox;
-
+	
+	UPROPERTY(EditAnywhere)
+	class UNiagaraSystem* TrailSystem;
+	
+	UPROPERTY()
+	class UNiagaraComponent* TrailSystemComponent;
+	
 	UPROPERTY(VisibleAnywhere)
 	class UProjectileMovementComponent* ProjectileMovementComponent;
 	
+	UPROPERTY(VisibleAnywhere)
+	class UStaticMeshComponent* ProjectileMesh;
+
+	UFUNCTION()
+	void SpawnTrailSystem();
+
+	void StartDestroyTimer();
+			
+	FTimerHandle DestroyHandle;
+	UPROPERTY(EditAnywhere)
+	float DestroyTime = 3.f;
+	UFUNCTION()
+	void DestroyTimerFinished();
+
+	
 private:
+	
 
 	UPROPERTY(EditAnywhere)
 	class UParticleSystem* Tracer;
