@@ -1,5 +1,15 @@
 ﻿#pragma once
 
+#ifndef CUSTOM_DEPTH_PURPLE
+#define CUSTOM_DEPTH_PURPLE 250
+#endif
+#ifndef CUSTOM_DEPTH_BLUE
+#define CUSTOM_DEPTH_BLUE 251
+#endif
+#ifndef CUSTOM_DEPTH_TAN
+#define CUSTOM_DEPTH_TAN 252
+#endif
+
 UENUM(BlueprintType)
 enum class EWeaponType : uint8
 {

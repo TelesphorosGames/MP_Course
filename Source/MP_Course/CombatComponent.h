@@ -32,7 +32,17 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void FinishReloading();
 	void UpdateAmmoValues();
+	void JumpToShotgunEnd();
+	void UpdateShotgunAmmoValues();
 	void FireButtonPressed(bool bPressed);
+	UFUNCTION(BlueprintPure)
+	FORCEINLINE AWeapon* GetEquippedWeapon() const {return EquippedWeapon ;}
+
+	UFUNCTION(BlueprintCallable)
+	void ShotgunShellReload();
+
+	UFUNCTION(BlueprintCallable)
+	void ThrowGrenadeFinished();
 
 protected:
 
@@ -54,7 +64,10 @@ protected:
 
 	int32 AmountToReload();
 
-	
+	void ThrowGrenade();
+
+	UFUNCTION(Server, Reliable)
+	void Server_ThrowGrenade();
 	
 	UFUNCTION(Server, Reliable)
 	void Server_Fire(const FVector_NetQuantize& TraceHitTarget);
@@ -76,7 +89,7 @@ private:
 	UPROPERTY()
 	class ABlasterHud* BC_Hud{};
 
-	UPROPERTY(ReplicatedUsing= OnRep_EquippedWeapon)
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing= OnRep_EquippedWeapon, meta = (AllowPrivateAccess = "true"))
 	AWeapon* EquippedWeapon;
 
 	UPROPERTY(Replicated)

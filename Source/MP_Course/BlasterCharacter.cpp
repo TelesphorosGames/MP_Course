@@ -70,6 +70,7 @@ void ABlasterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &ABlasterCharacter::FireButtonPressed);
 	PlayerInputComponent->BindAction("Fire", IE_Released, this, &ABlasterCharacter::FireButtonReleased);
 	PlayerInputComponent->BindAction("Reload", IE_Pressed, this, &ABlasterCharacter::ReloadButtonPressed);
+	PlayerInputComponent->BindAction("ThrowGrenade", IE_Pressed, this, &ABlasterCharacter::GrenadeButtonPressed);
 }
 
 void ABlasterCharacter::UpdateHudHealth()
@@ -340,6 +341,14 @@ void ABlasterCharacter::AimButtonReleased()
 	}
 }
 
+void ABlasterCharacter::GrenadeButtonPressed()
+{
+	if(CombatComponent)
+	{
+		CombatComponent->ThrowGrenade();
+	}
+}
+
 void ABlasterCharacter::ReloadButtonPressed()
 {
 	if(bDisableGameplay) return;
@@ -558,6 +567,16 @@ void ABlasterCharacter::PlayReloadMontage()
 		default: ;
 		}
 		AnimInstance->Montage_JumpToSection(SectionName);
+	}
+}
+
+void ABlasterCharacter::PlayThrowGrenadeMontage()
+{
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if(AnimInstance && ThrowGrenadeMontage)
+	{
+		AnimInstance->Montage_Play(ThrowGrenadeMontage);
+		AnimInstance->Montage_JumpToSection(FName("Throw"));
 	}
 }
 

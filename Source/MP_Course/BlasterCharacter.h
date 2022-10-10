@@ -40,6 +40,7 @@ public:
 	void PlayFireMontage(bool bAiming);
 	void PlayElimMontage();
 	void PlayReloadMontage();
+	void PlayThrowGrenadeMontage();
 	UFUNCTION(BlueprintImplementableEvent)
 	void ShowSniperScopeWidget(bool bShowScope);
 	
@@ -58,6 +59,7 @@ public:
 	FORCEINLINE bool GetDisableGameplay() const {return bDisableGameplay ;}
 	FORCEINLINE void SetDisableGameplay(const bool bDisable) { bDisableGameplay = bDisable ;}
 	FORCEINLINE UCombatComponent* GetCombatComponent() const {return CombatComponent ;}
+	FORCEINLINE UAnimMontage* GetReloadMontage() const {return ReloadMontage ;}
 	
 	AWeapon* GetEquippedWeapon();
 	FVector GetHitTarget() const;
@@ -77,7 +79,7 @@ protected:
 	void CrouchButtonPressed();
 	void AimButtonPressed();
 	void AimButtonReleased();
-
+	void GrenadeButtonPressed();
 	void ReloadButtonPressed();
 	
 
@@ -136,6 +138,9 @@ private:
 
 	UPROPERTY(EditAnywhere, Category= Combat, meta=(AllowPrivateAccess = "true"))
 	UAnimMontage* ReloadMontage;
+
+	UPROPERTY(EditAnywhere, Category= Combat, meta=(AllowPrivateAccess = "true"))
+	UAnimMontage* ThrowGrenadeMontage;
 	
 	UPROPERTY(EditAnywhere, Category= Combat, meta=(AllowPrivateAccess = "true"))
 	float CameraThreshold =200.f;

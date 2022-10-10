@@ -104,6 +104,7 @@ void UCombatComponent::ServerSetAiming_Implementation(bool bIsAiming)
 void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
 {
 	if(Character == nullptr || WeaponToEquip == nullptr) return;
+	if(CombatState != ECombatState::ECS_Unoccupied) return;
 	if(EquippedWeapon)
 	{
 		EquippedWeapon->Dropped();
@@ -196,7 +197,7 @@ void UCombatComponent::ReloadWeapon()
 {
 	if(CarriedAmmo<=0) return;
 
-	if(CarriedAmmo>0 && CombatState != ECombatState::ECS_Reloading)
+	if(CarriedAmmo>0 && CombatState == ECombatState::ECS_Unoccupied)
 	{
 		Server_Reload();
 	}
@@ -218,6 +219,7 @@ void UCombatComponent::FinishReloading()
 
 void UCombatComponent::UpdateAmmoValues()
 {
+	if(Character == nullptr || EquippedWeapon == nullptr ) return;
 	const int32 ReloadAmount = AmountToReload();
 	if(CarriedAmmoMap.Contains(EquippedWeapon->GetWeaponType()))
 	{
@@ -233,6 +235,54 @@ void UCombatComponent::UpdateAmmoValues()
 	}
 	
 	EquippedWeapon->AddAmmo(-ReloadAmount);
+}
+
+void UCombatComponent::JumpToShotgunEnd()
+{
+
+	UAnimInstance* AnimInstance = Character->GetMesh()->GetAnimInstance();
+    		
+	if(EquippedWeapon->IsFull() || CarriedAmmo == 0)
+	{
+		if(AnimInstance && Character->GetReloadMontage())
+            {
+            	AnimInstance->Montage_JumpToSection(FName("ShotgunEnd"));
+            }
+	}
+	else
+	{
+		if(AnimInstance && Character->GetReloadMontage())
+		{
+			if(AnimInstance->Montage_GetCurrentSection(Character->GetReloadMontage()) == FName("ShotgunCheck"))
+			{
+				AnimInstance->Montage_JumpToSection(FName("ShotgunShell"));
+			}
+		}
+	}
+	
+}
+
+void UCombatComponent::UpdateShotgunAmmoValues()
+{
+	if(Character == nullptr || EquippedWeapon == nullptr ) return;
+	
+	if(CarriedAmmoMap.Contains(EquippedWeapon->GetWeaponType()))
+	{
+		CarriedAmmoMap[EquippedWeapon->GetWeaponType()] -= 1;
+		CarriedAmmo = CarriedAmmoMap[EquippedWeapon->GetWeaponType()];
+	}
+	BC_Controller = BC_Controller == nullptr ? Cast<ABlasterPlayerController>(Character->GetController()) : BC_Controller ;
+	if(BC_Controller)
+	{
+		BC_Controller->SetHudCarriedAmmo(CarriedAmmo);
+	}
+	EquippedWeapon->AddAmmo(-1);
+	bCanFire = true;
+	
+		JumpToShotgunEnd();
+	
+	
+	
 }
 
 void UCombatComponent::Server_Reload_Implementation()
@@ -262,6 +312,30 @@ int32 UCombatComponent::AmountToReload()
 	return 0;
 }
 
+void UCombatComponent::ThrowGrenade()
+{
+	if(CombatState != ECombatState::ECS_Unoccupied) return;
+	CombatState = ECombatState::ECS_ThrowingGrenade;
+	if(Character)
+	{
+		Character->PlayThrowGrenadeMontage();
+	}
+	if(Character && !Character->HasAuthority())
+	{
+		Server_ThrowGrenade();
+	}
+	
+}
+
+void UCombatComponent::Server_ThrowGrenade_Implementation()
+{
+	CombatState = ECombatState::ECS_ThrowingGrenade;
+	if(Character)
+	{
+		Character->PlayThrowGrenadeMontage();
+	}
+}
+
 
 void UCombatComponent::OnRep_CombatState()
 {
@@ -275,6 +349,14 @@ void UCombatComponent::OnRep_CombatState()
 		{
 			Fire();
 		}
+		break;
+	case ECombatState::ECS_ThrowingGrenade:
+		if(Character && !Character->IsLocallyControlled())
+		{
+			Character->PlayThrowGrenadeMontage();
+		}
+		break;
+		
 	default: ;
 	}
 }
@@ -302,6 +384,19 @@ void UCombatComponent::FireButtonPressed(bool bPressed)
 	{
 		Fire();
 	}
+}
+
+void UCombatComponent::ShotgunShellReload()
+{
+	if(Character && Character->HasAuthority())
+	{
+		UpdateShotgunAmmoValues();
+	}
+}
+
+void UCombatComponent::ThrowGrenadeFinished()
+{
+	CombatState = ECombatState::ECS_Unoccupied;
 }
 
 void UCombatComponent::TraceUnderCrosshairs(FHitResult& TraceHitResult)
@@ -335,7 +430,7 @@ void UCombatComponent::TraceUnderCrosshairs(FHitResult& TraceHitResult)
 			DrawDebugSphere(GetWorld(),Start, 16.f, 12, FColor::Red);
 		}
 		
-		const FVector End = Start + CrosshairWorldDirection * 50'000;
+		const FVector End = Start + CrosshairWorldDirection * 5'000;
 
 		GetWorld()->LineTraceSingleByChannel(
 			TraceHitResult,
@@ -490,12 +585,21 @@ void UCombatComponent::StartFireTimer()
 
 void UCombatComponent::Multicast_Fire_Implementation(const FVector_NetQuantize& TraceHitTarget)
 {
-	if(EquippedWeapon == nullptr) return;
+	if(EquippedWeapon == nullptr)
+	{
+		return;
+	}
+	if(Character && CombatState == ECombatState::ECS_Reloading && EquippedWeapon->GetWeaponType() == EWeaponType::EWT_Shotgun)
+	{
+		Character->PlayFireMontage(bAiming);
+		EquippedWeapon->Fire(TraceHitTarget);
+		CombatState = ECombatState::ECS_Unoccupied;
+		return;
+	}
 	if(Character && CombatState == ECombatState::ECS_Unoccupied)
 	{
 		Character->PlayFireMontage(bAiming);
 		EquippedWeapon->Fire(TraceHitTarget);
-		
 	}
 }
 
@@ -510,6 +614,7 @@ bool UCombatComponent::CanFire()
 	{
 		return false;
 	}
+	if (!EquippedWeapon->IsEmpty() && bCanFire && CombatState == ECombatState::ECS_Reloading && EquippedWeapon->GetWeaponType() == EWeaponType::EWT_Shotgun) return true;
 	return !EquippedWeapon->IsEmpty() && bCanFire && CombatState==ECombatState::ECS_Unoccupied;
 }
 
@@ -520,6 +625,17 @@ void UCombatComponent::OnRep_CarriedAmmo()
 	{
 		BC_Controller->SetHudCarriedAmmo(CarriedAmmo);
 	}
+	const bool bJumpToShotgunEnd = (CombatState == ECombatState::ECS_Reloading &&
+		EquippedWeapon != nullptr &&
+		EquippedWeapon->GetWeaponType() == EWeaponType::EWT_Shotgun);
+		// && CarriedAmmo == 0);
+
+	if(bJumpToShotgunEnd)
+	{
+		JumpToShotgunEnd();
+	}
+
+		
 }
 
 void UCombatComponent::InitializeCarriedAmmo()

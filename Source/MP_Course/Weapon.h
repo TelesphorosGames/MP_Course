@@ -62,7 +62,10 @@ public:
 	void SetWeaponState(EWeaponState State);
 	void SetHUDWeaponAmmo();
 	bool IsEmpty();
+	bool IsFull();
 	void AddAmmo(int32 AmmoToAdd);
+
+	void EnableCustomDepth(bool bEnable);
 	
 protected:
 	
