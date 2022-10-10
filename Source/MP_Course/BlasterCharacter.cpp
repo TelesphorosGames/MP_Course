@@ -199,7 +199,10 @@ void ABlasterCharacter::Multicast_Elim_Implementation()
 	if(CombatComponent)
 	{
 		CombatComponent->FireButtonPressed(false);
-		if(IsLocallyControlled() && CombatComponent->EquippedWeapon->GetWeaponType() == EWeaponType::EWT_SniperRifle && CombatComponent->bAiming)
+		if(IsLocallyControlled() &&
+			CombatComponent->EquippedWeapon &&
+			CombatComponent->EquippedWeapon->GetWeaponType() == EWeaponType::EWT_SniperRifle &&
+			CombatComponent->bAiming)
 		{
 			ShowSniperScopeWidget(false);
 		}
@@ -538,19 +541,19 @@ void ABlasterCharacter::PlayReloadMontage()
 			SectionName = FName("Rifle");
 			break;
 		case EWeaponType::EWT_Pistol :
-			SectionName = FName("Rifle");
+			SectionName = FName("Pistol");
 			break;
 		case EWeaponType::EWT_SubMachineGun :
-			SectionName = FName("Rifle");
+			SectionName = FName("Pistol");
 			break;
 		case EWeaponType::EWT_Shotgun :
-			SectionName = FName("Rifle");
+			SectionName = FName("Shotgun");
 			break;
 		case EWeaponType::EWT_SniperRifle :
 			SectionName = FName("Rifle");
 			break;
 		case EWeaponType::EWT_GrenadeLauncher :
-			SectionName = FName("Rifle");
+			SectionName = FName("Shotgun");
 			break;
 		default: ;
 		}
