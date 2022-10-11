@@ -1,2 +1,2 @@
 # MP_Course
-Created following the UE5 Multiplayer Course by Stephen Ulibarri. 
+Created by TELESPHOROS GAMES, following the UE5 Multiplayer Course by Stephen Ulibarri. 

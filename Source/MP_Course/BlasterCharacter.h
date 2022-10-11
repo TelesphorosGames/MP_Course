@@ -60,6 +60,7 @@ public:
 	FORCEINLINE void SetDisableGameplay(const bool bDisable) { bDisableGameplay = bDisable ;}
 	FORCEINLINE UCombatComponent* GetCombatComponent() const {return CombatComponent ;}
 	FORCEINLINE UAnimMontage* GetReloadMontage() const {return ReloadMontage ;}
+	FORCEINLINE UStaticMeshComponent* GetAttachedGrenade() const {return Grenade ;}
 	
 	AWeapon* GetEquippedWeapon();
 	FVector GetHitTarget() const;
@@ -87,8 +88,7 @@ protected:
 	void TurnInPlace(float DeltaTime);
 
 	void FireButtonReleased();
-
-
+	
 	void HideCameraForFpp();
 
 	void PlayOnHitMontage();
@@ -163,6 +163,9 @@ private:
 
 	UPROPERTY(Replicated)
 	bool bDisableGameplay{};
+
+	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess ="true"))
+	UStaticMeshComponent* Grenade;
 	
 	
 	

@@ -21,6 +21,7 @@
 #include "Kismet/GameplayStatics.h"
 
 
+
 // Sets default values
 ABlasterCharacter::ABlasterCharacter()
 {
@@ -48,8 +49,12 @@ ABlasterCharacter::ABlasterCharacter()
 	GetMesh()->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
 	GetMesh()->SetCollisionObjectType(ECC_SkeletalMesh);
 
+	Grenade = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Grenade"));
+	
+	Grenade->SetupAttachment(GetMesh(), FName("PistolSocket"));
+	
+	Grenade->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
-
 
 void ABlasterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
@@ -96,7 +101,11 @@ void ABlasterCharacter::BeginPlay()
 	}
 	
 	HideElimText();
-	
+
+	if(Grenade)
+	{
+		Grenade->SetVisibility(false);
+	}
 }
 
 void ABlasterCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -125,11 +134,12 @@ void ABlasterCharacter::Tick(float DeltaTime)
 
 void ABlasterCharacter::PostInitializeComponents()
 {
-	Super::PostInitializeComponents();
+	
 	if(CombatComponent)
 	{
 		CombatComponent->Character = this;
 	}
+	Super::PostInitializeComponents();
 }
 
 void ABlasterCharacter::Destroyed()
@@ -141,10 +151,6 @@ void ABlasterCharacter::Destroyed()
 	{
 		CombatComponent->EquippedWeapon->Destroy();
 	}
-	
-
-
-	
 }
 
 void ABlasterCharacter::Elim()

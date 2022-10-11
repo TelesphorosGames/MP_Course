@@ -26,6 +26,7 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
+	
 	void EquipWeapon(class AWeapon* WeaponToEquip);
 	const USkeletalMeshSocket* GetEquipSocket();
 	void ReloadWeapon();
@@ -43,6 +44,11 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void ThrowGrenadeFinished();
+
+	UFUNCTION(BlueprintCallable)
+	void LaunchGrenade();
+	UFUNCTION(Server, Reliable)
+	void Server_LaunchGrenade(const FVector_NetQuantize& Target);
 
 protected:
 
@@ -68,6 +74,9 @@ protected:
 
 	UFUNCTION(Server, Reliable)
 	void Server_ThrowGrenade();
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class AProjectile> GrenadeClass;
 	
 	UFUNCTION(Server, Reliable)
 	void Server_Fire(const FVector_NetQuantize& TraceHitTarget);
@@ -78,7 +87,12 @@ protected:
 	void TraceUnderCrosshairs(FHitResult& TraceHitResult);
 
 	void SetHudCrosshairs(float DeltaTime);
-	
+
+	void AttachActorToRightHand(AActor* ActorToAttach);
+	void AttachActorToLeftHand(AActor* ActorToAttach);
+
+	void UpdateCarriedAmmo();
+	void PlayWeaponEquipSound();
 
 private:
 
@@ -155,4 +169,9 @@ private:
 	
 	UFUNCTION()
 	void OnRep_CombatState();
+
+	void ShowAttachedGrenade(bool bShowGrenade);
+	
 };
+
+

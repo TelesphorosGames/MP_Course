@@ -7,6 +7,7 @@
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Sound/SoundCue.h"
+#include "MP_Course.h"
 
 AProjectileGrenade::AProjectileGrenade()
 {
@@ -36,6 +37,9 @@ void AProjectileGrenade::BeginPlay()
 
 void AProjectileGrenade::OnBounce(const FHitResult& ImpactResult, const FVector& ImpactVelocity)
 {
+	UE_LOG(LogTemp, Warning, TEXT("%s"), *(ImpactResult.GetComponent()->GetName()));
+
+	// TODO : BOUNCE SOUND PER TIMER 
 	if(BounceSound)
 	{
 		UGameplayStatics::PlaySoundAtLocation(this, BounceSound, GetActorLocation());
