@@ -15,6 +15,7 @@
 #include "BlasterGameMode.h"
 #include "BlasterGameState.h"
 #include "BlasterPlayerState.h"
+#include "CombatComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Animation/WidgetAnimation.h"
 
@@ -180,7 +181,27 @@ void ABlasterPlayerController::SetHuDCountdownTime(float CountdownTime)
 	}
 }
 
-void ABlasterPlayerController::SetHUDAnnouncementCountdown(float Time)
+void ABlasterPlayerController::SetHudGrenades(int32 Grenades)
+{
+	if(BlasterHud == nullptr)
+	{
+		BlasterHud = Cast<ABlasterHud>(GetHUD());
+	}
+	if(BlasterHud &&
+		BlasterHud->CharacterOverlay &&
+		BlasterHud->CharacterOverlay->GrenadesCount)
+	{
+		const FString GrenadesText = FString::Printf(TEXT("%d"), Grenades);
+		BlasterHud->CharacterOverlay->GrenadesCount->SetText(FText::FromString(GrenadesText));
+	}
+	else
+	{
+		HudGrenades = Grenades;
+	}
+	
+}
+
+void ABlasterPlayerController::SetHUDAnnouncementCountdown(float CountDownTime)
 {
 		if(BlasterHud == nullptr)
     	{
@@ -190,13 +211,13 @@ void ABlasterPlayerController::SetHUDAnnouncementCountdown(float Time)
     		BlasterHud->AnnouncementWidget &&
     		BlasterHud->AnnouncementWidget->WarmupTime)
     	{
-    		if(Time< 0.f)
+    		if(CountDownTime< 0.f)
     		{
     			BlasterHud->AnnouncementWidget->WarmupTime->SetText(FText());
     			return;
     		}
-    		int32 Minutes = FMath::FloorToInt(Time/60.f);
-    		int32 Seconds = Time - Minutes * 60.f;
+    		int32 Minutes = FMath::FloorToInt(CountDownTime/60.f);
+    		int32 Seconds = CountDownTime - Minutes * 60.f;
     		
     		FString CountdownText = FString::Printf(TEXT("%02d : %02d"), Minutes, Seconds);
     		BlasterHud->AnnouncementWidget->WarmupTime->SetText(FText::FromString(CountdownText));
@@ -413,6 +434,12 @@ void ABlasterPlayerController::PollInit()
 				SetHudHealth(HudHealth, HudMaxHealth);
 				SetHudScore(HudScore);
 				SetHudDefeats(HudDefeats);
+				ABlasterCharacter* BlasterCharacter = Cast<ABlasterCharacter>(GetPawn());
+				if(BlasterCharacter && BlasterCharacter->GetCombatComponent())
+				{
+					SetHudGrenades(BlasterCharacter->GetCombatComponent()->GetGrenades());
+				}
+				SetHudGrenades(HudGrenades);
 			}
 		}
 	}

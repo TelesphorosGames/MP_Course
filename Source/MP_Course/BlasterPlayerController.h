@@ -31,6 +31,7 @@ public:
 	void SetHudWeaponAmmo(int32 Ammo);
 	void SetHudCarriedAmmo(int32 Ammo);
 	void SetHuDCountdownTime(float CountdownTime);
+	void SetHudGrenades(int32 Grenades);
 	void SetHUDAnnouncementCountdown(float Time);
 	void OnPossess(APawn* InPawn) override;
 
@@ -101,6 +102,9 @@ private:
 	float HudMaxHealth;
 	float HudScore;
 	int32 HudDefeats;
+
+
+	int32 HudGrenades = 4;
 
 	UPROPERTY()
 	class ABlasterGameMode* BlasterGameMode{};

@@ -34,5 +34,7 @@ public:
 	UTextBlock* CDText;
 	UPROPERTY(Transient, meta=(BindWidgetAnim))
 	UWidgetAnimation* UrgentText;
+	UPROPERTY(meta=(BindWidget))
+	UTextBlock* GrenadesCount;
 	
 };

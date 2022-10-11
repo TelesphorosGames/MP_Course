@@ -38,7 +38,8 @@ public:
 	void FireButtonPressed(bool bPressed);
 	UFUNCTION(BlueprintPure)
 	FORCEINLINE AWeapon* GetEquippedWeapon() const {return EquippedWeapon ;}
-
+	FORCEINLINE int32 GetGrenades() const { return Grenades ;}
+	
 	UFUNCTION(BlueprintCallable)
 	void ShotgunShellReload();
 
@@ -156,7 +157,15 @@ private:
 	int32 CarriedAmmo;
 	UFUNCTION()
 	void OnRep_CarriedAmmo();
+	UPROPERTY(ReplicatedUsing=OnRep_Grenades)
+	int32 Grenades = 4;
+	UFUNCTION()
+	void OnRep_Grenades();
+	UPROPERTY(EditAnywhere)
+	int32 MaxGrenades = 4;
+	void UpdateHudGrenades();
 
+	
 	TMap<EWeaponType, int32> CarriedAmmoMap;
 
 	UPROPERTY(EditAnywhere)
