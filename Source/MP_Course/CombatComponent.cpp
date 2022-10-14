@@ -179,6 +179,10 @@ const USkeletalMeshSocket* UCombatComponent::GetEquipSocket()
 		case EWeaponType::EWT_GrenadeLauncher:
 			RightHandSocket = Character->GetMesh()->GetSocketByName(FName("GrenadeLauncherSocket"));
 			break;
+	case EWeaponType::EWT_LightningGun:
+		RightHandSocket = Character->GetMesh()->GetSocketByName(FName("LightningGunSocket"));
+		break;
+		
 		case EWeaponType::EWT_MAX:
 			break;
 		default: ;
@@ -730,8 +734,6 @@ void UCombatComponent::OnRep_CarriedAmmo()
 	{
 		JumpToShotgunEnd();
 	}
-
-		
 }
 
 void UCombatComponent::OnRep_Grenades()
@@ -753,7 +755,6 @@ void UCombatComponent::UpdateHudGrenades()
 
 void UCombatComponent::InitializeCarriedAmmo()
 {
-	
 	CarriedAmmoMap.Emplace(EWeaponType::EWT_AssaultRifle, StartingAmmo);
 	CarriedAmmoMap.Emplace(EWeaponType::EWT_RocketLauncher, StartingAmmo);
 	CarriedAmmoMap.Emplace(EWeaponType::EWT_Pistol, StartingAmmo);
@@ -761,5 +762,5 @@ void UCombatComponent::InitializeCarriedAmmo()
 	CarriedAmmoMap.Emplace(EWeaponType::EWT_Shotgun, StartingAmmo);
 	CarriedAmmoMap.Emplace(EWeaponType::EWT_SniperRifle, StartingAmmo);
 	CarriedAmmoMap.Emplace(EWeaponType::EWT_GrenadeLauncher, StartingAmmo);
-	
+	CarriedAmmoMap.Emplace(EWeaponType::EWT_LightningGun, StartingAmmo);
 }

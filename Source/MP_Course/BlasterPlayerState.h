@@ -22,6 +22,7 @@ public:
 
 	void AddToScore(float ScoreAmount);
 	virtual void OnRep_Score() override;
+	
 
 protected:
 	virtual void BeginPlay() override;

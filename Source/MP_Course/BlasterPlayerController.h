@@ -23,6 +23,7 @@ public:
 	virtual void ReceivedPlayer() override;
 
 	FORCEINLINE float GetWarmupTime() const	{return WarmupTime ;}
+	FORCEINLINE FName GetBlasterMatchState() const {return BlasterMatchState ;}
 
 
 	void SetHudHealth(float Health, float MaxHealth);
@@ -36,13 +37,37 @@ public:
 	void OnPossess(APawn* InPawn) override;
 
 	void OnMatchStateSet(FName State);
+	void RemoveOverlay();
 	void HandleMatchHasStarted();
 	void HandleCooldown();
 
 	
 	// Synced with server world clock
 	virtual float GetServerTime();
+	
+	UPROPERTY()
+	class ABlasterHud* BlasterHud{};
 
+	UPROPERTY()
+	class UCharacterOverlay* CharacterOverlay;
+
+	
+	UPROPERTY()
+	float MatchTime = 0.f;
+	UPROPERTY()
+	float WarmupTime = 0.f;
+	UPROPERTY()
+	float LevelStartingTime = 0.f;
+	UPROPERTY()
+	float CoolDownTime = 0.f;
+	UPROPERTY()
+	uint32 CountDownInt=0;
+	
+	UPROPERTY()
+	class ABlasterGameMode* BlasterGameMode{};
+	UPROPERTY()
+	ABlasterPlayerController* BlasterPlayerController{};
+	
 protected:
 
 	virtual void BeginPlay() override;
@@ -60,12 +85,14 @@ protected:
 	UFUNCTION(Client, Reliable)
 	void Client_ReportServerTime(float TimeOfClientRequest, float TimeServerRecievedRequest);
 	// Difference Between Client and Server Time
+	UPROPERTY()
 	float ClientServerDelta = 0.f;
 	// How often client and server times should sync
 	UPROPERTY(EditAnywhere, Category= "Time")
 	float TimeSyncFrequency = 5.f;
+	UPROPERTY()
 	float TimeSyncRunningTime = 0.f;
-
+	UFUNCTION()
 	void CheckTimeSync(float DeltaTime);
 	
 	
@@ -77,37 +104,27 @@ protected:
 	
 	
 private:
-	UPROPERTY()
-    	class ABlasterHud* BlasterHud{};
-
-	float MatchTime = 0.f;
-	float WarmupTime = 0.f;
-	float LevelStartingTime = 0.f;
-	float CoolDownTime = 0.f;
-
-	uint32 CountDownInt=0;
 	
 	UPROPERTY(ReplicatedUsing=OnRep_MatchState)
-	FName BlasterMatchState;
+	FName BlasterMatchState{};
 	
 	UFUNCTION()
 	void OnRep_MatchState();
-
 	UPROPERTY()
-	class UCharacterOverlay* CharacterOverlay;
-
 	bool bInitializeCharacterOverlay = false;
-
+	UPROPERTY()
 	float HudHealth;
+	UPROPERTY()
 	float HudMaxHealth;
+	UPROPERTY()
 	float HudScore;
+	UPROPERTY()
 	int32 HudDefeats;
 
-
+	UPROPERTY()
 	int32 HudGrenades = 4;
 
-	UPROPERTY()
-	class ABlasterGameMode* BlasterGameMode{};
-
+	FTimerHandle RemoveOverlayTimer;
+	
 	
 };

@@ -2,17 +2,19 @@
 
 
 #include "BlasterGameMode.h"
+
+#include "Announcement.h"
 #include "BlasterCharacter.h"
 #include "BlasterGameState.h"
+#include "BlasterHud.h"
 #include "BlasterPlayerController.h"
 #include "BlasterPlayerState.h"
+#include "CharacterOverlay.h"
+#include "EngineUtils.h"
 #include "GameFramework/PlayerStart.h"
 #include "Kismet/GameplayStatics.h"
+#include "TimerManager.h"
 
-namespace MatchState
-{
-	const FName CoolDown = FName("Cooldown");
-}
 
 ABlasterGameMode::ABlasterGameMode()
 {
@@ -23,6 +25,7 @@ void ABlasterGameMode::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 
+	
 	if(MatchState == MatchState::WaitingToStart)
 	{
 		CountDownTime = WarmupTime - GetWorld()->GetTimeSeconds() + LevelStartingTime;
@@ -31,20 +34,22 @@ void ABlasterGameMode::Tick(float DeltaSeconds)
 			StartMatch();
 		}
 	}
-	else if(MatchState==MatchState::InProgress)
+	if(MatchState==MatchState::InProgress)
 	{
 		CountDownTime = WarmupTime + MatchTime - GetWorld()->GetTimeSeconds() + LevelStartingTime;
 		if(CountDownTime <= 0.f)
 		{
-			SetMatchState(MatchState::CoolDown);
+			SetMatchState(MatchState::WaitingPostMatch);
+			
 		}
 	}
-	else if(MatchState == MatchState::CoolDown)
+	if(MatchState == MatchState::WaitingPostMatch)
 	{
 		CountDownTime = CooldownTime + WarmupTime + MatchTime - GetWorld()->GetTimeSeconds() + LevelStartingTime;
-		if(CountDownTime<=0.f)
+		if(CountDownTime<=0.f && !bRestarted)
 		{
-			RestartGame();
+			GetWorld()->ServerTravel("/Game/VersionControlled/MyStuff/Levels/OpenWorld?Restart", false, false);
+			bRestarted = true;
 		}
 	}
 }
@@ -98,29 +103,71 @@ void ABlasterGameMode::BeginPlay()
 	Super::BeginPlay();
 
 	LevelStartingTime = GetWorld()->GetTimeSeconds();
-
 }
 
 void ABlasterGameMode::OnMatchStateSet()
 {
 	Super::OnMatchStateSet();
 	
-	for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
+	// for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
+	for(ABlasterPlayerController*  BlasterPlayer : TActorRange<ABlasterPlayerController>(GetWorld()))
 	{
-		ABlasterPlayerController* BlasterPlayer = Cast<ABlasterPlayerController>(*It);
+		// ABlasterPlayerController* BlasterPlayer = Cast<ABlasterPlayerController>(*It);
 		if(BlasterPlayer)
 		{
+			UE_LOG(LogTemp,Warning, TEXT("%s"), *BlasterPlayer->GetName());
 			BlasterPlayer->OnMatchStateSet(MatchState);
 		}
 		
 	}
+}
+
+void ABlasterGameMode::RemoveCharacterOverlay(ABlasterPlayerController* BlasterPlayer)
+{
+	if(BlasterPlayer &&
+		BlasterPlayer->BlasterHud &&
+		BlasterPlayer->BlasterHud->CharacterOverlay
+		)
+		{
+		BlasterPlayer->BlasterHud->CharacterOverlay->RemoveFromParent();
+		BlasterPlayer->BlasterHud->CharacterOverlay = nullptr;
+		}
 	
+	if(BlasterPlayer->BlasterHud->AnnouncementWidget)
+	{
+		BlasterPlayer->BlasterHud->AnnouncementWidget->RemoveFromParent();
+		BlasterPlayer->BlasterHud->AnnouncementWidget = nullptr;
+	}
+}
+
+void ABlasterGameMode::ResetTimes()
+{
+	CountDownTime=0.f;
+	WarmupTime = 10.f;
+	MatchTime = 10.f;
+	CooldownTime = 10.f;
+}
+
+void ABlasterGameMode::RestartBlasterGame()
+{
+
+	UWorld* World = GetWorld();
+	if(World)
+	{
+		for(ABlasterPlayerController*  BlasterPlayer : TActorRange<ABlasterPlayerController>(World))
+		{
+			if(BlasterPlayer)
+			{
+				RemoveCharacterOverlay(BlasterPlayer);
+			}
+		}
+	}
+	GetWorld()->ServerTravel("/Game/VersionControlled/MyStuff/Levels/OpenWorld?Restart", false, false);
+
 }
 
 void ABlasterGameMode::RequestRespawn(ACharacter* ElimmedCharacter, AController* ElimmedController)
 {
-
-	
 	if(ElimmedController && ElimmedCharacter)
 	{
 		ElimmedCharacter->Reset();

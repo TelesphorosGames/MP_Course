@@ -1,13 +1,17 @@
 #include "BlasterHud.h"
 
 #include "Announcement.h"
+#include "BlasterPlayerController.h"
 #include "CharacterOverlay.h"
 #include "Blueprint/UserWidget.h"
+#include "GameFramework/GameMode.h"
 
 
 void ABlasterHud::DrawHUD()
 {
 	Super::DrawHUD();
+
+	if(OwningPlayerController && OwningPlayerController->GetBlasterMatchState() != MatchState::InProgress) return;
 	
 	FVector2D ViewportSize;
 	if (GEngine)
@@ -20,46 +24,46 @@ void ABlasterHud::DrawHUD()
 		const float BaseSpread= 45.f;
 		const float SpreadScaled = (CrosshairSpreadMax * HudPackage.CrosshairSpread) + BaseSpread;
 		
-		if(HudPackage.CrosshairsCenter)
+		if(HudPackage.CrosshairsCenter != nullptr)
 		{
 			const FVector2D Spread{0.f, 0.f};
 			DrawCrosshairs(HudPackage.CrosshairsCenter, ViewportCenter, Spread, HudPackage.CrosshairsColor);
 			
 		}
-		if(HudPackage.CrosshairsLeft)
+		if(HudPackage.CrosshairsLeft != nullptr)
 		{
 			const FVector2D Spread{-SpreadScaled,0.f};
 			DrawCrosshairs(HudPackage.CrosshairsLeft, ViewportCenter, Spread, HudPackage.CrosshairsColor);
 		}
-		if(HudPackage.CrosshairsRight)
+		if(HudPackage.CrosshairsRight != nullptr)
 		{
 			FVector2D Spread{SpreadScaled, 0.f};
 			DrawCrosshairs(HudPackage.CrosshairsRight, ViewportCenter, Spread, HudPackage.CrosshairsColor);
 		}
-		if(HudPackage.CrosshairsTop)
+		if(HudPackage.CrosshairsTop != nullptr)
 		{
 			FVector2D Spread{0.f, -SpreadScaled};
 			DrawCrosshairs(HudPackage.CrosshairsTop, ViewportCenter, Spread, HudPackage.CrosshairsColor);
 		}
-		if(HudPackage.CrosshairsBottom)
+		if(HudPackage.CrosshairsBottom != nullptr)
 		{
 			FVector2D Spread{0.f, SpreadScaled};
 			DrawCrosshairs(HudPackage.CrosshairsBottom, ViewportCenter, Spread, HudPackage.CrosshairsColor);
 		}
 	}
-	
 }
 
 void ABlasterHud::BeginPlay()
 {
 	Super::BeginPlay();
-
+	OwningPlayerController = Cast<ABlasterPlayerController>(GetOwningPlayerController());
+	UE_LOG(LogTemp,Warning,TEXT("BEING CALLED YES YES"));
 }
 
 void ABlasterHud::AddAnnouncement()
 {
 	APlayerController* PlayerController = GetOwningPlayerController();
-	if(PlayerController && AnnouncementClass)
+	if(PlayerController && AnnouncementClass && AnnouncementWidget == nullptr)
 	{
 		AnnouncementWidget = CreateWidget<UAnnouncement>(PlayerController, AnnouncementClass);
 		AnnouncementWidget->AddToViewport();
@@ -69,13 +73,32 @@ void ABlasterHud::AddAnnouncement()
 void ABlasterHud::AddCharacterOverlay()
 {
 	APlayerController* PlayerController = GetOwningPlayerController();
-	if(PlayerController && CharacterOverlayClass)
+	if(PlayerController && CharacterOverlayClass && CharacterOverlay == nullptr)
 	{
 		CharacterOverlay = CreateWidget<UCharacterOverlay>(PlayerController, CharacterOverlayClass);
 		CharacterOverlay->AddToViewport();
-		
 	}
+}
 
+void ABlasterHud::RemoveAnnouncement()
+{
+	APlayerController* PlayerController = GetOwningPlayerController();
+	if(PlayerController && AnnouncementWidget != nullptr)
+		{
+			AnnouncementWidget->RemoveFromParent();
+		
+			AnnouncementWidget = nullptr;
+		}
+}
+
+void ABlasterHud::RemoveCharacterOverlay()
+{
+	APlayerController* PlayerController = GetOwningPlayerController();
+	if(PlayerController && CharacterOverlayClass && CharacterOverlay != nullptr)
+	{
+		CharacterOverlay->RemoveFromParent();
+		CharacterOverlay = nullptr;
+	}
 }
 
 void ABlasterHud::DrawCrosshairs(UTexture2D* Texture, FVector2D ViewportCenter, FVector2D Spread, FLinearColor CrosshairColor)
@@ -83,7 +106,5 @@ void ABlasterHud::DrawCrosshairs(UTexture2D* Texture, FVector2D ViewportCenter, 
 	const float TextureWidth = Texture->GetSizeX();
 	const float TextureHeight = Texture->GetSizeY();
 	const FVector2D TextureDrawPoint(ViewportCenter.X - (TextureWidth / 2.f) + Spread.X,	ViewportCenter.Y - (TextureHeight / 2.f) + Spread.Y);
-
-	DrawTexture(Texture, TextureDrawPoint.X, TextureDrawPoint.Y, TextureWidth, TextureHeight, 0.f, 0.f, 1.f,1.f, CrosshairColor);
-	
+	DrawTexture(Texture, TextureDrawPoint.X, TextureDrawPoint.Y, TextureWidth, TextureHeight, 0.f, 0.f, 1.f,1.f, CrosshairColor);	
 }
