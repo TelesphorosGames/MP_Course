@@ -57,7 +57,7 @@ void UOverhead::OnLevelRemovedFromWorld(ULevel* InLevel, UWorld* InWorld)
 {
 
 	RemoveFromParent();
-	Super::OnLevelRemovedFromWorld(InLevel, InWorld);
+	// Super::OnLevelRemovedFromWorld(InLevel, InWorld);
 
 	
 }

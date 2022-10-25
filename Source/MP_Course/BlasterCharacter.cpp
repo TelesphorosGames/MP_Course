@@ -3,6 +3,8 @@
 
 #include "BlasterCharacter.h"
 
+#include "BuffComponent.h"
+#include "Announcement.h"
 #include "BlasterGameMode.h"
 #include "BlasterPlayerController.h"
 #include "CharacterOverlay.h"
@@ -18,6 +20,8 @@
 #include "Components/CapsuleComponent.h"
 #include "Components/TextBlock.h"
 #include "CombatState.h"
+#include "MyEnhancedInputComponent.h"
+#include "MyGameplayTags.h"
 #include "Kismet/GameplayStatics.h"
 
 
@@ -45,6 +49,9 @@ ABlasterCharacter::ABlasterCharacter()
 	CombatComponent = CreateDefaultSubobject<UCombatComponent>(TEXT("CombatComponent"));
 	CombatComponent->SetIsReplicated(true);
 
+	BuffComponent = CreateDefaultSubobject<UBuffComponent>(TEXT("BuffComponent"));
+	BuffComponent->SetIsReplicated(true);
+
 	GetMesh()->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
 	GetMesh()->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
 	GetMesh()->SetCollisionObjectType(ECC_SkeletalMesh);
@@ -58,10 +65,32 @@ ABlasterCharacter::ABlasterCharacter()
 
 void ABlasterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
+/* NEW WAY: 
+	// UMyEnhancedInputComponent* MyEnhancedInputComponent = Cast<UMyEnhancedInputComponent>(PlayerInputComponent);
+	//
+	// check(MyEnhancedInputComponent);
+	//
+	//
+	// const FMyGameplayTags& GameplayTags = FMyGameplayTags::Get();
+	//
+	// //Bind Input actions by tag
+	// MyEnhancedInputComponent->BindActionByTag(InputConfig, GameplayTags.InputTag_Move, ETriggerEvent::Triggered, this, &ABlasterCharacter::Input_Move);
+	// MyEnhancedInputComponent->BindActionByTag(InputConfig, GameplayTags.InputTag_Look_Mouse, ETriggerEvent::Triggered, this, &ABlasterCharacter::Input_Look);
+	// MyEnhancedInputComponent->BindActionByTag(InputConfig, GameplayTags.InputTag_Look_Stick, ETriggerEvent::Triggered, this, &ABlasterCharacter::Input_Look);
+	// MyEnhancedInputComponent->BindActionByTag(InputConfig, GameplayTags.InputTag_Fire, ETriggerEvent::Triggered, this, &ABlasterCharacter::Input_Fire);
+	// MyEnhancedInputComponent->BindActionByTag(InputConfig, GameplayTags.InputTag_Jump, ETriggerEvent::Triggered, this, &ABlasterCharacter::Input_Jump);
+*/
+
+
+
+
+	// OLD WAY 
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
+	
 	check(PlayerInputComponent);
-
+	
+	
+	
 	PlayerInputComponent->BindAxis("MoveForward", this, &ABlasterCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &ABlasterCharacter::MoveRight);
 	PlayerInputComponent->BindAxis("Turn", this, &ABlasterCharacter::Turn);
@@ -76,6 +105,8 @@ void ABlasterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	PlayerInputComponent->BindAction("Fire", IE_Released, this, &ABlasterCharacter::FireButtonReleased);
 	PlayerInputComponent->BindAction("Reload", IE_Pressed, this, &ABlasterCharacter::ReloadButtonPressed);
 	PlayerInputComponent->BindAction("ThrowGrenade", IE_Pressed, this, &ABlasterCharacter::GrenadeButtonPressed);
+	
+	
 }
 
 void ABlasterCharacter::UpdateHudHealth()
@@ -139,6 +170,13 @@ void ABlasterCharacter::PostInitializeComponents()
 	{
 		CombatComponent->Character = this;
 	}
+	if(BuffComponent)
+	{
+		BuffComponent->Character = this;
+		BuffComponent->SetInitialSpeeds(GetCharacterMovement()->MaxWalkSpeed, GetCharacterMovement()->MaxWalkSpeedCrouched);
+	}
+
+	
 	Super::PostInitializeComponents();
 }
 
@@ -438,6 +476,56 @@ void ABlasterCharacter::FireButtonPressed()
 	}
 }
 
+void ABlasterCharacter::Input_Move(const FInputActionValue& InputActionValue)
+{
+	if (Controller != nullptr)
+	{
+		const FVector2D MoveValue = InputActionValue.Get<FVector2D>();
+		const FRotator MovementRotation(0.0f, Controller->GetControlRotation().Yaw, 0.0f);
+
+		if (MoveValue.X != 0.0f)
+		{
+			const FVector MovementDirection = MovementRotation.RotateVector(FVector::RightVector);
+			AddMovementInput(MovementDirection, MoveValue.X);
+		}
+
+		if (MoveValue.Y != 0.0f)
+		{
+			const FVector MovementDirection = MovementRotation.RotateVector(FVector::ForwardVector);
+			AddMovementInput(MovementDirection, MoveValue.Y);
+		}
+	}
+}
+
+void ABlasterCharacter::Input_Look(const FInputActionValue& InputActionValue)
+{
+	
+	if (Controller != nullptr)
+	{
+		const FVector2D LookValue = InputActionValue.Get<FVector2D>();
+
+		if (LookValue.X != 0.0f)
+		{
+			Turn(LookValue.X);
+		}
+
+		if (LookValue.Y != 0.0f)
+		{
+			LookUp(LookValue.Y);
+		}
+	}
+}
+
+void ABlasterCharacter::Input_Jump(const FInputActionValue& InputActionValue)
+{
+	Jump();
+}
+
+void ABlasterCharacter::Input_Fire(const FInputActionValue& InputActionValue)
+{
+	FireButtonPressed();
+}
+
 void ABlasterCharacter::FireButtonReleased()
 {
 	if(bDisableGameplay) return;
@@ -472,10 +560,15 @@ void ABlasterCharacter::OnRep_OverlappingWeapon(AWeapon* LastWeapon)
 	}
 }
 
-void ABlasterCharacter::OnRep_Health()
+void ABlasterCharacter::OnRep_Health(float LastHealth)
 {
 	UpdateHudHealth();
-	PlayOnHitMontage();
+
+	if(Health<LastHealth)
+	{
+		PlayOnHitMontage();
+	}
+	
 }
 
 

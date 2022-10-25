@@ -1,6 +1,6 @@
 {
 	"FileVersion": 3,
-	"EngineAssociation": "5.0",
+	"EngineAssociation": "5.1",
 	"Category": "",
 	"Description": "",
 	"Modules": [
@@ -10,7 +10,8 @@
 			"LoadingPhase": "Default",
 			"AdditionalDependencies": [
 				"Engine",
-				"UMG"
+				"UMG",
+				"EnhancedInput"
 			]
 		}
 	],
@@ -53,24 +54,11 @@
 			]
 		},
 		{
-			"Name": "TimeClock",
-			"Enabled": true,
-			"MarketplaceURL": "com.epicgames.launcher://ue/marketplace/product/6f6a4afb66af43deb946a48b78d8c80a"
-		},
-		{
-			"Name": "CodeView",
-			"Enabled": true
-		},
-		{
 			"Name": "Water",
 			"Enabled": true
 		},
 		{
 			"Name": "WaterExtras",
-			"Enabled": true
-		},
-		{
-			"Name": "MetaHuman",
 			"Enabled": true
 		},
 		{
@@ -80,11 +68,6 @@
 		{
 			"Name": "OnlineSubsystemSteam",
 			"Enabled": true
-		},
-		{
-			"Name": "ElectronicNodes",
-			"Enabled": true,
-			"MarketplaceURL": "com.epicgames.launcher://ue/marketplace/content/5cb2a394d0c04e73891762be4cbd7216"
 		},
 		{
 			"Name": "OnlineFramework",

@@ -44,7 +44,7 @@ public:
 	
 	// Synced with server world clock
 	virtual float GetServerTime();
-	
+
 	UPROPERTY()
 	class ABlasterHud* BlasterHud{};
 
@@ -125,6 +125,13 @@ private:
 	int32 HudGrenades = 4;
 
 	FTimerHandle RemoveOverlayTimer;
-	
-	
+
+	UPROPERTY()
+	bool bHealthInitialized = false; 
+	UPROPERTY()
+	bool bScoreInitialized = false; 
+	UPROPERTY()
+	bool bDefeatsInitialized = false;
+	UPROPERTY()
+	bool bGrenadesInitialized = false; 
 };

@@ -36,20 +36,25 @@ public:
 	void JumpToShotgunEnd();
 	void UpdateShotgunAmmoValues();
 	void FireButtonPressed(bool bPressed);
-	UFUNCTION(BlueprintPure)
-	FORCEINLINE AWeapon* GetEquippedWeapon() const {return EquippedWeapon ;}
-	FORCEINLINE int32 GetGrenades() const { return Grenades ;}
+	
+
 	
 	UFUNCTION(BlueprintCallable)
 	void ShotgunShellReload();
-
 	UFUNCTION(BlueprintCallable)
 	void ThrowGrenadeFinished();
-
 	UFUNCTION(BlueprintCallable)
 	void LaunchGrenade();
 	UFUNCTION(Server, Reliable)
 	void Server_LaunchGrenade(const FVector_NetQuantize& Target);
+
+	
+	void PickupAmmo(EWeaponType WeaponType, int32 AmmoAmount);
+
+
+		UFUNCTION(BlueprintPure)
+    	FORCEINLINE AWeapon* GetEquippedWeapon() const {return EquippedWeapon ;}
+    	FORCEINLINE int32 GetGrenades() const { return Grenades ;}
 
 protected:
 
@@ -161,6 +166,8 @@ private:
 	int32 Grenades = 4;
 	UFUNCTION()
 	void OnRep_Grenades();
+	UPROPERTY(EditAnywhere)
+	int32 MaxCarriedAmmo = 500;
 	UPROPERTY(EditAnywhere)
 	int32 MaxGrenades = 4;
 	void UpdateHudGrenades();

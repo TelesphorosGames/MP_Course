@@ -68,6 +68,11 @@ void ABlasterHud::AddAnnouncement()
 		AnnouncementWidget = CreateWidget<UAnnouncement>(PlayerController, AnnouncementClass);
 		AnnouncementWidget->AddToViewport();
 	}
+	else if (PlayerController && AnnouncementClass && AnnouncementWidget)
+	{
+		AnnouncementWidget->SetVisibility(ESlateVisibility::Visible);
+	}
+	
 }
 
 void ABlasterHud::AddCharacterOverlay()
@@ -78,6 +83,10 @@ void ABlasterHud::AddCharacterOverlay()
 		CharacterOverlay = CreateWidget<UCharacterOverlay>(PlayerController, CharacterOverlayClass);
 		CharacterOverlay->AddToViewport();
 	}
+	else
+	{
+		CharacterOverlay->SetVisibility(ESlateVisibility::Visible);
+	}
 }
 
 void ABlasterHud::RemoveAnnouncement()
@@ -85,9 +94,7 @@ void ABlasterHud::RemoveAnnouncement()
 	APlayerController* PlayerController = GetOwningPlayerController();
 	if(PlayerController && AnnouncementWidget != nullptr)
 		{
-			AnnouncementWidget->RemoveFromParent();
-		
-			AnnouncementWidget = nullptr;
+			AnnouncementWidget->SetVisibility(ESlateVisibility::Hidden);
 		}
 }
 
@@ -96,8 +103,7 @@ void ABlasterHud::RemoveCharacterOverlay()
 	APlayerController* PlayerController = GetOwningPlayerController();
 	if(PlayerController && CharacterOverlayClass && CharacterOverlay != nullptr)
 	{
-		CharacterOverlay->RemoveFromParent();
-		CharacterOverlay = nullptr;
+		CharacterOverlay->SetVisibility(ESlateVisibility::Hidden);
 	}
 }
 

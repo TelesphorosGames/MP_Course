@@ -8,9 +8,9 @@ public class MP_Course : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "HeadMountedDisplay", "OnlineSubsystemSteam", "OnlineSubsystem", "OnlineSubsystemUtils", "ColinsMultiplayerSessions", "Niagara", "UMG" });
+		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "HeadMountedDisplay", "OnlineSubsystemSteam", "OnlineSubsystem", "OnlineSubsystemUtils", "ColinsMultiplayerSessions", "Niagara", "UMG", "GameplayTags", "EnhancedInput" });
 
-	// Uncomment if you are using Slate UI
+		// Uncomment if you are using Slate UI
 		PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "SlateCore" });
 		
 		// Uncomment if you are using online features

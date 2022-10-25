@@ -30,7 +30,6 @@ void ABlasterPlayerController::BeginPlay()
 	
 	Server_CheckMatchState();
 	
-	
 }
 
 void ABlasterPlayerController::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -56,6 +55,12 @@ void ABlasterPlayerController::ReceivedPlayer()
 void ABlasterPlayerController::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
+
+	bInitializeCharacterOverlay = (bGrenadesInitialized &&
+									bHealthInitialized &&
+									bDefeatsInitialized &&
+									bScoreInitialized);
+	
 	
 	PollInit();
 	
@@ -72,11 +77,12 @@ void ABlasterPlayerController::Tick(float DeltaSeconds)
 
 void ABlasterPlayerController::SetHudHealth(float Health, float MaxHealth)
 {
+	UE_LOG(LogTemp,Warning,TEXT("THIS IS TICKING RIGHT NOW ( HEALTH) "))
 	if(BlasterHud == nullptr)
 	{
 		BlasterHud = Cast<ABlasterHud>(GetHUD());
 	}
-	// Check to make sure health bar elements are valid 
+
 	if(BlasterHud &&
 		BlasterHud->CharacterOverlay &&
 		BlasterHud->CharacterOverlay->HealthBar &&
@@ -86,10 +92,12 @@ void ABlasterPlayerController::SetHudHealth(float Health, float MaxHealth)
 		BlasterHud->CharacterOverlay->HealthBar->SetPercent(HealthPercent);
 		FString HealthText = FString::Printf(TEXT("%d/%d"), FMath::CeilToInt(Health), FMath::CeilToInt(MaxHealth));
 		BlasterHud->CharacterOverlay->HealthText->SetText(FText::FromString(HealthText));
+		bHealthInitialized = true;
 	}
 	else
 	{
-		bInitializeCharacterOverlay = true;
+		bHealthInitialized = false;
+	
 		HudHealth = Health;
 		HudMaxHealth = MaxHealth;
 	}
@@ -107,10 +115,12 @@ void ABlasterPlayerController::SetHudScore(float Score)
 	{
 		FString ScoreText = FString::Printf(TEXT("%d"), FMath::CeilToInt(Score));
 		BlasterHud->CharacterOverlay->ScoreAmount->SetText(FText::FromString(ScoreText));
+		bScoreInitialized = true;
 	}
 	else
 	{
-		bInitializeCharacterOverlay = true;
+		bScoreInitialized = false;
+
 		HudScore = Score;
 	}
 }
@@ -127,10 +137,12 @@ void ABlasterPlayerController::SetHudDefeats(int32 Defeats)
 	{
 		FString DefeatsText = FString::Printf(TEXT("%d"), Defeats);
 		BlasterHud->CharacterOverlay->DefeatsAmount->SetText(FText::FromString(DefeatsText));
+		bDefeatsInitialized = true;
 	}
 	else
 	{
-		bInitializeCharacterOverlay = true;
+		bDefeatsInitialized = false;
+	
 		HudDefeats = Defeats;
 	}
 }
@@ -148,6 +160,10 @@ void ABlasterPlayerController::SetHudWeaponAmmo(int32 Ammo)
 		FString AmmoText = FString::Printf(TEXT("%d"), Ammo);
 		BlasterHud->CharacterOverlay->AmmoCount->SetText(FText::FromString(AmmoText));
 	}
+	else
+	{
+		
+	}
 }
 
 void ABlasterPlayerController::SetHudCarriedAmmo(int32 Ammo)
@@ -162,6 +178,10 @@ void ABlasterPlayerController::SetHudCarriedAmmo(int32 Ammo)
 	{
 		const FString AmmoText = FString::Printf(TEXT("%d"), Ammo);
 		BlasterHud->CharacterOverlay->CarriedAmmo->SetText(FText::FromString(AmmoText));
+	}
+	else
+	{
+		
 	}
 }
 
@@ -190,6 +210,10 @@ void ABlasterPlayerController::SetHuDCountdownTime(float CountdownTime)
 			BlasterHud->CharacterOverlay->PlayAnimation(BlasterHud->CharacterOverlay->UrgentText);
 		}
 	}
+	else
+	{
+		
+	}
 }
 
 void ABlasterPlayerController::SetHudGrenades(int32 Grenades)
@@ -204,9 +228,12 @@ void ABlasterPlayerController::SetHudGrenades(int32 Grenades)
 	{
 		const FString GrenadesText = FString::Printf(TEXT("%d"), Grenades);
 		BlasterHud->CharacterOverlay->GrenadesCount->SetText(FText::FromString(GrenadesText));
+		bGrenadesInitialized = true;
 	}
 	else
 	{
+		bGrenadesInitialized = false;
+		
 		HudGrenades = Grenades;
 	}
 	
@@ -219,21 +246,29 @@ void ABlasterPlayerController::SetHUDAnnouncementCountdown(float CountDownTime)
     		BlasterHud = Cast<ABlasterHud>(GetHUD());
     	}
     	if(BlasterHud &&
-    		BlasterHud->AnnouncementWidget &&
-    		BlasterHud->AnnouncementWidget->WarmupTime)
+    		BlasterHud->AnnouncementWidget)
     	{
-    		if(CountDownTime <= 0.f)
+    		if(BlasterHud->AnnouncementWidget->WarmupTime)
     		{
-    			BlasterHud->AnnouncementWidget->WarmupTime->SetText(FText());
-    			BlasterHud->RemoveAnnouncement();
-    			return;
+    			if(CountDownTime <= 0.f)
+    			{
+    				BlasterHud->AnnouncementWidget->WarmupTime->SetText(FText());
+    				BlasterHud->RemoveAnnouncement();
+    				return;
+    			}
+    			int32 Minutes = FMath::FloorToInt(CountDownTime/60.f);
+    			int32 Seconds = CountDownTime - Minutes * 60.f;
+                		
+    			FString CountdownText = FString::Printf(TEXT("%02d : %02d"), Minutes, Seconds);
+    			BlasterHud->AnnouncementWidget->WarmupTime->SetText(FText::FromString(CountdownText));
+                	
     		}
-    		int32 Minutes = FMath::FloorToInt(CountDownTime/60.f);
-    		int32 Seconds = CountDownTime - Minutes * 60.f;
-    		
-    		FString CountdownText = FString::Printf(TEXT("%02d : %02d"), Minutes, Seconds);
-    		BlasterHud->AnnouncementWidget->WarmupTime->SetText(FText::FromString(CountdownText));
+
     	}
+        else
+        {
+	       
+        }
 }
 
 void ABlasterPlayerController::OnPossess(APawn* InPawn)
@@ -253,9 +288,8 @@ void ABlasterPlayerController::OnMatchStateSet(FName State)
 
 	if(BlasterMatchState == MatchState::WaitingToStart)
 	{
-		RemoveOverlay();
 	}
-
+	
 	if(BlasterMatchState == MatchState::InProgress)
 	{
 		HandleMatchHasStarted();
@@ -299,7 +333,7 @@ void ABlasterPlayerController::OnRep_MatchState()
 	{
 		HandleCooldown();
 
-		if(!GetWorldTimerManager().IsTimerActive(RemoveOverlayTimer))
+		if(!GetWorldTimerManager().IsTimerActive(RemoveOverlayTimer) && BlasterGameMode != nullptr)
 		{
 			GetWorldTimerManager().SetTimer(RemoveOverlayTimer, this, &ABlasterPlayerController::RemoveOverlay, BlasterGameMode->GetCooldownTime());
 		}
@@ -319,6 +353,7 @@ void ABlasterPlayerController::HandleMatchHasStarted()
 		if(BlasterHud->AnnouncementWidget)
 		{
 			BlasterHud->AnnouncementWidget->SetVisibility(ESlateVisibility::Hidden);
+			
 		}
 	}
 }
@@ -471,6 +506,8 @@ if(BlasterMatchState == MatchState::InProgress)
 
 void ABlasterPlayerController::PollInit()
 {
+	if(bInitializeCharacterOverlay) return;
+	
 		if(BlasterHud && BlasterHud->CharacterOverlay)
 		{
 			CharacterOverlay = BlasterHud->CharacterOverlay;
@@ -479,12 +516,12 @@ void ABlasterPlayerController::PollInit()
 				SetHudHealth(HudHealth, HudMaxHealth);
 				SetHudScore(HudScore);
 				SetHudDefeats(HudDefeats);
+				
 				ABlasterCharacter* BlasterCharacter = Cast<ABlasterCharacter>(GetPawn());
 				if(BlasterCharacter && BlasterCharacter->GetCombatComponent())
 				{
 					SetHudGrenades(BlasterCharacter->GetCombatComponent()->GetGrenades());
 				}
-				SetHudGrenades(HudGrenades);
 			}
 		}
 	if(BlasterHud && BlasterMatchState == MatchState::WaitingToStart)

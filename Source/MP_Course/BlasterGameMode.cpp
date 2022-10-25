@@ -129,14 +129,14 @@ void ABlasterGameMode::RemoveCharacterOverlay(ABlasterPlayerController* BlasterP
 		BlasterPlayer->BlasterHud->CharacterOverlay
 		)
 		{
-		BlasterPlayer->BlasterHud->CharacterOverlay->RemoveFromParent();
-		BlasterPlayer->BlasterHud->CharacterOverlay = nullptr;
+		BlasterPlayer->BlasterHud->RemoveCharacterOverlay();
 		}
 	
-	if(BlasterPlayer->BlasterHud->AnnouncementWidget)
+	if(BlasterPlayer &&
+		BlasterPlayer->BlasterHud &&
+		BlasterPlayer->BlasterHud->AnnouncementWidget)
 	{
-		BlasterPlayer->BlasterHud->AnnouncementWidget->RemoveFromParent();
-		BlasterPlayer->BlasterHud->AnnouncementWidget = nullptr;
+		BlasterPlayer->BlasterHud->RemoveAnnouncement();
 	}
 }
 

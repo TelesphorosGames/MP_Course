@@ -11,6 +11,9 @@
 
 #include "BlasterCharacter.generated.h"
 
+class UBuffComponent;
+struct FInputActionValue;
+class UInputConfig;
 class UCombatComponent;
 UCLASS()
 class MP_COURSE_API ABlasterCharacter : public ACharacter, public IIInteractWithCrosshairs
@@ -56,9 +59,11 @@ public:
 	FORCEINLINE void SetIsElimmed(const bool Elimmed) {bElimmed = Elimmed ;}
 	FORCEINLINE float GetHealth() const {return Health ;}
 	FORCEINLINE float GetMaxHealth() const {return MaxHealth ;}
+	FORCEINLINE void SetHealth(float HealthAmount) { Health = HealthAmount ; }
 	FORCEINLINE bool GetDisableGameplay() const {return bDisableGameplay ;}
 	FORCEINLINE void SetDisableGameplay(const bool bDisable) { bDisableGameplay = bDisable ;}
 	FORCEINLINE UCombatComponent* GetCombatComponent() const {return CombatComponent ;}
+	FORCEINLINE UBuffComponent* GetBuffComponent() const {return BuffComponent ;}
 	FORCEINLINE UAnimMontage* GetReloadMontage() const {return ReloadMontage ;}
 	FORCEINLINE UStaticMeshComponent* GetAttachedGrenade() const {return Grenade ;}
 	
@@ -68,6 +73,22 @@ public:
 	void FireButtonPressed();
 	
 protected:
+
+	/** The input config that maps Input Actions to Input Tags*/
+	UPROPERTY(EditDefaultsOnly, Category = "Input")
+	UInputConfig* InputConfig;
+
+	/** Handles moving forward/backward */
+	void Input_Move(const FInputActionValue& InputActionValue);
+
+	/** Handles mouse and stick look */
+	void Input_Look(const FInputActionValue& InputActionValue);
+
+	/** Handles Jumping */
+	void Input_Jump(const FInputActionValue& InputActionValue);
+
+	/** Handles Pew Pew */
+	void Input_Fire(const FInputActionValue& InputActionValue);
 
 	virtual void BeginPlay() override;
 	
@@ -116,6 +137,9 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess ="true"))
 	class UCombatComponent* CombatComponent;
 
+	UPROPERTY(VisibleAnywhere, meta = (AllowPrivateAccess ="true"))
+	class UBuffComponent* BuffComponent;
+
 	UFUNCTION(Server, Reliable)
 	void ServerEquipButtonPressed();
 	
@@ -149,7 +173,7 @@ private:
 	UPROPERTY(EditAnywhere, Category= Stats, meta=(AllowPrivateAccess = "true"), ReplicatedUsing=OnRep_Health)
 	float Health = 100.f;
 	UFUNCTION()
-	void OnRep_Health();
+	void OnRep_Health(float LastHealth);
 	UPROPERTY()
 	class ABlasterPlayerController* BlasterPlayerController{};
 	UPROPERTY()
