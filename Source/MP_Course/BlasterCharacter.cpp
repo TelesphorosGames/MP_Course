@@ -112,10 +112,29 @@ void ABlasterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 void ABlasterCharacter::UpdateHudHealth()
 {
 	if(BlasterPlayerController == nullptr)
+	{
 		BlasterPlayerController = Cast<ABlasterPlayerController>(Controller);
-
+	}
+	
 	if(BlasterPlayerController)
+	{
 		BlasterPlayerController->SetHudHealth(Health, MaxHealth);
+	}
+		
+}
+
+void ABlasterCharacter::UpdateHudShields()
+{
+	if(BlasterPlayerController == nullptr)
+	{
+		BlasterPlayerController = Cast<ABlasterPlayerController>(Controller);
+	}
+	
+	if(BlasterPlayerController)
+	{
+		BlasterPlayerController->SetHudShields(Shield, MaxShield);
+	}
+		
 }
 
 void ABlasterCharacter::BeginPlay()
@@ -125,6 +144,7 @@ void ABlasterCharacter::BeginPlay()
 	BlasterPlayerController = Cast<ABlasterPlayerController>(Controller);
 		
 	UpdateHudHealth();
+	UpdateHudShields();
 	
 	if(HasAuthority())
 	{
@@ -146,6 +166,8 @@ void ABlasterCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Ou
 	DOREPLIFETIME_CONDITION(ABlasterCharacter, OverlappingWeapon, COND_OwnerOnly);
 	DOREPLIFETIME(ABlasterCharacter, Health);
 	DOREPLIFETIME(ABlasterCharacter, bDisableGameplay);
+	
+	DOREPLIFETIME(ABlasterCharacter, Shield);
 
 }
 
@@ -571,6 +593,16 @@ void ABlasterCharacter::OnRep_Health(float LastHealth)
 	
 }
 
+void ABlasterCharacter::OnRep_Shield(float LastShield)
+{
+	UpdateHudShields();
+
+	if(Shield<LastShield)
+	{
+		PlayOnHitMontage();
+	}
+	
+}
 
 
 void ABlasterCharacter::ServerEquipButtonPressed_Implementation()
@@ -713,9 +745,32 @@ void ABlasterCharacter::PlayOnHitMontage()
 void ABlasterCharacter::ReceiveDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType,
 	AController* InstigatorController, AActor* DamageCauser)
 {
-	if(bElimmed) return; 
-	Health=FMath::Clamp(Health-Damage,0.f, MaxHealth);
+	if(bElimmed) return;
+
+	float DamageToReceiveToHealth = Damage;
+
+	if(Shield > 0)
+	{
+		if(Shield >= Damage)
+		{
+			Shield = FMath::Clamp(Shield - Damage, 0.f, MaxShield);
+			DamageToReceiveToHealth = 0.f ;
+		}
+		else
+		{
+			Shield = 0.f ;
+			DamageToReceiveToHealth = FMath::Clamp(DamageToReceiveToHealth - Shield, 0.f, Damage);
+		}
+		
+	}
+
+
+
+
+	
+	Health=FMath::Clamp(Health-DamageToReceiveToHealth,0.f, MaxHealth);
 	UpdateHudHealth();
+	UpdateHudShields();
 	PlayOnHitMontage();
 
 	if(Health==0.f)

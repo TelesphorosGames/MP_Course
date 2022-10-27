@@ -27,6 +27,7 @@ public:
 
 
 	void SetHudHealth(float Health, float MaxHealth);
+	void SetHudShields(float Shields, float MaxShields);
 	void SetHudScore(float Score);
 	void SetHudDefeats(int32 Defeats);
 	void SetHudWeaponAmmo(int32 Ammo);
@@ -113,9 +114,14 @@ private:
 	UPROPERTY()
 	bool bInitializeCharacterOverlay = false;
 	UPROPERTY()
-	float HudHealth;
+	float HudHealth{};
 	UPROPERTY()
-	float HudMaxHealth;
+	float HudMaxHealth{};
+	UPROPERTY()
+	float HudShield{};
+	UPROPERTY()
+	float HudMaxShield{};
+	
 	UPROPERTY()
 	float HudScore;
 	UPROPERTY()
@@ -133,5 +139,12 @@ private:
 	UPROPERTY()
 	bool bDefeatsInitialized = false;
 	UPROPERTY()
-	bool bGrenadesInitialized = false; 
+	bool bGrenadesInitialized = false;
+	UPROPERTY()
+	bool bShieldInitialized = false;
+
+
+
+
+
 };

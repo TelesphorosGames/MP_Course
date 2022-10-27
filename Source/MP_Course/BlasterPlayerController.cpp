@@ -59,7 +59,8 @@ void ABlasterPlayerController::Tick(float DeltaSeconds)
 	bInitializeCharacterOverlay = (bGrenadesInitialized &&
 									bHealthInitialized &&
 									bDefeatsInitialized &&
-									bScoreInitialized);
+									bScoreInitialized &&
+									bShieldInitialized);
 	
 	
 	PollInit();
@@ -77,7 +78,7 @@ void ABlasterPlayerController::Tick(float DeltaSeconds)
 
 void ABlasterPlayerController::SetHudHealth(float Health, float MaxHealth)
 {
-	UE_LOG(LogTemp,Warning,TEXT("THIS IS TICKING RIGHT NOW ( HEALTH) "))
+	UE_LOG(LogTemp,Warning,TEXT("THIS IS TICKING RIGHT NOW ( HEALTH) "));
 	if(BlasterHud == nullptr)
 	{
 		BlasterHud = Cast<ABlasterHud>(GetHUD());
@@ -100,6 +101,38 @@ void ABlasterPlayerController::SetHudHealth(float Health, float MaxHealth)
 	
 		HudHealth = Health;
 		HudMaxHealth = MaxHealth;
+	}
+}
+
+void ABlasterPlayerController::SetHudShields(float Shields, float MaxShields)
+{
+	UE_LOG(LogTemp,Warning,TEXT("THIS IS TICKING RIGHT NOW (SHIELDS) "));
+	if(BlasterHud == nullptr)
+	{
+		BlasterHud = Cast<ABlasterHud>(GetHUD());
+	}
+
+	if(BlasterHud &&
+		BlasterHud->CharacterOverlay &&
+		BlasterHud->CharacterOverlay->ShieldBar &&
+		BlasterHud->CharacterOverlay->ShieldText)
+	{
+		const float ShieldPercent = Shields / MaxShields;
+		
+		BlasterHud->CharacterOverlay->ShieldBar->SetPercent(ShieldPercent);
+		
+		FString ShieldText = FString::Printf(TEXT("%d/%d"), FMath::CeilToInt(Shields), FMath::CeilToInt(MaxShields));
+		BlasterHud->CharacterOverlay->ShieldText->SetText(FText::FromString(ShieldText));
+		
+		bShieldInitialized = true;
+		
+	}
+	else
+	{
+		bShieldInitialized = false;
+	
+		HudShield = Shields;
+		HudMaxShield = MaxShields;
 	}
 }
 
@@ -279,7 +312,9 @@ void ABlasterPlayerController::OnPossess(APawn* InPawn)
 	if(BlasterCharacter)
 	{
 		SetHudHealth(BlasterCharacter->GetHealth(), BlasterCharacter->GetMaxHealth());
+		SetHudShields(BlasterCharacter->GetShields(), BlasterCharacter->GetMaxShields());
 	}
+	
 }
 
 void ABlasterPlayerController::OnMatchStateSet(FName State)
@@ -514,6 +549,7 @@ void ABlasterPlayerController::PollInit()
 			if(CharacterOverlay)
 			{
 				SetHudHealth(HudHealth, HudMaxHealth);
+				SetHudShields(HudShield, HudMaxShield);
 				SetHudScore(HudScore);
 				SetHudDefeats(HudDefeats);
 				

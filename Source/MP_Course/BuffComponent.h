@@ -31,6 +31,9 @@ protected:
 
 	void HealRampUp(float DeltaTime);
 
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastSpeedBuff(float BaseSpeed, float CrouchSpeed);
+
 private:
 
 	UPROPERTY()

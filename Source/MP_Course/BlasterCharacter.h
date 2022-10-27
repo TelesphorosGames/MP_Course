@@ -26,6 +26,7 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	void UpdateHudHealth();
+	void UpdateHudShields();
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void PostInitializeComponents() override;
 	virtual void Destroyed() override;
@@ -59,7 +60,10 @@ public:
 	FORCEINLINE void SetIsElimmed(const bool Elimmed) {bElimmed = Elimmed ;}
 	FORCEINLINE float GetHealth() const {return Health ;}
 	FORCEINLINE float GetMaxHealth() const {return MaxHealth ;}
+	FORCEINLINE float GetShields() const {return Shield ;}
+	FORCEINLINE float GetMaxShields() const {return MaxShield ;}
 	FORCEINLINE void SetHealth(float HealthAmount) { Health = HealthAmount ; }
+	FORCEINLINE void SetShields(float ShieldAmount) { Shield = ShieldAmount ; }
 	FORCEINLINE bool GetDisableGameplay() const {return bDisableGameplay ;}
 	FORCEINLINE void SetDisableGameplay(const bool bDisable) { bDisableGameplay = bDisable ;}
 	FORCEINLINE UCombatComponent* GetCombatComponent() const {return CombatComponent ;}
@@ -172,8 +176,17 @@ private:
 	float MaxHealth = 100.f;
 	UPROPERTY(EditAnywhere, Category= Stats, meta=(AllowPrivateAccess = "true"), ReplicatedUsing=OnRep_Health)
 	float Health = 100.f;
+	UPROPERTY(EditAnywhere, Category= Stats, meta=(AllowPrivateAccess = "true"))
+	float MaxShield = 100.f;
+	UPROPERTY(EditAnywhere, Category= Stats, meta=(AllowPrivateAccess = "true"), ReplicatedUsing=OnRep_Shield)
+	float Shield = 20.f;
+	
 	UFUNCTION()
 	void OnRep_Health(float LastHealth);
+	
+	UFUNCTION()
+	void OnRep_Shield(float LastShield);
+	
 	UPROPERTY()
 	class ABlasterPlayerController* BlasterPlayerController{};
 	UPROPERTY()
@@ -187,7 +200,7 @@ private:
 
 	UPROPERTY(Replicated)
 	bool bDisableGameplay{};
-
+	
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess ="true"))
 	UStaticMeshComponent* Grenade;
 	
