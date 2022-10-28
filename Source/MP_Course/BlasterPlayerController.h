@@ -142,6 +142,14 @@ private:
 	bool bGrenadesInitialized = false;
 	UPROPERTY()
 	bool bShieldInitialized = false;
+	UPROPERTY()
+	bool bHudCarriedAmmoInitialized = false;
+	UPROPERTY()
+	bool bHudWeaponAmmoInitizalized = false;
+	UPROPERTY()
+	float HudCarriedAmmo;
+	UPROPERTY()
+	float HudWeaponAmmo;
 
 
 

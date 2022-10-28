@@ -14,6 +14,7 @@ enum class EWeaponState : uint8
 	EWS_Initial UMETA(DisplayName= "Initial State"),
 	EWS_Equipped UMETA(DisplayName= "Equipped"),
 	EWS_Dropped UMETA(DisplayName= "Dropped"),
+	EWS_EquippedSecondary UMETA(DisplayName="EquippedSecondary"),
 
 	EWS_MAX UMETA(DisplayName="DefaultMAX")
 };
@@ -60,16 +61,23 @@ public:
 
 	void Dropped();
 	void SetWeaponState(EWeaponState State);
+	void OnEquipped();
+	void OnDropped();
+	void OnEquippedSecondary();
 	void SetHUDWeaponAmmo();
 	bool IsEmpty();
 	bool IsFull();
 	void AddAmmo(int32 AmmoToAdd);
 
 	void EnableCustomDepth(bool bEnable);
+
+	UPROPERTY()
+	bool bDestroyWeapon = false;
 	
 protected:
 	
 	virtual void BeginPlay() override;
+	virtual void OnWeaponStateSet();
 
 	UFUNCTION()
 	virtual void OnAreaSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
@@ -155,5 +163,8 @@ private:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(AllowPrivateAccess = "true"))
 	EWeaponType WeaponType{};
+
+
+	
 
 };

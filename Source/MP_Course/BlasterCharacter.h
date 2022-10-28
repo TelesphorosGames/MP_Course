@@ -27,6 +27,7 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	void UpdateHudHealth();
 	void UpdateHudShields();
+	void UpdateHudAmmo();
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void PostInitializeComponents() override;
 	virtual void Destroyed() override;
@@ -121,6 +122,9 @@ protected:
 	UFUNCTION()
 	void ReceiveDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatorController, AActor* DamageCauser);
 	
+	void SpawnDefaultWeapon();
+
+
 private:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Camera", meta=(AllowPrivateAccess = "true"))
@@ -204,6 +208,12 @@ private:
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess ="true"))
 	UStaticMeshComponent* Grenade;
 	
+	/*
+	 * Default Weapon
+	 */
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<AWeapon> DefaultWeaponClass;
 	
 	
 	

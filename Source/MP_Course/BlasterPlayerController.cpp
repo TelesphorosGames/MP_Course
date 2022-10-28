@@ -60,7 +60,9 @@ void ABlasterPlayerController::Tick(float DeltaSeconds)
 									bHealthInitialized &&
 									bDefeatsInitialized &&
 									bScoreInitialized &&
-									bShieldInitialized);
+									bShieldInitialized &&
+									bHudCarriedAmmoInitialized &&
+									bHudWeaponAmmoInitizalized);
 	
 	
 	PollInit();
@@ -192,10 +194,13 @@ void ABlasterPlayerController::SetHudWeaponAmmo(int32 Ammo)
 	{
 		FString AmmoText = FString::Printf(TEXT("%d"), Ammo);
 		BlasterHud->CharacterOverlay->AmmoCount->SetText(FText::FromString(AmmoText));
+		bHudWeaponAmmoInitizalized = true;
 	}
 	else
 	{
-		
+		bHudWeaponAmmoInitizalized = false;
+
+		HudWeaponAmmo = Ammo;
 	}
 }
 
@@ -211,10 +216,12 @@ void ABlasterPlayerController::SetHudCarriedAmmo(int32 Ammo)
 	{
 		const FString AmmoText = FString::Printf(TEXT("%d"), Ammo);
 		BlasterHud->CharacterOverlay->CarriedAmmo->SetText(FText::FromString(AmmoText));
+		bHudCarriedAmmoInitialized = true;
 	}
 	else
 	{
-		
+		bHudCarriedAmmoInitialized = false;
+		HudCarriedAmmo = Ammo;
 	}
 }
 
@@ -552,6 +559,8 @@ void ABlasterPlayerController::PollInit()
 				SetHudShields(HudShield, HudMaxShield);
 				SetHudScore(HudScore);
 				SetHudDefeats(HudDefeats);
+				SetHudCarriedAmmo(HudCarriedAmmo);
+				SetHudWeaponAmmo(HudWeaponAmmo);
 				
 				ABlasterCharacter* BlasterCharacter = Cast<ABlasterCharacter>(GetPawn());
 				if(BlasterCharacter && BlasterCharacter->GetCombatComponent())

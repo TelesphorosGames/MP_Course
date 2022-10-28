@@ -36,6 +36,8 @@ public:
 	void JumpToShotgunEnd();
 	void UpdateShotgunAmmoValues();
 	void FireButtonPressed(bool bPressed);
+
+	void SwapWeapons();
 	
 
 	
@@ -67,6 +69,8 @@ protected:
 
 	UFUNCTION()
 	void OnRep_EquippedWeapon();
+	UFUNCTION()
+	void OnRep_SecondaryWeapon();
 	void Fire();
 
 	UFUNCTION(Server,Reliable)
@@ -96,9 +100,12 @@ protected:
 
 	void AttachActorToRightHand(AActor* ActorToAttach);
 	void AttachActorToLeftHand(AActor* ActorToAttach);
-
+	void AttachActorToBackpack(AActor* ActorToAttach);
 	void UpdateCarriedAmmo();
-	void PlayWeaponEquipSound();
+	void PlayWeaponEquipSound(AWeapon* WeaponToEquip);
+
+	void EquipPrimaryWeapon(AWeapon* WeaponToEquip);
+	void EquipSecondaryWeapon(AWeapon* WeaponToEquip);
 
 private:
 
@@ -111,6 +118,9 @@ private:
 
 	UPROPERTY(BlueprintReadOnly, ReplicatedUsing= OnRep_EquippedWeapon, meta = (AllowPrivateAccess = "true"))
 	AWeapon* EquippedWeapon;
+
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing= OnRep_SecondaryWeapon, meta = (AllowPrivateAccess = "true"))
+	AWeapon* SecondaryWeapon;
 
 	UPROPERTY(Replicated)
 	bool bAiming;
@@ -187,6 +197,8 @@ private:
 	void OnRep_CombatState();
 
 	void ShowAttachedGrenade(bool bShowGrenade);
+
+	bool ShouldSwapWeapons();
 	
 };
 

@@ -33,7 +33,6 @@ protected:
 	
 	UPROPERTY(EditAnywhere)
 	class UStaticMeshComponent* PickupMesh;
-
 	
 	UPROPERTY(VisibleAnywhere)
 	class UNiagaraComponent* PickupEffectComponent;
@@ -41,7 +40,6 @@ protected:
 	UPROPERTY(EditAnywhere)
 	class UNiagaraSystem* PickupEffect;
 
-	
 private:
 	
 	UPROPERTY(EditAnywhere)
@@ -49,8 +47,10 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	class USoundCue* PickupSound;
-	
 
+	FTimerHandle BindOverlapTimer;
+	float BindOverlapTime = 0.25f;
+	void  BindOverlapTimerFinihsed();
 
 
 };

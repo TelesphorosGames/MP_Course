@@ -137,12 +137,28 @@ void ABlasterCharacter::UpdateHudShields()
 		
 }
 
+void ABlasterCharacter::UpdateHudAmmo()
+{
+	
+	if(BlasterPlayerController == nullptr)
+	{
+		BlasterPlayerController = Cast<ABlasterPlayerController>(Controller);
+	}
+	if(BlasterPlayerController)
+	{
+		BlasterPlayerController->SetHudCarriedAmmo(CombatComponent->CarriedAmmo);
+		BlasterPlayerController->SetHudWeaponAmmo(CombatComponent->EquippedWeapon->GetAmmo());
+	}
+	
+}
+
 void ABlasterCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
 	BlasterPlayerController = Cast<ABlasterPlayerController>(Controller);
-		
+	
+	SpawnDefaultWeapon();
 	UpdateHudHealth();
 	UpdateHudShields();
 	
@@ -217,7 +233,15 @@ void ABlasterCharacter::Elim()
 {
 	if(CombatComponent && CombatComponent->EquippedWeapon)
 	{
-		GetEquippedWeapon()->Dropped();
+		if(CombatComponent->EquippedWeapon->bDestroyWeapon)
+		{
+			CombatComponent->EquippedWeapon->Destroy();
+		}
+		else
+		{
+			GetEquippedWeapon()->Dropped();
+		}
+		
 	}
 	Multicast_Elim();
 	GetWorldTimerManager().SetTimer(ElimTimer, this, &ABlasterCharacter::ElimTimerFinished, ElimDelay);
@@ -609,7 +633,18 @@ void ABlasterCharacter::ServerEquipButtonPressed_Implementation()
 {
 	if(CombatComponent)
 	{
-		CombatComponent->EquipWeapon(OverlappingWeapon);
+		if(OverlappingWeapon)
+		{
+			CombatComponent->EquipWeapon(OverlappingWeapon);
+		}
+		else
+		{
+			if(CombatComponent->ShouldSwapWeapons())
+			{
+				CombatComponent->SwapWeapons();
+			}
+		}
+		
 	}
 }
 
@@ -787,6 +822,22 @@ void ABlasterCharacter::ReceiveDamage(AActor* DamagedActor, float Damage, const 
 					GameMode->PlayerEliminated(this, BlasterPlayerController, InsigatingPC);
 				}
 			}
+		}
+	}
+}
+
+void ABlasterCharacter::SpawnDefaultWeapon()
+{
+	ABlasterGameMode* BlasterGameMode = Cast<ABlasterGameMode>(UGameplayStatics::GetGameMode(this));
+	UWorld* World = GetWorld();
+	if(BlasterGameMode && World && !bElimmed && DefaultWeaponClass)
+	{
+		AWeapon* StartingWeapon = World->SpawnActor<AWeapon>(DefaultWeaponClass);
+		StartingWeapon->bDestroyWeapon = true;
+		StartingWeapon->ShowPickupWidget(false);
+		if(CombatComponent)
+		{
+			CombatComponent->EquipWeapon(StartingWeapon);
 		}
 	}
 }
