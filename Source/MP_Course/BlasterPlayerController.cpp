@@ -16,6 +16,7 @@
 #include "BlasterGameState.h"
 #include "BlasterPlayerState.h"
 #include "CombatComponent.h"
+#include "Weapon.h"
 #include "Kismet/GameplayStatics.h"
 #include "Animation/WidgetAnimation.h"
 
@@ -195,11 +196,11 @@ void ABlasterPlayerController::SetHudWeaponAmmo(int32 Ammo)
 		FString AmmoText = FString::Printf(TEXT("%d"), Ammo);
 		BlasterHud->CharacterOverlay->AmmoCount->SetText(FText::FromString(AmmoText));
 		bHudWeaponAmmoInitizalized = true;
+		
 	}
 	else
 	{
 		bHudWeaponAmmoInitizalized = false;
-
 		HudWeaponAmmo = Ammo;
 	}
 }
@@ -216,6 +217,7 @@ void ABlasterPlayerController::SetHudCarriedAmmo(int32 Ammo)
 	{
 		const FString AmmoText = FString::Printf(TEXT("%d"), Ammo);
 		BlasterHud->CharacterOverlay->CarriedAmmo->SetText(FText::FromString(AmmoText));
+		
 		bHudCarriedAmmoInitialized = true;
 	}
 	else
@@ -320,6 +322,9 @@ void ABlasterPlayerController::OnPossess(APawn* InPawn)
 	{
 		SetHudHealth(BlasterCharacter->GetHealth(), BlasterCharacter->GetMaxHealth());
 		SetHudShields(BlasterCharacter->GetShields(), BlasterCharacter->GetMaxShields());
+		SetHudWeaponAmmo(30);
+		SetHudCarriedAmmo(50);
+		
 	}
 	
 }

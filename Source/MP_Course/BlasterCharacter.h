@@ -31,6 +31,7 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void PostInitializeComponents() override;
 	virtual void Destroyed() override;
+	void DropOrDestroyWeapons();
 	void Elim();
 	void HideElimText();
 	void ShowElimText();
@@ -73,9 +74,11 @@ public:
 	FORCEINLINE UStaticMeshComponent* GetAttachedGrenade() const {return Grenade ;}
 	
 	AWeapon* GetEquippedWeapon();
+	AWeapon* GetSecondaryWeapon();
 	FVector GetHitTarget() const;
 	ECombatState GetCombatState() const;
 	void FireButtonPressed();
+	void DropOrDestroyWeapon(AWeapon* Weapon);
 	
 protected:
 

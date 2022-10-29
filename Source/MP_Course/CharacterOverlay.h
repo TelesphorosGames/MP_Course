@@ -35,7 +35,7 @@ public:
 	UPROPERTY(meta=(BindWidget))
 	UTextBlock* AmmoCount;
 	UPROPERTY(meta=(BindWidget))
-	UTextBlock* CarriedAmmo;
+	UTextBlock* CarriedAmmo{};
 	UPROPERTY(meta=(BindWidget))
 	UTextBlock* CDText;
 	UPROPERTY(Transient, meta=(BindWidgetAnim))

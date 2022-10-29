@@ -65,6 +65,7 @@ public:
 	void OnDropped();
 	void OnEquippedSecondary();
 	void SetHUDWeaponAmmo();
+	void SetHUDWeaponAmmo(int32 AmmoAmount);
 	bool IsEmpty();
 	bool IsFull();
 	void AddAmmo(int32 AmmoToAdd);

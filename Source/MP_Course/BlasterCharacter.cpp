@@ -22,6 +22,7 @@
 #include "CombatState.h"
 #include "MyEnhancedInputComponent.h"
 #include "MyGameplayTags.h"
+#include "Components/SphereComponent.h"
 #include "Kismet/GameplayStatics.h"
 
 
@@ -144,7 +145,7 @@ void ABlasterCharacter::UpdateHudAmmo()
 	{
 		BlasterPlayerController = Cast<ABlasterPlayerController>(Controller);
 	}
-	if(BlasterPlayerController)
+	if(BlasterPlayerController && CombatComponent && CombatComponent->EquippedWeapon)
 	{
 		BlasterPlayerController->SetHudCarriedAmmo(CombatComponent->CarriedAmmo);
 		BlasterPlayerController->SetHudWeaponAmmo(CombatComponent->EquippedWeapon->GetAmmo());
@@ -161,7 +162,7 @@ void ABlasterCharacter::BeginPlay()
 	SpawnDefaultWeapon();
 	UpdateHudHealth();
 	UpdateHudShields();
-	
+	UpdateHudAmmo();
 	if(HasAuthority())
 	{
 		OnTakeAnyDamage.AddDynamic(this, &ABlasterCharacter::ReceiveDamage);
@@ -182,7 +183,6 @@ void ABlasterCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Ou
 	DOREPLIFETIME_CONDITION(ABlasterCharacter, OverlappingWeapon, COND_OwnerOnly);
 	DOREPLIFETIME(ABlasterCharacter, Health);
 	DOREPLIFETIME(ABlasterCharacter, bDisableGameplay);
-	
 	DOREPLIFETIME(ABlasterCharacter, Shield);
 
 }
@@ -229,19 +229,23 @@ void ABlasterCharacter::Destroyed()
 	}
 }
 
+void ABlasterCharacter::DropOrDestroyWeapons()
+{
+	if(GetEquippedWeapon() != nullptr)
+	{
+		DropOrDestroyWeapon(GetEquippedWeapon());
+	}
+	if(GetSecondaryWeapon() != nullptr)
+	{
+		DropOrDestroyWeapon(GetSecondaryWeapon());
+	}
+}
+
 void ABlasterCharacter::Elim()
 {
-	if(CombatComponent && CombatComponent->EquippedWeapon)
+	if(CombatComponent)
 	{
-		if(CombatComponent->EquippedWeapon->bDestroyWeapon)
-		{
-			CombatComponent->EquippedWeapon->Destroy();
-		}
-		else
-		{
-			GetEquippedWeapon()->Dropped();
-		}
-		
+		DropOrDestroyWeapons();
 	}
 	Multicast_Elim();
 	GetWorldTimerManager().SetTimer(ElimTimer, this, &ABlasterCharacter::ElimTimerFinished, ElimDelay);
@@ -324,6 +328,12 @@ AWeapon* ABlasterCharacter::GetEquippedWeapon()
 	return CombatComponent->EquippedWeapon;
 }
 
+AWeapon* ABlasterCharacter::GetSecondaryWeapon()
+{
+	if(CombatComponent == nullptr) return nullptr;
+	return CombatComponent->SecondaryWeapon;
+}
+
 
 FVector ABlasterCharacter::GetHitTarget() const
 {
@@ -387,14 +397,7 @@ void ABlasterCharacter::EquipButtonPressed()
 	if(bDisableGameplay) return;
 	if(CombatComponent)
 	{
-		if(HasAuthority())
-		{
-			CombatComponent->EquipWeapon(OverlappingWeapon);	
-		}
-		else
-		{
 			ServerEquipButtonPressed();
-		}
 	}
 }
 
@@ -471,7 +474,6 @@ void ABlasterCharacter::AimOffset(float DeltaTime)
 	}
 	if(Speed > 0.f || bIsInAir)
 	{
-		
 		StartingAimRotation = {0.f, GetBaseAimRotation().Yaw, 0.f};
 		AO_Yaw = 0.f;
 		bUseControllerRotationYaw = true;
@@ -519,6 +521,19 @@ void ABlasterCharacter::FireButtonPressed()
 	if(CombatComponent)
 	{
 		CombatComponent->FireButtonPressed(true);
+	}
+}
+
+void ABlasterCharacter::DropOrDestroyWeapon(AWeapon* Weapon)
+{
+	if(Weapon == nullptr) return;
+	if(Weapon->bDestroyWeapon)
+	{
+		Destroy();
+	}
+	else
+	{
+		Weapon->Dropped();
 	}
 }
 
@@ -796,12 +811,7 @@ void ABlasterCharacter::ReceiveDamage(AActor* DamagedActor, float Damage, const 
 			Shield = 0.f ;
 			DamageToReceiveToHealth = FMath::Clamp(DamageToReceiveToHealth - Shield, 0.f, Damage);
 		}
-		
 	}
-
-
-
-
 	
 	Health=FMath::Clamp(Health-DamageToReceiveToHealth,0.f, MaxHealth);
 	UpdateHudHealth();
@@ -835,6 +845,8 @@ void ABlasterCharacter::SpawnDefaultWeapon()
 		AWeapon* StartingWeapon = World->SpawnActor<AWeapon>(DefaultWeaponClass);
 		StartingWeapon->bDestroyWeapon = true;
 		StartingWeapon->ShowPickupWidget(false);
+		StartingWeapon->GetAreaSphere()->SetCollisionResponseToAllChannels(ECR_Ignore);
+		StartingWeapon->SetHUDWeaponAmmo(StartingWeapon->GetAmmo());
 		if(CombatComponent)
 		{
 			CombatComponent->EquipWeapon(StartingWeapon);

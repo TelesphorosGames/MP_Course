@@ -108,7 +108,6 @@ void AWeapon::OnRep_Owner()
 void AWeapon::SetWeaponState(EWeaponState State)
 {
 	WeaponState = State ;
-
 }
 
 
@@ -167,6 +166,13 @@ void AWeapon::OnWeaponStateSet()
 		
 		OnDropped();
 		
+		break;
+
+	case EWeaponState::EWS_EquippedSecondary :
+
+		OnEquippedSecondary();
+		ShowPickupWidget(false);
+
 		break;
 	default: ;
 	}
@@ -243,6 +249,25 @@ void AWeapon::SetHUDWeaponAmmo()
         {
             BlasterPlayerController->SetHudWeaponAmmo(Ammo);
         }
+	}
+}
+
+void AWeapon::SetHUDWeaponAmmo(int32 AmmoAmount)
+{
+	if(BlasterOwnerCharacter == nullptr)
+	{
+		BlasterOwnerCharacter = Cast<ABlasterCharacter>(GetOwner());
+	}
+	if(BlasterOwnerCharacter)
+	{
+		if(BlasterPlayerController == nullptr)
+		{
+			BlasterPlayerController = Cast<ABlasterPlayerController>(BlasterOwnerCharacter->GetController());
+		}
+		if(BlasterPlayerController)
+		{
+			BlasterPlayerController->SetHudWeaponAmmo(AmmoAmount);
+		}
 	}
 }
 

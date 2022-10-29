@@ -57,6 +57,7 @@ public:
 		UFUNCTION(BlueprintPure)
     	FORCEINLINE AWeapon* GetEquippedWeapon() const {return EquippedWeapon ;}
     	FORCEINLINE int32 GetGrenades() const { return Grenades ;}
+		FORCEINLINE int32 GetCarriedAmmo() const { return CarriedAmmo ;}
 
 protected:
 
@@ -117,10 +118,10 @@ private:
 	class ABlasterHud* BC_Hud{};
 
 	UPROPERTY(BlueprintReadOnly, ReplicatedUsing= OnRep_EquippedWeapon, meta = (AllowPrivateAccess = "true"))
-	AWeapon* EquippedWeapon;
+	AWeapon* EquippedWeapon{};
 
 	UPROPERTY(BlueprintReadOnly, ReplicatedUsing= OnRep_SecondaryWeapon, meta = (AllowPrivateAccess = "true"))
-	AWeapon* SecondaryWeapon;
+	AWeapon* SecondaryWeapon{};
 
 	UPROPERTY(Replicated)
 	bool bAiming;
