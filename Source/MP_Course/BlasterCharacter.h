@@ -58,6 +58,7 @@ public:
 	FORCEINLINE float GetAO_Pitch() const {return AO_Pitch ;}
 	FORCEINLINE ETurningInPlace GetTurningInPlace() const {return TurningInPlace ;}
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const {return FollowCamera ;}
+	FORCEINLINE AWeapon* GetOverlappingWeapon() const {return OverlappingWeapon ;}
 	FORCEINLINE bool GetIsElimmed() const { return bElimmed ;}
 	FORCEINLINE void SetIsElimmed(const bool Elimmed) {bElimmed = Elimmed ;}
 	FORCEINLINE float GetHealth() const {return Health ;}

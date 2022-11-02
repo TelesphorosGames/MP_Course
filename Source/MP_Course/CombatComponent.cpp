@@ -7,7 +7,6 @@
 #include "BlasterCharacter.h"
 #include "Weapon.h"
 #include "Engine/SkeletalMeshSocket.h"
-#include "Components/SphereComponent.h"
 #include "BlasterPlayerController.h"
 #include "BlasterHud.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -16,10 +15,9 @@
 #include "DrawDebugHelpers.h"
 #include "Projectile.h"
 #include "Camera/CameraComponent.h"
-#include "GameFramework/GameSession.h"
 #include "Sound/SoundCue.h"
 #include "MP_Course.h"
-#include "ThumbnailRendering/WorldThumbnailInfo.h"
+
 
 UCombatComponent::UCombatComponent()
 {
@@ -49,10 +47,6 @@ void UCombatComponent::BeginPlay()
         	InitializeCarriedAmmo();
         }
 	}
-	
-
-
-	
 }
 
 void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -137,11 +131,11 @@ void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
 {
 	if(Character == nullptr || WeaponToEquip == nullptr) return;
 	if(CombatState != ECombatState::ECS_Unoccupied) return;
-	if(EquippedWeapon != nullptr && SecondaryWeapon == nullptr)
+	if(EquippedWeapon != nullptr && EquippedWeapon != WeaponToEquip && SecondaryWeapon == nullptr)
 	{
 		EquipSecondaryWeapon(WeaponToEquip);
 	}
-	else
+	else if(EquippedWeapon && SecondaryWeapon)
 	{
 		EquipPrimaryWeapon(WeaponToEquip);
 	}
@@ -157,15 +151,21 @@ void UCombatComponent::EquipPrimaryWeapon(AWeapon* WeaponToEquip)
 	if(EquippedWeapon)
 	{
 		EquippedWeapon->Dropped();
+		
+		EquippedWeapon = nullptr;
 	}
+	
 	EquippedWeapon = WeaponToEquip;
+	
 	EquippedWeapon->SetWeaponState(EWeaponState::EWS_Equipped);
 	PlayWeaponEquipSound(WeaponToEquip);
 	AttachActorToRightHand(EquippedWeapon);
 	EquippedWeapon->SetOwner(Character);
-	EquippedWeapon->SetHUDWeaponAmmo(); 
+	EquippedWeapon->SetHUDWeaponAmmo();
+	Character->SetOverlappingWeapon(nullptr);
 	UpdateCarriedAmmo();
 	UpdateAmmoValues();
+	EquippedWeapon->EnableCustomDepth(false);
 }
 
 void UCombatComponent::EquipSecondaryWeapon(AWeapon* WeaponToEquip)
@@ -173,9 +173,10 @@ void UCombatComponent::EquipSecondaryWeapon(AWeapon* WeaponToEquip)
 	if(WeaponToEquip == nullptr) return;
 	SecondaryWeapon = WeaponToEquip;
 	SecondaryWeapon->SetWeaponState(EWeaponState::EWS_EquippedSecondary);
-	AttachActorToBackpack(WeaponToEquip);
+	AttachActorToBackpack(SecondaryWeapon);
 	SecondaryWeapon->SetOwner(Character);
-	PlayWeaponEquipSound(WeaponToEquip);
+	Character->SetOverlappingWeapon(nullptr);
+	PlayWeaponEquipSound(SecondaryWeapon);
 	
 }
 
@@ -236,7 +237,7 @@ void UCombatComponent::OnRep_EquippedWeapon()
 
 void UCombatComponent::OnRep_SecondaryWeapon()
 {
-	if(SecondaryWeapon && Character)
+	if(SecondaryWeapon)
 	{
 		SecondaryWeapon->SetWeaponState(EWeaponState::EWS_EquippedSecondary);
 		AttachActorToBackpack(SecondaryWeapon);
@@ -436,7 +437,6 @@ void UCombatComponent::Server_ThrowGrenade_Implementation()
 	Grenades = FMath::Clamp(Grenades-1, 0, MaxGrenades);
 }
 
-
 void UCombatComponent::OnRep_CombatState()
 {
 	switch(CombatState)
@@ -509,6 +509,7 @@ void UCombatComponent::SwapWeapons()
 
 
 	EquippedWeapon->SetWeaponState(EWeaponState::EWS_Equipped);
+	EquippedWeapon->EnableCustomDepth(false);
 	PlayWeaponEquipSound(EquippedWeapon);
 	AttachActorToRightHand(EquippedWeapon);
 	EquippedWeapon->SetHUDWeaponAmmo(); 

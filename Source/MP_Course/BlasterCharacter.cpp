@@ -231,11 +231,11 @@ void ABlasterCharacter::Destroyed()
 
 void ABlasterCharacter::DropOrDestroyWeapons()
 {
-	if(GetEquippedWeapon() != nullptr)
+	if(GetEquippedWeapon())
 	{
 		DropOrDestroyWeapon(GetEquippedWeapon());
 	}
-	if(GetSecondaryWeapon() != nullptr)
+	if(GetSecondaryWeapon())
 	{
 		DropOrDestroyWeapon(GetSecondaryWeapon());
 	}
@@ -243,10 +243,9 @@ void ABlasterCharacter::DropOrDestroyWeapons()
 
 void ABlasterCharacter::Elim()
 {
-	if(CombatComponent)
-	{
-		DropOrDestroyWeapons();
-	}
+	
+	DropOrDestroyWeapons();
+	
 	Multicast_Elim();
 	GetWorldTimerManager().SetTimer(ElimTimer, this, &ABlasterCharacter::ElimTimerFinished, ElimDelay);
 		
@@ -288,9 +287,9 @@ void ABlasterCharacter::Multicast_Elim_Implementation()
 	PlayElimMontage();
 	if(BlasterPlayerController)
 	{
-		SetDisableGameplay(true);
 		BlasterPlayerController->SetHudWeaponAmmo(0);
 	}
+	SetDisableGameplay(true);
 	if(CombatComponent)
 	{
 		CombatComponent->FireButtonPressed(false);
@@ -529,7 +528,7 @@ void ABlasterCharacter::DropOrDestroyWeapon(AWeapon* Weapon)
 	if(Weapon == nullptr) return;
 	if(Weapon->bDestroyWeapon)
 	{
-		Destroy();
+		Weapon->Destroy();
 	}
 	else
 	{
@@ -648,7 +647,7 @@ void ABlasterCharacter::ServerEquipButtonPressed_Implementation()
 {
 	if(CombatComponent)
 	{
-		if(OverlappingWeapon)
+		if(OverlappingWeapon && OverlappingWeapon != CombatComponent->GetEquippedWeapon())
 		{
 			CombatComponent->EquipWeapon(OverlappingWeapon);
 		}
@@ -665,14 +664,17 @@ void ABlasterCharacter::ServerEquipButtonPressed_Implementation()
 
 void ABlasterCharacter::SetOverlappingWeapon(AWeapon* Weapon)
 {
-	if(OverlappingWeapon)
+	
+	if(OverlappingWeapon != nullptr)
 	{
 		OverlappingWeapon->ShowPickupWidget(false);
 	}
+	
 	OverlappingWeapon = Weapon;
+	
 	if(IsLocallyControlled())
 	{
-		if(OverlappingWeapon)
+		if(OverlappingWeapon != nullptr)
 		{
 			OverlappingWeapon->ShowPickupWidget(true);
 		}
@@ -846,11 +848,16 @@ void ABlasterCharacter::SpawnDefaultWeapon()
 		StartingWeapon->bDestroyWeapon = true;
 		StartingWeapon->ShowPickupWidget(false);
 		StartingWeapon->GetAreaSphere()->SetCollisionResponseToAllChannels(ECR_Ignore);
+		StartingWeapon->EnableCustomDepth(false);
 		StartingWeapon->SetHUDWeaponAmmo(StartingWeapon->GetAmmo());
 		if(CombatComponent)
 		{
-			CombatComponent->EquipWeapon(StartingWeapon);
+			CombatComponent->EquipPrimaryWeapon(StartingWeapon);
 		}
+	
+		GetCharacterMovement()->bOrientRotationToMovement = false;
+		bUseControllerRotationYaw = true;
+		
 	}
 }
 

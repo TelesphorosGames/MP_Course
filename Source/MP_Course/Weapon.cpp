@@ -22,7 +22,7 @@ AWeapon::AWeapon()
 	WeaponMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("WeaponMesh"));
 	WeaponMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
 	WeaponMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Ignore);
-	WeaponMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	WeaponMesh->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
 	SetRootComponent(WeaponMesh);
 
 	WeaponMesh->SetCustomDepthStencilValue(CUSTOM_DEPTH_BLUE);
@@ -38,6 +38,9 @@ AWeapon::AWeapon()
 	
 	PickupWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("Pickup Widget"));
 	PickupWidget->SetupAttachment(RootComponent);
+
+
+	WeaponMesh->bAlwaysCreatePhysicsState = true;
 
 	
 }
@@ -76,6 +79,8 @@ void AWeapon::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeP
 
 	DOREPLIFETIME(AWeapon, WeaponState);
 	DOREPLIFETIME(AWeapon, Ammo);
+
+	
 	
 }
 
@@ -98,18 +103,14 @@ void AWeapon::OnRep_Owner()
 		{
 			SetHUDWeaponAmmo();
 		}
-		
 	}
-	
-
-	
 }
 
 void AWeapon::SetWeaponState(EWeaponState State)
 {
 	WeaponState = State ;
+	OnWeaponStateSet();
 }
-
 
 void AWeapon::OnEquipped()
 {
@@ -118,9 +119,13 @@ void AWeapon::OnEquipped()
 	AreaSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	WeaponMesh->SetSimulatePhysics(false);
 	WeaponMesh->SetEnableGravity(false);
-	WeaponMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-		
+	WeaponMesh->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
+	
+	WeaponMesh->SetCustomDepthStencilValue(0);
+	WeaponMesh->MarkRenderStateDirty();
 	EnableCustomDepth(false);
+
+	
 	if(WeaponType == EWeaponType::EWT_SubMachineGun)
 	{
 		WeaponMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
@@ -133,20 +138,18 @@ void AWeapon::OnDropped()
 {
 	if(HasAuthority())
 	{
-		
-		AreaSphere->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-		
+		AreaSphere->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	}
+
 	WeaponMesh->SetSimulatePhysics(true);
-	WeaponMesh->SetEnableGravity(true);
 	WeaponMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	WeaponMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
 	WeaponMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Ignore);
 	WeaponMesh->SetCustomDepthStencilValue(CUSTOM_DEPTH_BLUE);
 	WeaponMesh->MarkRenderStateDirty();
 	EnableCustomDepth(true);
-}
 
+}
 void AWeapon::OnEquippedSecondary()
 {
 	OnEquipped();
@@ -170,11 +173,13 @@ void AWeapon::OnWeaponStateSet()
 
 	case EWeaponState::EWS_EquippedSecondary :
 
-		OnEquippedSecondary();
-		ShowPickupWidget(false);
+		OnEquipped();
 
 		break;
-	default: ;
+		
+	default:
+		
+		break;
 	}
 }
 
@@ -191,16 +196,18 @@ void AWeapon::OnAreaSphereOverlap(UPrimitiveComponent* OverlappedComponent, AAct
 	ABlasterCharacter* BlasterCharacter = Cast<ABlasterCharacter>(OtherActor);
 	if(BlasterCharacter)
 	{
-		BlasterCharacter->SetOverlappingWeapon(this);
+		if(BlasterCharacter->GetEquippedWeapon() != this)
+		{
+			BlasterCharacter->SetOverlappingWeapon(this);
+		}
 	}
-	
 }
 
 void AWeapon::OnAreaSphereEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
 	ABlasterCharacter* BlasterCharacter = Cast<ABlasterCharacter>(OtherActor);
-	if(BlasterCharacter)
+	if(BlasterCharacter && BlasterCharacter->GetOverlappingWeapon() == this)
 	{
 		BlasterCharacter->SetOverlappingWeapon(nullptr);
 	}
@@ -209,12 +216,18 @@ void AWeapon::OnAreaSphereEndOverlap(UPrimitiveComponent* OverlappedComponent, A
 
 void AWeapon::Dropped()
 {
+	
+	WeaponMesh->SetSimulatePhysics(true);
+	WeaponMesh->SetEnableGravity(true);
+	WeaponMesh->DetachFromComponent(FDetachmentTransformRules::KeepRelativeTransform);
 	SetWeaponState(EWeaponState::EWS_Dropped);
-	FDetachmentTransformRules FDR(EDetachmentRule::KeepRelative, true);
-	WeaponMesh->DetachFromComponent(FDR);
 	SetOwner(nullptr);
 	BlasterOwnerCharacter = nullptr;
 	BlasterPlayerController = nullptr;
+	
+	EnableCustomDepth(true);
+	
+	
 	
 }
 
@@ -293,9 +306,9 @@ void AWeapon::AddAmmo(int32 AmmoToAdd)
 
 void AWeapon::EnableCustomDepth(bool bEnable)
 {
-	if(GetWeaponMesh())
+	if(WeaponMesh != nullptr)
 	{
-		GetWeaponMesh()->SetRenderCustomDepth(bEnable);
+		WeaponMesh->bRenderCustomDepth = bEnable;
 	}
 }
 

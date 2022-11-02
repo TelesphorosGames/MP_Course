@@ -60,6 +60,7 @@ public:
 	virtual void Fire(const FVector& HitTarget);
 
 	void Dropped();
+	
 	void SetWeaponState(EWeaponState State);
 	void OnEquipped();
 	void OnDropped();
@@ -74,6 +75,9 @@ public:
 
 	UPROPERTY()
 	bool bDestroyWeapon = false;
+
+	UPROPERTY(VisibleAnywhere, Category  ="Weapon Properties")
+	USkeletalMeshComponent* WeaponMesh{};
 	
 protected:
 	
@@ -95,21 +99,20 @@ protected:
 
 private:
 
-	UPROPERTY(VisibleAnywhere, Category  ="Weapon Properties")
-	USkeletalMeshComponent* WeaponMesh;
+	
 	
 	// USED TO DETECT OVERLAPS WITH CHARACTERS
 	UPROPERTY(VisibleAnywhere, Category  ="Weapon Properties")
-	class USphereComponent* AreaSphere;
+	class USphereComponent* AreaSphere{};
 
 	UPROPERTY(ReplicatedUsing = OnRep_WeaponState, VisibleAnywhere)
-	EWeaponState WeaponState;
+	EWeaponState WeaponState = EWeaponState::EWS_Initial;
 
 	UFUNCTION()
 	void OnRep_WeaponState();
 
 	UPROPERTY(VisibleAnywhere, Category  ="Weapon Properties")
-	class UWidgetComponent* PickupWidget;
+	class UWidgetComponent* PickupWidget{};
 
 	UPROPERTY(EditAnywhere, Category  ="Weapon Properties")
 	class USoundCue* EquipSound{};
