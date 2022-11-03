@@ -2,6 +2,8 @@
 #include "BuffComponent.h"
 
 #include "BlasterCharacter.h"
+#include "CombatComponent.h"
+#include "Weapon.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/PawnMovementComponent.h"
 
@@ -63,6 +65,26 @@ void UBuffComponent::SetInitialSpeeds(float BaseSpeed, float CrouchSpeed)
 	InitialCrouchedSpeed = CrouchSpeed;
 }
 
+void UBuffComponent::BuffAccuracy(float BaseAccuracy, float BuffAccuracy, float BuffTime)
+{
+	if(Character)
+	{
+		UCombatComponent* CombatComponent = Character->GetCombatComponent();
+        	if(CombatComponent && CombatComponent->GetEquippedWeapon())
+        	{
+        		InitialAccuracy = BaseAccuracy;
+        		CombatComponent->GetEquippedWeapon()->SetScatterSphereRadius(
+        		InitialAccuracy - BuffAccuracy);
+
+        		Character->GetWorldTimerManager().SetTimer(AccuracyBuffTimer, this, &UBuffComponent::ResetAccuracy, BuffTime);
+				
+				MulticastAccuracyBuff(BuffAccuracy);
+        	}
+	}
+	
+
+}
+
 void UBuffComponent::HealRampUp(float DeltaTime)
 {
 	if(!bHealing || Character == nullptr || Character->GetIsElimmed())
@@ -104,11 +126,22 @@ void UBuffComponent::ShieldRampUp(float DeltaTime)
 	}
 }
 
+void UBuffComponent::MulticastAccuracyBuff_Implementation(float InBuffAccuracy)
+{
+	UCombatComponent* CombatComponent = Character->GetCombatComponent();
+	if(CombatComponent && CombatComponent->GetEquippedWeapon())
+	{
+		CombatComponent->GetEquippedWeapon()->SetScatterSphereRadius(
+			   InitialAccuracy - InBuffAccuracy);
+	}
+
+}
+
 void UBuffComponent::MulticastSpeedBuff_Implementation(float BaseSpeed, float CrouchSpeed)
 {
 	Character->GetCharacterMovement()->MaxWalkSpeed = BaseSpeed ;
 	Character->GetCharacterMovement()->MaxWalkSpeedCrouched = CrouchSpeed ;
-		
+	
 }
 
 void UBuffComponent::ResetSpeed()
@@ -120,5 +153,13 @@ void UBuffComponent::ResetSpeed()
 
 	MulticastSpeedBuff(InitialBaseSpeed, InitialCrouchedSpeed);
 		
+}
+
+void UBuffComponent::ResetAccuracy()
+{
+	if(Character == nullptr || Character->GetCombatComponent() == nullptr || Character->GetCombatComponent()->GetEquippedWeapon() == nullptr) return;
+	
+	Character->GetCombatComponent()->GetEquippedWeapon()->SetScatterSphereRadius(InitialAccuracy);
+	MulticastAccuracyBuff(0);
 }
 

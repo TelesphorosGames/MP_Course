@@ -24,6 +24,8 @@ public:
 	void ReplenishShield(float ShieldAmount, float ReplenishTime);
 	void BuffSpeed(float BuffBaseSpeed, float BuffCrouchSpeed, float BuffTime);
 	void SetInitialSpeeds(float BaseSpeed, float CrouchSpeed);
+
+	void BuffAccuracy(float BaseAccuracy, float BuffAccuracy, float BuffTime);
 		
 protected:
 	// Called when the game starts
@@ -35,6 +37,9 @@ protected:
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastSpeedBuff(float BaseSpeed, float CrouchSpeed);
 
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastAccuracyBuff(float InBuffAccuracy);
+	
 private:
 
 	UPROPERTY()
@@ -54,5 +59,11 @@ private:
 
 	float InitialBaseSpeed;
 	float InitialCrouchedSpeed;
+
+	FTimerHandle AccuracyBuffTimer;
+	UFUNCTION()
+	void ResetAccuracy();
+
+	float InitialAccuracy;
 	
 };
