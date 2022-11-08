@@ -532,6 +532,7 @@ void ABlasterCharacter::DropOrDestroyWeapon(AWeapon* Weapon)
 	}
 	else
 	{
+
 		Weapon->Dropped();
 	}
 }

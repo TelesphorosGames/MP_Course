@@ -73,7 +73,11 @@ protected:
 	UFUNCTION()
 	void OnRep_SecondaryWeapon();
 	void Fire();
+	void FireProjectileWeapon();
+	void FireHitScanWeapon();
+	void FireShotgun();
 
+	
 	UFUNCTION(Server,Reliable)
 	void Server_Reload();
 
@@ -167,6 +171,7 @@ private:
 	
 	void FireTimerFinished();
 	void StartFireTimer();
+	void LocalFire(const FVector_NetQuantize& TraceHitTarget);
 
 	bool CanFire();
 	UPROPERTY(ReplicatedUsing=OnRep_CarriedAmmo)

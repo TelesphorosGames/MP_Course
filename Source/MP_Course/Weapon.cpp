@@ -11,6 +11,7 @@
 #include "Engine/SkeletalMeshSocket.h"
 #include "Net/UnrealNetwork.h"
 #include "CombatComponent.h"
+#include "Kismet/KismetMathLibrary.h"
 
 
 AWeapon::AWeapon()
@@ -50,13 +51,11 @@ void AWeapon::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if(HasAuthority())
-	{
 		AreaSphere->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 		AreaSphere->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Overlap);
 		AreaSphere->OnComponentBeginOverlap.AddDynamic(this, &AWeapon::OnAreaSphereOverlap);
 		AreaSphere->OnComponentEndOverlap.AddDynamic(this, &AWeapon::OnAreaSphereEndOverlap);
-	}
+	
 	if(PickupWidget)
 	{
 		PickupWidget->SetVisibility(false);
@@ -353,7 +352,45 @@ void AWeapon::Fire(const FVector& HitTarget)
 		}
 		
 	}
-	SpendRound();
+	if(HasAuthority())
+	{
+		SpendRound();
+	}
+
 
 }
 
+
+
+
+FVector AWeapon::TraceEndWithScatter(const FVector& HitTarget)
+{
+
+	const USkeletalMeshSocket* MuzzleSocket = GetWeaponMesh()->GetSocketByName(FName("MuzzleFlash"));
+	if(MuzzleSocket == nullptr)
+	{
+		return FVector();
+	}
+	const FTransform SocketTransform = MuzzleSocket->GetSocketTransform(GetWeaponMesh());
+	const FVector Start = SocketTransform.GetLocation();
+	
+	// Pointing from the trace start location to the hit target
+	const FVector ToTargetNormalized = (HitTarget - Start).GetSafeNormal();
+
+	const FVector SphereCenterLocation = Start + (ToTargetNormalized * DistanceToSphere);
+
+
+	const FVector RandomVector = UKismetMathLibrary::RandomUnitVector() * FMath::FRandRange(0.f, SphereRadius);
+	const FVector Endloc = SphereCenterLocation + RandomVector;
+
+	const FVector ToEndLoc = Endloc - Start ;
+	
+	
+	DrawDebugSphere(GetWorld(), SphereCenterLocation, SphereRadius, 12, FColor::Red, true);
+	DrawDebugSphere(GetWorld(), Endloc, 4.f, 12, FColor::Orange, true);
+	DrawDebugLine(GetWorld(), Start, FVector(Start + ToEndLoc * 10), FColor::Cyan, true );
+	
+	
+	return  FVector(Start + ToEndLoc * 10);
+	
+}

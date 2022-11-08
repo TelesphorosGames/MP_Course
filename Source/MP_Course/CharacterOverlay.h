@@ -42,5 +42,10 @@ public:
 	UWidgetAnimation* UrgentText;
 	UPROPERTY(meta=(BindWidget))
 	UTextBlock* GrenadesCount;
-	
+	UPROPERTY(meta=(BindWidget))
+	class UImage* HighPingImage;
+	UPROPERTY(Transient, meta=(BindWidgetAnim))
+	UWidgetAnimation* HighPingAnimation;
+	UPROPERTY(meta=(BindWidget))
+	UTextBlock* PingNumberText;
 };

@@ -19,6 +19,7 @@
 #include "Weapon.h"
 #include "Kismet/GameplayStatics.h"
 #include "Animation/WidgetAnimation.h"
+#include "Components/Image.h"
 
 
 void ABlasterPlayerController::BeginPlay()
@@ -53,6 +54,45 @@ void ABlasterPlayerController::ReceivedPlayer()
 	}
 }
 
+void ABlasterPlayerController::CheckPing(float DeltaSeconds)
+{
+	
+	HighPingRunningTime += DeltaSeconds;
+
+	if(HighPingRunningTime > CheckPingFrequency)
+	{
+		if(PlayerState == nullptr)
+		{
+			PlayerState = GetPlayerState<APlayerState>();
+		}
+		if(PlayerState)
+		{
+			if((PlayerState->GetCompressedPing() * 4)  > HighPingThreshold)
+			{
+				int32 PingInt = PlayerState->GetCompressedPing();
+				PingInt *= 4;
+			
+				HighPingWarning(PingInt);
+				PingAnimationRunningTime = 0.f;
+			}
+		}
+		HighPingRunningTime = 0.f;
+		
+	}
+	bool bHighPingAnimationPlaying = BlasterHud &&
+		BlasterHud->CharacterOverlay &&
+		BlasterHud->CharacterOverlay->HighPingAnimation &&
+		BlasterHud->CharacterOverlay->IsAnimationPlaying(BlasterHud->CharacterOverlay->HighPingAnimation);
+	if(bHighPingAnimationPlaying)
+	{
+		PingAnimationRunningTime += DeltaSeconds;
+		if(PingAnimationRunningTime > HighPingDuration)
+		{
+			StopHighPingWarning();
+		}
+	}
+}
+
 void ABlasterPlayerController::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
@@ -72,10 +112,7 @@ void ABlasterPlayerController::Tick(float DeltaSeconds)
 	
 	SetHudTime();
 	
-	
-	
-	
-
+	CheckPing(DeltaSeconds);
 	
 }
 
@@ -588,6 +625,55 @@ void ABlasterPlayerController::CheckTimeSync(float DeltaTime)
 	{
 		Server_RequestServerTime(GetWorld()->GetTimeSeconds());
 		TimeSyncRunningTime = 0.f;
+	}
+}
+
+void ABlasterPlayerController::HighPingWarning(int32 WarningPing)
+{
+	if(BlasterHud == nullptr)
+	{
+		BlasterHud = Cast<ABlasterHud>(GetHUD());
+	}
+
+	if(BlasterHud &&
+		BlasterHud->CharacterOverlay &&
+		BlasterHud->CharacterOverlay->HighPingImage &&
+		BlasterHud->CharacterOverlay->HighPingAnimation &&
+		BlasterHud->CharacterOverlay->PingNumberText)
+	{
+		BlasterHud->CharacterOverlay->HighPingImage->SetOpacity(1.f);
+		BlasterHud->CharacterOverlay->PlayAnimation(BlasterHud->CharacterOverlay->HighPingAnimation, 0.f, 5);
+		BlasterHud->CharacterOverlay->PingNumberText->SetOpacity(1.f);
+		const FText PingString = FText::FromString(FString::Printf(TEXT("%d"), WarningPing));
+		BlasterHud->CharacterOverlay->PingNumberText->SetText(PingString);
+	}
+	else
+	{
+	}
+}
+
+void ABlasterPlayerController::StopHighPingWarning()
+{
+	if(BlasterHud == nullptr)
+	{
+		BlasterHud = Cast<ABlasterHud>(GetHUD());
+	}
+
+	if(BlasterHud &&
+		BlasterHud->CharacterOverlay &&
+		BlasterHud->CharacterOverlay->HighPingImage &&
+		BlasterHud->CharacterOverlay->HighPingAnimation &&
+		BlasterHud->CharacterOverlay->PingNumberText)
+	{
+		BlasterHud->CharacterOverlay->HighPingImage->SetOpacity(0.f);
+		if(BlasterHud->CharacterOverlay->IsAnimationPlaying(BlasterHud->CharacterOverlay->HighPingAnimation))
+		{
+			BlasterHud->CharacterOverlay->StopAnimation(BlasterHud->CharacterOverlay->HighPingAnimation);
+		}
+		BlasterHud->CharacterOverlay->PingNumberText->SetOpacity(0.f);
+		const FText PingString = FText::FromString(FString());
+		BlasterHud->CharacterOverlay->PingNumberText->SetText(PingString);
+		
 	}
 }
 

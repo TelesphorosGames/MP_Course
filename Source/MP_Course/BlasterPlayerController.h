@@ -21,6 +21,7 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	
 	virtual void ReceivedPlayer() override;
+	void CheckPing(float DeltaSeconds);
 
 	FORCEINLINE float GetWarmupTime() const	{return WarmupTime ;}
 	FORCEINLINE FName GetBlasterMatchState() const {return BlasterMatchState ;}
@@ -102,6 +103,8 @@ protected:
 	UFUNCTION(Client, Reliable)
 	void Client_JoinMidGame(FName StateOfMatch, float Warmup, float Match, float StartingTime, float Cooldown);
 
+	void HighPingWarning(int32 WarningPing);
+	void StopHighPingWarning();
 	
 	
 private:
@@ -152,7 +155,14 @@ private:
 	float HudWeaponAmmo;
 
 
-
-
-
+	float HighPingRunningTime = 10.f;
+	UPROPERTY(EditAnywhere)
+	float HighPingDuration = 5.f;
+	UPROPERTY(EditAnywhere)
+	float PingAnimationRunningTime = 0.f;
+	UPROPERTY(EditAnywhere)
+	float CheckPingFrequency = 20.f;
+	UPROPERTY(EditAnywhere)
+	float HighPingThreshold = 50.f;
+	
 };

@@ -19,6 +19,17 @@ enum class EWeaponState : uint8
 	EWS_MAX UMETA(DisplayName="DefaultMAX")
 };
 
+UENUM(BlueprintType)
+enum class EFireType : uint8
+{
+	EFT_HitScanWeapon UMETA(DisplayName= "Hit Scan Weapon"),
+	EFT_ProjectileWeapon UMETA(DisplayName = "Projectile Weapon"),
+	EFT_ShotgunWeapon UMETA(DisplayName = "Shotgun Weapon"),
+	
+	EFT_MAX UMETA(DisplayName = "DefaultMAX")
+};
+
+
 UCLASS()
 class MP_COURSE_API AWeapon : public AActor
 {
@@ -51,13 +62,18 @@ public:
 	FORCEINLINE int32 GetAmmo() const {return Ammo ;}
 	FORCEINLINE int32 GetMagazineCapacity() const {return MagCapacity ;}
 	FORCEINLINE class USoundCue* GetEquipSound() const {return EquipSound ;}
+	FORCEINLINE float GetScatterSphereRadius() const {return SphereRadius ;}
+	FORCEINLINE bool GetWeaponUsesScatter() const {return bUseScatter ;}
 	
-	FORCEINLINE	void SetWeaponType(EWeaponType Type){ WeaponType = Type; }
+	FORCEINLINE	void SetWeaponType(EWeaponType Type){ WeaponType = Type ;}
+	FORCEINLINE void SetScatterSphereRadius(float InSphereRadius) {SphereRadius = InSphereRadius ;}
 
+	
 	/* Public Custom Functions */ 
 
 	void ShowPickupWidget(bool bShowWidget);
 	virtual void Fire(const FVector& HitTarget);
+	FVector TraceEndWithScatter(const FVector& HitTarget);
 
 	void Dropped();
 	
@@ -78,6 +94,9 @@ public:
 
 	UPROPERTY(VisibleAnywhere, Category  ="Weapon Properties")
 	USkeletalMeshComponent* WeaponMesh{};
+
+	UPROPERTY(EditAnywhere)
+	EFireType FireType;
 	
 protected:
 	
@@ -95,8 +114,18 @@ protected:
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<class ACasing> CasingClass;
 
+	// Trace End With Scatter :
 
+	UPROPERTY(EditAnywhere, Category="Weapon Scatter")
+	float DistanceToSphere = 800.f;
 
+	UPROPERTY(EditAnywhere, Category="Weapon Scatter")
+	bool bUseScatter = false;
+
+	UPROPERTY(EditAnywhere, Category="Weapon Scatter")
+	float SphereRadius = 70.f;
+
+	
 private:
 
 	
@@ -167,7 +196,6 @@ private:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(AllowPrivateAccess = "true"))
 	EWeaponType WeaponType{};
-
 
 	
 
