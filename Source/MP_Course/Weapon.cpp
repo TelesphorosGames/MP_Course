@@ -373,6 +373,7 @@ FVector AWeapon::TraceEndWithScatter(const FVector& HitTarget)
 	}
 	const FTransform SocketTransform = MuzzleSocket->GetSocketTransform(GetWeaponMesh());
 	const FVector Start = SocketTransform.GetLocation();
+
 	
 	// Pointing from the trace start location to the hit target
 	const FVector ToTargetNormalized = (HitTarget - Start).GetSafeNormal();
