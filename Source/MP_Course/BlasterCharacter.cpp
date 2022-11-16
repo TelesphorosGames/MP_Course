@@ -333,6 +333,12 @@ AWeapon* ABlasterCharacter::GetSecondaryWeapon()
 	return CombatComponent->SecondaryWeapon;
 }
 
+bool ABlasterCharacter::IsLocallyReloading()
+{
+	if(CombatComponent == nullptr) return false;
+	return CombatComponent->bLocallyReloading;
+}
+
 
 FVector ABlasterCharacter::GetHitTarget() const
 {

@@ -1,4 +1,4 @@
-#include "BCAnimInstance.h"
+ #include "BCAnimInstance.h"
 
 #include "BlasterCharacter.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -88,21 +88,24 @@ void UBCAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 			RightShoulderTransform.SetLocation(ShoulderOutPosition);
 			RightShoulderTransform.SetRotation(FQuat(ShoulderOutRotation));
 		
-		// Correct Look At Rotation of equipped weapon to ensure it points towards crosshairs (clients only!!!)
-		
+		bUseFabrik = BlasterCharacter->GetCombatState() == ECombatState::ECS_Unoccupied  && !BlasterCharacter->GetDisableGameplay();
+       	// Correct Look At Rotation of equipped weapon to ensure it points towards crosshairs (clients only!!!)
 		// FTransform MuzzleFlashTransform = EquippedWeapon->GetWeaponMesh()->GetSocketTransform(FName("MuzzleFlash"));
 		if(BlasterCharacter->IsLocallyControlled())
 		{
 			bLocallyControlledCharacter=true;
 			if(BlasterCharacter->GetDisableGameplay()) return;
-		
+			if(BlasterCharacter->GetCombatState()!= ECombatState::ECS_ThrowingGrenade)
+			{
+				bUseFabrik = !BlasterCharacter->IsLocallyReloading();
+			}
+			
 			const FTransform RightHandTransform = EquippedWeapon->GetWeaponMesh()->GetSocketTransform(FName("hand_r", ERelativeTransformSpace::RTS_World));
             FRotator LookAtRotation = UKismetMathLibrary::FindLookAtRotation(RightHandTransform.GetLocation(), RightHandTransform.GetLocation() + (RightHandTransform.GetLocation()-BlasterCharacter->GetHitTarget()));
             RightHandRotation = FMath::RInterpTo(RightHandRotation, LookAtRotation, DeltaSeconds, 40.f);    
 		}
 	}
 
-	bUseFabrik = BlasterCharacter->GetCombatState() == ECombatState::ECS_Unoccupied  && !BlasterCharacter->GetDisableGameplay();
 	bUseAimOffsets = BlasterCharacter->GetCombatState() == ECombatState::ECS_Unoccupied && !BlasterCharacter->GetDisableGameplay();
 	
 }

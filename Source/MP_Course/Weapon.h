@@ -122,7 +122,7 @@ protected:
 	UPROPERTY(EditAnywhere, Category="Weapon Scatter")
 	bool bUseScatter = false;
 
-	UPROPERTY(EditAnywhere, Category="Weapon Scatter")
+	UPROPERTY(Replicated, EditAnywhere, Category="Weapon Scatter")
 	float SphereRadius = 70.f;
 
 	
@@ -177,14 +177,13 @@ private:
 	UPROPERTY(EditAnywhere)
 	bool bAutomaticWeapon = true;
 
-	UPROPERTY(EditAnywhere, ReplicatedUsing=OnRep_Ammo)
+	UPROPERTY(EditAnywhere)
 	int32 Ammo;
 
 	UPROPERTY(EditAnywhere)
 	int32 MagCapacity;
 	
-	UFUNCTION()
-	void OnRep_Ammo();
+
 
 	UFUNCTION()
 	void SpendRound();
@@ -197,6 +196,23 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(AllowPrivateAccess = "true"))
 	EWeaponType WeaponType{};
 
+	UFUNCTION(Client, Reliable)
+	void Client_UpdateAmmo(int32 ServerAmmo);
+
+	UFUNCTION(Client, Reliable)
+	void Client_AddAmmo(int32 AmmoToAdd);
+
+	// The number of unprocessed server requests for ammo
+	// Increments in SpendRound, decrements in Client_UpdateAmmo
+	int32 Sequence = 0;
+
 	
 
 };
+
+
+
+
+
+	// UFUNCTION()
+ //    	void OnRep_Ammo();

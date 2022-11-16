@@ -74,8 +74,10 @@ public:
 	FORCEINLINE UAnimMontage* GetReloadMontage() const {return ReloadMontage ;}
 	FORCEINLINE UStaticMeshComponent* GetAttachedGrenade() const {return Grenade ;}
 	
+	
 	AWeapon* GetEquippedWeapon();
 	AWeapon* GetSecondaryWeapon();
+	bool IsLocallyReloading();
 	FVector GetHitTarget() const;
 	ECombatState GetCombatState() const;
 	void FireButtonPressed();

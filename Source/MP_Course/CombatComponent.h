@@ -58,6 +58,7 @@ public:
     	FORCEINLINE AWeapon* GetEquippedWeapon() const {return EquippedWeapon ;}
     	FORCEINLINE int32 GetGrenades() const { return Grenades ;}
 		FORCEINLINE int32 GetCarriedAmmo() const { return CarriedAmmo ;}
+		FORCEINLINE bool GetIsLocallyReloading() const {return  bLocallyReloading;}
 
 protected:
 
@@ -135,8 +136,14 @@ private:
 	UPROPERTY(BlueprintReadOnly, ReplicatedUsing= OnRep_SecondaryWeapon, meta = (AllowPrivateAccess = "true"))
 	AWeapon* SecondaryWeapon{};
 
-	UPROPERTY(Replicated)
-	bool bAiming;
+	UPROPERTY(ReplicatedUsing = OnRep_Aiming)
+	bool bAiming = false;
+
+	UPROPERTY()
+	bool bAimingButtonPressed= false;
+
+	UFUNCTION()
+	void OnRep_Aiming();
 	
 	UPROPERTY(EditAnywhere)
 	float BaseWalkSpeed;
@@ -214,6 +221,9 @@ private:
 	void ShowAttachedGrenade(bool bShowGrenade);
 
 	bool ShouldSwapWeapons();
+
+	UPROPERTY()
+	bool bLocallyReloading = false;
 	
 };
 

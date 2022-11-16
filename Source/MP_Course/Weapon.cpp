@@ -35,15 +35,10 @@ AWeapon::AWeapon()
 	AreaSphere->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 	AreaSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	
-	
-	
 	PickupWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("Pickup Widget"));
 	PickupWidget->SetupAttachment(RootComponent);
-
-
-	WeaponMesh->bAlwaysCreatePhysicsState = true;
-
 	
+	WeaponMesh->bAlwaysCreatePhysicsState = true;
 }
 
 
@@ -68,6 +63,7 @@ void AWeapon::BeginPlay()
 
 void AWeapon::Tick(float DeltaTime)
  {
+	
  	Super::Tick(DeltaTime);
  
  }
@@ -77,9 +73,7 @@ void AWeapon::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeP
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(AWeapon, WeaponState);
-	DOREPLIFETIME(AWeapon, Ammo);
-
-	
+	DOREPLIFETIME(AWeapon, SphereRadius);
 	
 }
 
@@ -231,19 +225,6 @@ void AWeapon::Dropped()
 }
 
 
-void AWeapon::OnRep_Ammo()
-{
-
-	if(BlasterOwnerCharacter &&
-		BlasterOwnerCharacter->GetCombatComponent() &&
-		IsFull() &&
-		WeaponType == EWeaponType::EWT_Shotgun)
-	{
-		BlasterOwnerCharacter->GetCombatComponent()->JumpToShotgunEnd();
-	}
-	SetHUDWeaponAmmo();
-	
-}
 
 void AWeapon::SetHUDWeaponAmmo()
 {
@@ -299,7 +280,47 @@ bool AWeapon::IsFull()
 
 void AWeapon::AddAmmo(int32 AmmoToAdd)
 {
-	Ammo = FMath::Clamp(Ammo-AmmoToAdd, 0 , MagCapacity);
+	Ammo = FMath::Clamp(Ammo+AmmoToAdd, 0 , MagCapacity);
+	SetHUDWeaponAmmo();
+	Client_AddAmmo(AmmoToAdd);
+}
+
+void AWeapon::SpendRound()
+{
+	Ammo = FMath::Clamp(Ammo - 1, 0, MagCapacity);
+	
+	SetHUDWeaponAmmo();
+	if(HasAuthority())
+	{
+		Client_UpdateAmmo(Ammo);
+	}
+	else
+	{
+		++Sequence;
+	}
+}
+
+void AWeapon::Client_AddAmmo_Implementation(int32 AmmoToAdd)
+{
+	if(HasAuthority()) return;
+	Ammo = FMath::Clamp(Ammo+AmmoToAdd, 0 , MagCapacity);
+	
+	if(BlasterOwnerCharacter &&
+		BlasterOwnerCharacter->GetCombatComponent() &&
+		IsFull() &&
+		WeaponType == EWeaponType::EWT_Shotgun)
+	{
+		BlasterOwnerCharacter->GetCombatComponent()->JumpToShotgunEnd();
+	}
+	SetHUDWeaponAmmo();
+}
+
+void AWeapon::Client_UpdateAmmo_Implementation(int32 ServerAmmo)
+{
+	if(HasAuthority()) return;
+	Ammo = ServerAmmo;
+	--Sequence;
+	Ammo -= Sequence;
 	SetHUDWeaponAmmo();
 }
 
@@ -309,13 +330,6 @@ void AWeapon::EnableCustomDepth(bool bEnable)
 	{
 		WeaponMesh->bRenderCustomDepth = bEnable;
 	}
-}
-
-void AWeapon::SpendRound()
-{
-	Ammo = FMath::Clamp(Ammo - 1, 0, MagCapacity);
-	
-	SetHUDWeaponAmmo();
 }
 
 void AWeapon::ShowPickupWidget(bool bShowWidget)
@@ -352,10 +366,9 @@ void AWeapon::Fire(const FVector& HitTarget)
 		}
 		
 	}
-	if(HasAuthority())
-	{
-		SpendRound();
-	}
+	
+	SpendRound();
+	
 
 
 }
@@ -395,3 +408,18 @@ FVector AWeapon::TraceEndWithScatter(const FVector& HitTarget)
 	return  FVector(Start + ToEndLoc * 10);
 	
 }
+
+/*
+// void AWeapon::OnRep_Ammo()
+// {
+//
+// 	if(BlasterOwnerCharacter &&
+// 		BlasterOwnerCharacter->GetCombatComponent() &&
+// 		IsFull() &&
+// 		WeaponType == EWeaponType::EWT_Shotgun)
+// 	{
+// 		BlasterOwnerCharacter->GetCombatComponent()->JumpToShotgunEnd();
+// 	}
+// 	SetHUDWeaponAmmo();
+// 	}
+*/ 
