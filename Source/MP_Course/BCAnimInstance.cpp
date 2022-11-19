@@ -88,7 +88,7 @@ void UBCAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 			RightShoulderTransform.SetLocation(ShoulderOutPosition);
 			RightShoulderTransform.SetRotation(FQuat(ShoulderOutRotation));
 		
-		bUseFabrik = BlasterCharacter->GetCombatState() == ECombatState::ECS_Unoccupied  && !BlasterCharacter->GetDisableGameplay();
+		bUseFabrik = BlasterCharacter->GetCombatState() == ECombatState::ECS_Unoccupied  && !BlasterCharacter->GetDisableGameplay() && !bIsInAir;
        	// Correct Look At Rotation of equipped weapon to ensure it points towards crosshairs (clients only!!!)
 		// FTransform MuzzleFlashTransform = EquippedWeapon->GetWeaponMesh()->GetSocketTransform(FName("MuzzleFlash"));
 		if(BlasterCharacter->IsLocallyControlled())
@@ -97,7 +97,7 @@ void UBCAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 			if(BlasterCharacter->GetDisableGameplay()) return;
 			if(BlasterCharacter->GetCombatState()!= ECombatState::ECS_ThrowingGrenade)
 			{
-				bUseFabrik = !BlasterCharacter->IsLocallyReloading();
+				bUseFabrik = !BlasterCharacter->IsLocallyReloading() && !bIsInAir;
 			}
 			
 			const FTransform RightHandTransform = EquippedWeapon->GetWeaponMesh()->GetSocketTransform(FName("hand_r", ERelativeTransformSpace::RTS_World));

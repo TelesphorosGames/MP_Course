@@ -11,6 +11,7 @@
 
 #include "BlasterCharacter.generated.h"
 
+class UBoxComponent;
 class UBuffComponent;
 struct FInputActionValue;
 class UInputConfig;
@@ -73,6 +74,7 @@ public:
 	FORCEINLINE UBuffComponent* GetBuffComponent() const {return BuffComponent ;}
 	FORCEINLINE UAnimMontage* GetReloadMontage() const {return ReloadMontage ;}
 	FORCEINLINE UStaticMeshComponent* GetAttachedGrenade() const {return Grenade ;}
+	FORCEINLINE TMap<FName, UBoxComponent*> GetHitCollisionBoxes() const {return HitCollisionBoxes ;}
 	
 	
 	AWeapon* GetEquippedWeapon();
@@ -82,6 +84,61 @@ public:
 	ECombatState GetCombatState() const;
 	void FireButtonPressed();
 	void DropOrDestroyWeapon(AWeapon* Weapon);
+
+	// Hit boxes for Server Side Rewind :
+
+	UPROPERTY(EditAnywhere)
+	class UBoxComponent* HeadBox{};
+	UPROPERTY(EditAnywhere)
+	class UBoxComponent* NeckBox{};
+	UPROPERTY(EditAnywhere)
+	class UBoxComponent* ChestBox{};
+	UPROPERTY(EditAnywhere)
+	class UBoxComponent* ShouldersBox{};
+	
+	UPROPERTY(EditAnywhere)
+	class UBoxComponent* UpperArmLeft{};
+
+	UPROPERTY(EditAnywhere)
+	class UBoxComponent* LowerArmLeft{};
+
+	UPROPERTY(EditAnywhere)
+	class UBoxComponent* HandLeft{};
+
+	UPROPERTY(EditAnywhere)
+	class UBoxComponent* UpperArmRight{};
+
+	UPROPERTY(EditAnywhere)
+	class UBoxComponent* LowerArmRight{};
+
+	UPROPERTY(EditAnywhere)
+	class UBoxComponent* HandRight{};
+
+	UPROPERTY(EditAnywhere)
+	class UBoxComponent* AbsBox{};
+
+	UPROPERTY(EditAnywhere)
+	class UBoxComponent* WaistBox{};
+
+	UPROPERTY(EditAnywhere)
+	class UBoxComponent* UpperLegLeft{};
+
+	UPROPERTY(EditAnywhere)
+	class UBoxComponent* LowerLegLeft{};
+
+	UPROPERTY(EditAnywhere)
+	class UBoxComponent* FootLeft{};
+
+	UPROPERTY(EditAnywhere)
+	class UBoxComponent* UpperLegRight{};
+
+	UPROPERTY(EditAnywhere)
+	class UBoxComponent* LowerLegRight{};
+
+	UPROPERTY(EditAnywhere)
+	class UBoxComponent* FootRight{};
+
+	
 	
 protected:
 
@@ -154,6 +211,9 @@ private:
 	UPROPERTY(VisibleAnywhere, meta = (AllowPrivateAccess ="true"))
 	class UBuffComponent* BuffComponent;
 
+	UPROPERTY(VisibleAnywhere, meta = (AllowPrivateAccess ="true"))
+	class ULagCompensationComponent* LagCompensationComponent;
+
 	UFUNCTION(Server, Reliable)
 	void ServerEquipButtonPressed();
 	
@@ -220,7 +280,8 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<AWeapon> DefaultWeaponClass;
-	
-	
+
+	UPROPERTY()
+	TMap<FName, UBoxComponent*> HitCollisionBoxes;
 	
 };

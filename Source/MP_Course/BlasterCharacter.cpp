@@ -20,8 +20,10 @@
 #include "Components/CapsuleComponent.h"
 #include "Components/TextBlock.h"
 #include "CombatState.h"
+#include "LagCompensationComponent.h"
 #include "MyEnhancedInputComponent.h"
 #include "MyGameplayTags.h"
+#include "Components/BoxComponent.h"
 #include "Components/SphereComponent.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -53,6 +55,9 @@ ABlasterCharacter::ABlasterCharacter()
 	BuffComponent = CreateDefaultSubobject<UBuffComponent>(TEXT("BuffComponent"));
 	BuffComponent->SetIsReplicated(true);
 
+	LagCompensationComponent = CreateDefaultSubobject<ULagCompensationComponent>(TEXT("LagCompensationComponent"));
+	
+
 	GetMesh()->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
 	GetMesh()->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
 	GetMesh()->SetCollisionObjectType(ECC_SkeletalMesh);
@@ -62,6 +67,96 @@ ABlasterCharacter::ABlasterCharacter()
 	Grenade->SetupAttachment(GetMesh(), FName("PistolSocket"));
 	
 	Grenade->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+	HeadBox = CreateDefaultSubobject<UBoxComponent>(TEXT("HeadBox"));
+	HeadBox->SetupAttachment(GetMesh(), FName("head"));
+	HeadBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	HitCollisionBoxes.Add(FName("head"), HeadBox);
+
+	NeckBox = CreateDefaultSubobject<UBoxComponent>(TEXT("NeckBox"));
+	NeckBox->SetupAttachment(GetMesh(), FName("neck_01"));
+	NeckBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	HitCollisionBoxes.Add(FName("Neck"), NeckBox);
+	
+	ShouldersBox = CreateDefaultSubobject<UBoxComponent>(TEXT("ShouldersBox"));
+	ShouldersBox->SetupAttachment(GetMesh(), FName("spine_05"));
+	ShouldersBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	HitCollisionBoxes.Add(FName("Shoulders"), ShouldersBox);
+
+	ChestBox = CreateDefaultSubobject<UBoxComponent>(TEXT("ChestBox"));
+	ChestBox->SetupAttachment(GetMesh(), FName("spine_04"));
+	ChestBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	HitCollisionBoxes.Add(FName("Chest"), ChestBox);
+
+	WaistBox = CreateDefaultSubobject<UBoxComponent>(TEXT("WaistBox"));
+	WaistBox->SetupAttachment(GetMesh(), FName("spine_01"));
+	WaistBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	HitCollisionBoxes.Add(FName("Waist"), WaistBox);
+
+	UpperArmLeft = CreateDefaultSubobject<UBoxComponent>(TEXT("UpperArmLeft"));
+	UpperArmLeft->SetupAttachment(GetMesh(), FName("upperarm_l"));
+	UpperArmLeft->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	HitCollisionBoxes.Add(FName("UpperArmLeft"), UpperArmLeft);
+
+	UpperArmRight = CreateDefaultSubobject<UBoxComponent>(TEXT("UpperArmRight"));
+	UpperArmRight->SetupAttachment(GetMesh(), FName("upperarm_r"));
+	UpperArmRight->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	HitCollisionBoxes.Add(FName("UpperArmRight"), UpperArmRight);
+
+	LowerArmLeft = CreateDefaultSubobject<UBoxComponent>(TEXT("LowerArmLeft"));
+	LowerArmLeft->SetupAttachment(GetMesh(), FName("lowerarm_l"));
+	LowerArmLeft->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	HitCollisionBoxes.Add(FName("LowerArmLeft"), LowerArmLeft);
+	
+	LowerArmRight = CreateDefaultSubobject<UBoxComponent>(TEXT("LowerArmRight"));
+	LowerArmRight->SetupAttachment(GetMesh(), FName("lowerarm_r"));
+	LowerArmRight->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	HitCollisionBoxes.Add(FName("LowerArmRight"), LowerArmRight);
+
+	HandRight = CreateDefaultSubobject<UBoxComponent>(TEXT("HandRight"));
+	HandRight->SetupAttachment(GetMesh(), FName("hand_r"));
+	HandRight->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	HitCollisionBoxes.Add(FName("HandRight"), HandRight);
+
+	HandLeft = CreateDefaultSubobject<UBoxComponent>(TEXT("HandLeft"));
+	HandLeft->SetupAttachment(GetMesh(), FName("hand_l"));
+	HandLeft->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	HitCollisionBoxes.Add(FName("HandLeft"), HandLeft);
+
+	AbsBox = CreateDefaultSubobject<UBoxComponent>(TEXT("AbsBox"));
+	AbsBox->SetupAttachment(GetMesh(), FName("spine_03"));
+	AbsBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	HitCollisionBoxes.Add(FName("Abs"), AbsBox);
+
+	UpperLegLeft = CreateDefaultSubobject<UBoxComponent>(TEXT("UpperLegLeft"));
+	UpperLegLeft->SetupAttachment(GetMesh(), FName("thigh_l"));
+	UpperLegLeft->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	HitCollisionBoxes.Add(FName("UpperLegLeft"), UpperLegLeft); 
+
+	UpperLegRight = CreateDefaultSubobject<UBoxComponent>(TEXT("UpperLegRight"));
+	UpperLegRight->SetupAttachment(GetMesh(), FName("thigh_r"));
+	UpperLegRight->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	HitCollisionBoxes.Add(FName("UpperLegRight"), UpperLegRight);
+
+	LowerLegLeft = CreateDefaultSubobject<UBoxComponent>(TEXT("LowerLegLeft"));
+	LowerLegLeft->SetupAttachment(GetMesh(), FName("calf_l"));
+	LowerLegLeft->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	HitCollisionBoxes.Add(FName("LowerLegLeft"), LowerLegLeft);
+	
+	LowerLegRight = CreateDefaultSubobject<UBoxComponent>(TEXT("LowerLegRight"));
+	LowerLegRight->SetupAttachment(GetMesh(), FName("calf_r"));
+	LowerLegRight->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	HitCollisionBoxes.Add(FName("LowerLegRight"), LowerLegRight);
+
+	FootRight = CreateDefaultSubobject<UBoxComponent>(TEXT("FootRight"));
+	FootRight->SetupAttachment(GetMesh(), FName("ball_r"));
+	FootRight->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	HitCollisionBoxes.Add(FName("FootRight"), FootRight);
+
+	FootLeft = CreateDefaultSubobject<UBoxComponent>(TEXT("FootLeft"));
+	FootLeft->SetupAttachment(GetMesh(), FName("ball_l"));
+	FootLeft->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	HitCollisionBoxes.Add(FName("FootLeft"), FootLeft);
 }
 
 void ABlasterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -107,49 +202,6 @@ void ABlasterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	PlayerInputComponent->BindAction("Reload", IE_Pressed, this, &ABlasterCharacter::ReloadButtonPressed);
 	PlayerInputComponent->BindAction("ThrowGrenade", IE_Pressed, this, &ABlasterCharacter::GrenadeButtonPressed);
 	
-	
-}
-
-void ABlasterCharacter::UpdateHudHealth()
-{
-	if(BlasterPlayerController == nullptr)
-	{
-		BlasterPlayerController = Cast<ABlasterPlayerController>(Controller);
-	}
-	
-	if(BlasterPlayerController)
-	{
-		BlasterPlayerController->SetHudHealth(Health, MaxHealth);
-	}
-		
-}
-
-void ABlasterCharacter::UpdateHudShields()
-{
-	if(BlasterPlayerController == nullptr)
-	{
-		BlasterPlayerController = Cast<ABlasterPlayerController>(Controller);
-	}
-	
-	if(BlasterPlayerController)
-	{
-		BlasterPlayerController->SetHudShields(Shield, MaxShield);
-	}
-		
-}
-
-void ABlasterCharacter::UpdateHudAmmo()
-{
-	
-	if(BlasterPlayerController == nullptr)
-	{
-		BlasterPlayerController = Cast<ABlasterPlayerController>(Controller);
-	}
-	if(BlasterPlayerController && CombatComponent && CombatComponent->EquippedWeapon)
-	{
-		BlasterPlayerController->SetHudCarriedAmmo(CombatComponent->CarriedAmmo);
-		BlasterPlayerController->SetHudWeaponAmmo(CombatComponent->EquippedWeapon->GetAmmo());
-	}
 	
 }
 
@@ -212,6 +264,14 @@ void ABlasterCharacter::PostInitializeComponents()
 	{
 		BuffComponent->Character = this;
 		BuffComponent->SetInitialSpeeds(GetCharacterMovement()->MaxWalkSpeed, GetCharacterMovement()->MaxWalkSpeedCrouched);
+	}
+	if(LagCompensationComponent)
+	{
+		LagCompensationComponent->Character = this;
+		if(Controller)
+		{
+			LagCompensationComponent->BlasterPlayerController = Cast<ABlasterPlayerController>(Controller);
+		}
 	}
 
 	
@@ -526,6 +586,14 @@ void ABlasterCharacter::FireButtonPressed()
 	if(CombatComponent)
 	{
 		CombatComponent->FireButtonPressed(true);
+	}
+	if(LagCompensationComponent)
+	{
+		
+		FFramePackage FramePackage;
+		LagCompensationComponent->SaveFramePackage(FramePackage);
+
+		LagCompensationComponent->ShowFramePackage(FramePackage, FColor::Yellow);
 	}
 }
 
@@ -844,6 +912,50 @@ void ABlasterCharacter::ReceiveDamage(AActor* DamagedActor, float Damage, const 
 		}
 	}
 }
+
+void ABlasterCharacter::UpdateHudHealth()
+{
+	if(BlasterPlayerController == nullptr)
+	{
+		BlasterPlayerController = Cast<ABlasterPlayerController>(Controller);
+	}
+	
+	if(BlasterPlayerController)
+	{
+		BlasterPlayerController->SetHudHealth(Health, MaxHealth);
+	}
+		
+}
+
+void ABlasterCharacter::UpdateHudShields()
+{
+	if(BlasterPlayerController == nullptr)
+	{
+		BlasterPlayerController = Cast<ABlasterPlayerController>(Controller);
+	}
+	
+	if(BlasterPlayerController)
+	{
+		BlasterPlayerController->SetHudShields(Shield, MaxShield);
+	}
+		
+}
+
+void ABlasterCharacter::UpdateHudAmmo()
+{
+	
+	if(BlasterPlayerController == nullptr)
+	{
+		BlasterPlayerController = Cast<ABlasterPlayerController>(Controller);
+	}
+	if(BlasterPlayerController && CombatComponent && CombatComponent->EquippedWeapon)
+	{
+		BlasterPlayerController->SetHudCarriedAmmo(CombatComponent->CarriedAmmo);
+		BlasterPlayerController->SetHudWeaponAmmo(CombatComponent->EquippedWeapon->GetAmmo());
+	}
+	
+}
+
 
 void ABlasterCharacter::SpawnDefaultWeapon()
 {
