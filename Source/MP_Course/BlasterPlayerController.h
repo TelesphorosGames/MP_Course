@@ -69,6 +69,11 @@ public:
 	class ABlasterGameMode* BlasterGameMode{};
 	UPROPERTY()
 	ABlasterPlayerController* BlasterPlayerController{};
+
+	UPROPERTY()
+	float SingleTripTime = 0;
+
+	
 	
 protected:
 

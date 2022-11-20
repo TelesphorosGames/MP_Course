@@ -36,8 +36,7 @@ protected:
 	USoundCue* HitSound;
 
 	
-	UPROPERTY(EditAnywhere)
-	float Damage = 20.f;
+
 	
 private :
 

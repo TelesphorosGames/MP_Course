@@ -59,6 +59,14 @@ void AWeapon::BeginPlay()
 	{
 		BlasterOwnerCharacter = Cast<ABlasterCharacter>(GetOwner());
 	}
+	if(BlasterPlayerController == nullptr)
+	{
+		if(BlasterOwnerCharacter)
+		{
+			BlasterPlayerController = Cast<ABlasterPlayerController>(BlasterOwnerCharacter->Controller);
+		}
+		
+	}
 }
 
 void AWeapon::Tick(float DeltaTime)

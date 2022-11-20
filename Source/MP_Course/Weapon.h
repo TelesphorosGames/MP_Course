@@ -64,6 +64,8 @@ public:
 	FORCEINLINE class USoundCue* GetEquipSound() const {return EquipSound ;}
 	FORCEINLINE float GetScatterSphereRadius() const {return SphereRadius ;}
 	FORCEINLINE bool GetWeaponUsesScatter() const {return bUseScatter ;}
+	FORCEINLINE float GetDamage() const {return Damage ;}
+
 	
 	FORCEINLINE	void SetWeaponType(EWeaponType Type){ WeaponType = Type ;}
 	FORCEINLINE void SetScatterSphereRadius(float InSphereRadius) {SphereRadius = InSphereRadius ;}
@@ -125,10 +127,18 @@ protected:
 	UPROPERTY(Replicated, EditAnywhere, Category="Weapon Scatter")
 	float SphereRadius = 70.f;
 
+	UPROPERTY(EditAnywhere)
+	float Damage = 20.f;
+
+	UPROPERTY(EditAnywhere)
+	bool bUseServerSideRewind = false;
+
+	UPROPERTY()
+	class ABlasterCharacter* BlasterOwnerCharacter{};
+	UPROPERTY()
+	class ABlasterPlayerController* BlasterPlayerController{};
 	
 private:
-
-	
 	
 	// USED TO DETECT OVERLAPS WITH CHARACTERS
 	UPROPERTY(VisibleAnywhere, Category  ="Weapon Properties")
@@ -145,9 +155,7 @@ private:
 
 	UPROPERTY(EditAnywhere, Category  ="Weapon Properties")
 	class USoundCue* EquipSound{};
-
-
-
+	
 	// Crosshairs Textures :
 
 	UPROPERTY(EditAnywhere, Category=Crosshairs)
@@ -188,10 +196,7 @@ private:
 	UFUNCTION()
 	void SpendRound();
 
-	UPROPERTY()
-	class ABlasterCharacter* BlasterOwnerCharacter{};
-	UPROPERTY()
-	class ABlasterPlayerController* BlasterPlayerController{};
+	
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(AllowPrivateAccess = "true"))
 	EWeaponType WeaponType{};

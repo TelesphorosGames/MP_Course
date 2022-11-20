@@ -11,6 +11,7 @@
 
 #include "BlasterCharacter.generated.h"
 
+class ULagCompensationComponent;
 class UBoxComponent;
 class UBuffComponent;
 struct FInputActionValue;
@@ -72,6 +73,7 @@ public:
 	FORCEINLINE void SetDisableGameplay(const bool bDisable) { bDisableGameplay = bDisable ;}
 	FORCEINLINE UCombatComponent* GetCombatComponent() const {return CombatComponent ;}
 	FORCEINLINE UBuffComponent* GetBuffComponent() const {return BuffComponent ;}
+	FORCEINLINE ULagCompensationComponent* GetLagCompensationComponent() const {return LagCompensationComponent ;}
 	FORCEINLINE UAnimMontage* GetReloadMontage() const {return ReloadMontage ;}
 	FORCEINLINE UStaticMeshComponent* GetAttachedGrenade() const {return Grenade ;}
 	FORCEINLINE TMap<FName, UBoxComponent*> GetHitCollisionBoxes() const {return HitCollisionBoxes ;}

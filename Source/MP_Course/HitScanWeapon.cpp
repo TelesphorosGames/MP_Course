@@ -4,10 +4,12 @@
 #include "HitScanWeapon.h"
 
 #include "BlasterCharacter.h"
+#include "BlasterPlayerController.h"
 #include "Engine/SkeletalMeshSocket.h"
 #include "Kismet/GameplayStatics.h"
 #include "Particles/ParticleSystemComponent.h"
 #include "DrawDebugHelpers.h"
+#include "LagCompensationComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Sound/SoundCue.h"
 
@@ -22,16 +24,22 @@ void AHitScanWeapon::Fire(const FVector& HitTarget)
 		FTransform SocketTransform = MuzzleSocket->GetSocketTransform(GetWeaponMesh());
 		FVector Start = SocketTransform.GetLocation();
 		
-
 		FHitResult FireHit;
 		WeaponTraceHit(Start, HitTarget, FireHit);
 
 		ABlasterCharacter* BlasterCharacter = Cast<ABlasterCharacter>(FireHit.GetActor());
 		if(BlasterCharacter)
 		{
-			if(HasAuthority())
+			if(HasAuthority() && !bUseServerSideRewind)
 			{
 				UGameplayStatics::ApplyDamage(BlasterCharacter, Damage, GetOwner()->GetInstigatorController(), this, UDamageType::StaticClass());
+			}
+			if(!HasAuthority() && bUseServerSideRewind)
+			{
+				if(BlasterOwnerCharacter && BlasterPlayerController && BlasterOwnerCharacter->GetLagCompensationComponent())
+				{
+					BlasterOwnerCharacter->GetLagCompensationComponent()->Server_ScoreRequest(BlasterCharacter, Start, FireHit.ImpactPoint, BlasterPlayerController->GetServerTime() - BlasterPlayerController->SingleTripTime, this);
+				}
 			}
 		}
 		if(HitScanImpactParticles)
@@ -49,10 +57,12 @@ void AHitScanWeapon::Fire(const FVector& HitTarget)
 		{
 			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), MuzzleFlash, SocketTransform);
 		}
+		
 		if(FireSound)
 		{
 			UGameplayStatics::PlaySoundAtLocation(this, FireSound, GetActorLocation(), GetActorRotation());
 		}
+		
 	}
 	
 }
