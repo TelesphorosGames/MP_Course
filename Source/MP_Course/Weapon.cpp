@@ -217,7 +217,6 @@ void AWeapon::OnAreaSphereEndOverlap(UPrimitiveComponent* OverlappedComponent, A
 
 void AWeapon::Dropped()
 {
-	
 	WeaponMesh->SetSimulatePhysics(true);
 	WeaponMesh->SetEnableGravity(true);
 	WeaponMesh->DetachFromComponent(FDetachmentTransformRules::KeepRelativeTransform);
@@ -228,11 +227,7 @@ void AWeapon::Dropped()
 	
 	EnableCustomDepth(true);
 	
-	
-	
 }
-
-
 
 void AWeapon::SetHUDWeaponAmmo()
 {

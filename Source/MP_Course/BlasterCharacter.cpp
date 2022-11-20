@@ -587,14 +587,7 @@ void ABlasterCharacter::FireButtonPressed()
 	{
 		CombatComponent->FireButtonPressed(true);
 	}
-	if(LagCompensationComponent)
-	{
-		
-		FFramePackage FramePackage;
-		LagCompensationComponent->SaveFramePackage(FramePackage);
-
-		LagCompensationComponent->ShowFramePackage(FramePackage, FColor::Yellow);
-	}
+	
 }
 
 void ABlasterCharacter::DropOrDestroyWeapon(AWeapon* Weapon)

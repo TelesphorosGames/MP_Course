@@ -546,6 +546,8 @@ void UCombatComponent::FireProjectileWeapon()
 	if(!Character->HasAuthority())
 	{
 		LocalFire(HitTargetImpactPoint);
+
+		
 	}
 	
 	Server_Fire(HitTargetImpactPoint);
@@ -553,21 +555,24 @@ void UCombatComponent::FireProjectileWeapon()
 
 void UCombatComponent::FireHitScanWeapon()
 {
-	if(!EquippedWeapon || !Character)
+	if(EquippedWeapon ==nullptr || Character==nullptr)
 	{
 		return;
 	}
 	if(EquippedWeapon->GetWeaponUsesScatter())
 	{
 		HitTargetImpactPoint = EquippedWeapon->TraceEndWithScatter(HitTargetImpactPoint);
-		if(Character->HasAuthority())
-		{
-			LocalFire(HitTargetImpactPoint);
-		}
-		
-		Server_Fire(HitTargetImpactPoint);
-
+	}	
+	if(!Character->HasAuthority())
+	{
+		LocalFire(HitTargetImpactPoint);
 	}
+		Server_Fire(HitTargetImpactPoint);
+	
+	
+
+	
+	
 	
 }
 
@@ -578,7 +583,7 @@ void UCombatComponent::FireShotgun()
 	{
 		TArray<FVector_NetQuantize> HitTargets;
 		ShotGun->ShotgunTraceEndWithScatter(HitTargetImpactPoint, HitTargets);
-		if(Character->HasAuthority())
+		if(!Character->HasAuthority())
 		{
 			LocalShotgunFire(HitTargets);
 		}

@@ -38,7 +38,7 @@ void AHitScanWeapon::Fire(const FVector& HitTarget)
 			{
 				if(BlasterOwnerCharacter && BlasterPlayerController && BlasterOwnerCharacter->GetLagCompensationComponent())
 				{
-					BlasterOwnerCharacter->GetLagCompensationComponent()->Server_ScoreRequest(BlasterCharacter, Start, FireHit.ImpactPoint, BlasterPlayerController->GetServerTime() - BlasterPlayerController->SingleTripTime, this);
+					BlasterOwnerCharacter->GetLagCompensationComponent()->Server_ScoreRequest(BlasterCharacter, Start, HitTarget, BlasterPlayerController->GetServerTime() - BlasterPlayerController->SingleTripTime, this);
 				}
 			}
 		}
