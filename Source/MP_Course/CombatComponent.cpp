@@ -567,7 +567,7 @@ void UCombatComponent::FireHitScanWeapon()
 	{
 		LocalFire(HitTargetImpactPoint);
 	}
-		Server_Fire(HitTargetImpactPoint);
+	Server_Fire(HitTargetImpactPoint);
 	
 	
 
@@ -587,6 +587,7 @@ void UCombatComponent::FireShotgun()
 		{
 			LocalShotgunFire(HitTargets);
 		}
+		
 		Server_ShotgunFire(HitTargets);
 		
 	}
@@ -612,7 +613,6 @@ void UCombatComponent::SwapWeapons()
 	AWeapon* TempWeapon = EquippedWeapon;
 	EquippedWeapon = SecondaryWeapon;
 	SecondaryWeapon = TempWeapon;
-
 
 	EquippedWeapon->SetWeaponState(EWeaponState::EWS_Equipped);
 	EquippedWeapon->EnableCustomDepth(false);
@@ -698,12 +698,11 @@ void UCombatComponent::Server_ShotgunFire_Implementation(const TArray<FVector_Ne
 
 void UCombatComponent::Multicast_ShotgunFire_Implementation(const TArray<FVector_NetQuantize>& TraceHitTargets)
 {
+		
 	if(Character && Character->IsLocallyControlled() && !Character->HasAuthority())
 	{
 		return;
-		
 	}
-	
 	LocalShotgunFire(TraceHitTargets);
 }
 
@@ -918,7 +917,10 @@ void UCombatComponent::LocalShotgunFire(const TArray<FVector_NetQuantize> TraceH
 	if(CombatState == ECombatState::ECS_Reloading || CombatState == ECombatState::ECS_Unoccupied)
 	{
 		Character->PlayFireMontage(bAiming);
-		SG->FireShotgun(TraceHitTargets);
+	
+				SG->FireShotgun(TraceHitTargets);
+		
+	
 		CombatState = ECombatState::ECS_Unoccupied;
 	}
 }

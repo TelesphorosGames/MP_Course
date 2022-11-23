@@ -7,6 +7,7 @@
 #include "LagCompensationComponent.generated.h"
 
 
+class ABlasterCharacter;
 USTRUCT(BlueprintType)
 struct FBoxInformation
 {
@@ -34,6 +35,9 @@ struct FFramePackage
 
 	UPROPERTY()
 	TMap<FName, FBoxInformation> HitBoxInfo;
+
+	UPROPERTY()
+	ABlasterCharacter* Character;
 	
 };
 
@@ -47,6 +51,19 @@ struct FServerSideRewindResult
 
 	UPROPERTY()
 	bool bHeadshot;
+};
+
+USTRUCT()
+struct FShotgunServerSideRewindResult
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+	TMap<ABlasterCharacter*, uint32> Headshots;
+
+	UPROPERTY()
+	TMap<ABlasterCharacter*, uint32> Bodyshots;
+	
 };
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -66,21 +83,28 @@ public:
 
 	FServerSideRewindResult ServerSideRewind(class ABlasterCharacter* HitCharacter, const FVector_NetQuantize& TraceStart, const FVector_NetQuantize& HitLocation, float HitTime);
 
+	FShotgunServerSideRewindResult ShotgunServerSideRewind(const TArray<ABlasterCharacter*>& HitCharacters, const FVector_NetQuantize& TraceStart, const TArray<FVector_NetQuantize>& HitLocations, float HitTime);
+	
 	UFUNCTION(Server, Reliable)
 	void Server_ScoreRequest(ABlasterCharacter* HitCharacter, const FVector_NetQuantize& TraceStart, const FVector_NetQuantize& HitLocation, float HitTime, class AWeapon* DamageCauser);
 
+	UFUNCTION(Server, Reliable)
+	void Server_ShotgunScoreRequest(const TArray<ABlasterCharacter*>& HitCharacters, const FVector_NetQuantize& TraceStart, const TArray<FVector_NetQuantize>& HitLocations, float HitTime);
 
 
 protected:
 	
 	virtual void BeginPlay() override;
-
+	
+	void SaveFramePackage();
 	void SaveFramePackage(FFramePackage& Package);
 
 	FFramePackage InterpBetweenFrames(const FFramePackage& OlderFrame, const FFramePackage& YoungerFrame, float HitTime);
 
 	FServerSideRewindResult ConfirmHit(const FFramePackage& Package, ABlasterCharacter* HitCharacter, const FVector_NetQuantize& TraceStart, const FVector_NetQuantize& HitLocation);
 
+	FShotgunServerSideRewindResult ShotgunConfirmHit(const TArray<FFramePackage>& FramePackages, const FVector_NetQuantize& TraceStart, const TArray<FVector_NetQuantize>& HitLocations);
+	
 	void CacheBoxPositions(ABlasterCharacter* HitCharacter, FFramePackage& OutFramePackage);
 
 	void MoveBoxes(ABlasterCharacter* HitCharacter, const FFramePackage& Package);
@@ -88,7 +112,10 @@ protected:
 	void ResetHitBoxes(ABlasterCharacter* HitCharacter, const FFramePackage& Package);
 
 	void EnableCharacterMeshCollision(ABlasterCharacter* HitCharacter, ECollisionEnabled::Type CollisionEnabled);
-	void SaveFramePackage();
+	
+	FFramePackage GetFrameToCheck(ABlasterCharacter* HitCharacter, float HitTime);
+
+	
 private:
 
 	UPROPERTY()

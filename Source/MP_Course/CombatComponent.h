@@ -164,7 +164,7 @@ private:
 	float CrosshairMovingFactor{};
 	float CrosshairTargetFactor{};
 
-	FVector HitTargetImpactPoint{};
+	FVector_NetQuantize HitTargetImpactPoint{};
 
 	// Aiming and FOV
 

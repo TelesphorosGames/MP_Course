@@ -10,6 +10,8 @@
 // #include "DrawDebugHelpers.h"
 // #include "Kismet/GameplayStatics.h"
 // #include "Particles/ParticleSystemComponent.h"
+#include "BlasterPlayerController.h"
+#include "LagCompensationComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Sound/SoundCue.h"
 #include "MP_Course.h"
@@ -31,13 +33,11 @@ void AShotgun::ShotgunTraceEndWithScatter(const FVector& HitTarget, TArray<FVect
 	
 	for(uint32 i=0; i<NumberOfPellets; i++)
 	{
-		
 		const FVector RandomVector = UKismetMathLibrary::RandomUnitVector() * FMath::FRandRange(0.f, SphereRadius);
 		const FVector Endloc = SphereCenterLocation + RandomVector;
 		FVector ToEndLoc = Endloc - Start;
-		ToEndLoc = (Start + ToEndLoc * 10);
-		HitTargets.Add(TraceEndWithScatter(ToEndLoc));
-		
+		FVector_NetQuantize FVNQToEndLoc = {Start + ToEndLoc * 10};
+		HitTargets.Add(TraceEndWithScatter(FVNQToEndLoc));
 	}
 }
 
@@ -79,21 +79,24 @@ void AShotgun::FireShotgun(const TArray<FVector_NetQuantize>& HitTargets)
 				UGameplayStatics::PlaySoundAtLocation(this,HitSound,FireHit.ImpactPoint, .5f, FMath::FRandRange(-.5f, .5f));
 			}
 		}
+		TArray<ABlasterCharacter*> HitCharacters;
 		for (auto Hitpair : HitMap)
 		{
 			if(Hitpair.Key && HasAuthority())
 			{
 				UGameplayStatics::ApplyDamage(Hitpair.Key, Damage * Hitpair.Value, GetOwner()->GetInstigatorController(), this, UDamageType::StaticClass());
 			}
-			
+			HitCharacters.Add(Hitpair.Key);
 		}
-		
+		if(!HasAuthority() && bUseServerSideRewind)
+		{
+			if(BlasterOwnerCharacter && BlasterPlayerController && BlasterOwnerCharacter->GetLagCompensationComponent() && BlasterOwnerCharacter->IsLocallyControlled())
+			{
+				BlasterOwnerCharacter->GetLagCompensationComponent()->Server_ShotgunScoreRequest(HitCharacters, Start, HitTargets, BlasterPlayerController->GetServerTime() - BlasterPlayerController->SingleTripTime);
+			}
+		}
 	}
-	
 }
-
-
-
 /*// void AShotgun::Fire(const FVector& HitTarget)
 // {
 // 	AWeapon::Fire(HitTarget);
