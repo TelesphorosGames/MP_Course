@@ -11,6 +11,7 @@
 
 #include "BlasterCharacter.generated.h"
 
+class ABlasterPlayerController;
 class ULagCompensationComponent;
 class UBoxComponent;
 class UBuffComponent;
@@ -77,6 +78,7 @@ public:
 	FORCEINLINE UAnimMontage* GetReloadMontage() const {return ReloadMontage ;}
 	FORCEINLINE UStaticMeshComponent* GetAttachedGrenade() const {return Grenade ;}
 	FORCEINLINE TMap<FName, UBoxComponent*> GetHitCollisionBoxes() const {return HitCollisionBoxes ;}
+	FORCEINLINE ABlasterPlayerController* GetBlasterPlayerController() const {return BlasterPlayerController ;}
 	
 	
 	AWeapon* GetEquippedWeapon();
@@ -140,7 +142,8 @@ public:
 	UPROPERTY(EditAnywhere)
 	class UBoxComponent* FootRight{};
 
-	
+	UPROPERTY()
+	TMap<FName, UBoxComponent*> HitCollisionBoxes;
 	
 protected:
 
@@ -282,8 +285,5 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<AWeapon> DefaultWeaponClass;
-
-	UPROPERTY()
-	TMap<FName, UBoxComponent*> HitCollisionBoxes;
 	
 };

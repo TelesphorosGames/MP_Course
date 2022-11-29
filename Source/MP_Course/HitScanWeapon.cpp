@@ -30,7 +30,7 @@ void AHitScanWeapon::Fire(const FVector& HitTarget)
 		ABlasterCharacter* BlasterCharacter = Cast<ABlasterCharacter>(FireHit.GetActor());
 		if(BlasterCharacter)
 		{
-			if(HasAuthority())
+			if(HasAuthority() && !bUseServerSideRewind)
 			{
 				UGameplayStatics::ApplyDamage(BlasterCharacter, Damage, GetOwner()->GetInstigatorController(), this, UDamageType::StaticClass());
 			}
@@ -38,7 +38,8 @@ void AHitScanWeapon::Fire(const FVector& HitTarget)
 			{
 				if(BlasterOwnerCharacter && BlasterPlayerController && BlasterOwnerCharacter->GetLagCompensationComponent()&& BlasterOwnerCharacter->IsLocallyControlled())
 				{
-					BlasterOwnerCharacter->GetLagCompensationComponent()->Server_ScoreRequest(BlasterCharacter, Start, HitTarget, BlasterPlayerController->GetServerTime() - BlasterPlayerController->SingleTripTime, this);
+					BlasterOwnerCharacter->GetLagCompensationComponent()->Server_ScoreRequest(BlasterCharacter, Start, HitTarget, BlasterPlayerController->GetServerTime() + BlasterPlayerController->SingleTripTime, this);
+					UE_LOG(LogTemp, Warning, TEXT("hit time : %f"), BlasterPlayerController->GetServerTime() + BlasterPlayerController->SingleTripTime);
 				}
 			}
 		}

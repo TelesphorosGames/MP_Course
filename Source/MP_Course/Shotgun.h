@@ -25,5 +25,6 @@ private:
 	UPROPERTY(EditAnywhere)
 	uint32 NumberOfPellets = 10;
 
+    
 	
 };

@@ -41,7 +41,7 @@ struct FFramePackage
 	
 };
 
-USTRUCT()
+USTRUCT(BlueprintType)
 struct FServerSideRewindResult
 {
 	GENERATED_BODY()
@@ -53,7 +53,7 @@ struct FServerSideRewindResult
 	bool bHeadshot;
 };
 
-USTRUCT()
+USTRUCT(BlueprintType)
 struct FShotgunServerSideRewindResult
 {
 	GENERATED_BODY()
@@ -90,7 +90,8 @@ public:
 
 	UFUNCTION(Server, Reliable)
 	void Server_ShotgunScoreRequest(const TArray<ABlasterCharacter*>& HitCharacters, const FVector_NetQuantize& TraceStart, const TArray<FVector_NetQuantize>& HitLocations, float HitTime);
-
+	
+	FHitResult ConfirmedHitResult;
 
 protected:
 	
