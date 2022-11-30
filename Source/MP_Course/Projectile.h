@@ -17,10 +17,21 @@ public:
 	AProjectile();
 
 	FORCEINLINE UStaticMeshComponent* GetProjectileMesh() const {return ProjectileMesh ;}
- 
+	FORCEINLINE 
 	
 	virtual void Tick(float DeltaTime) override;
 	virtual void Destroyed() override;
+
+
+	bool bUseServerSideRewind = false;
+	
+	FVector_NetQuantize TraceStart;
+	FVector_NetQuantize100 InitialVelocity;
+	
+	UPROPERTY(EditAnywhere)
+	float BulletSpeed = 15000.f;
+	
+	float Damage = {40.f};
 
 protected:
 
@@ -35,8 +46,6 @@ protected:
 
 	void ExplodeDamage();
 	
-	UPROPERTY(EditAnywhere)
-	float Damage{40.f};
 
 	UPROPERTY(EditAnywhere)
 	float DamageInnerRadius = 200.f;
@@ -77,6 +86,7 @@ protected:
 	float DestroyTime = 3.f;
 	UFUNCTION()
 	void DestroyTimerFinished();
+	
 
 	
 private:

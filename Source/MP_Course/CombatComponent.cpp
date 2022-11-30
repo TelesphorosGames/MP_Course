@@ -962,6 +962,7 @@ void UCombatComponent::OnRep_CarriedAmmo()
 	const bool bJumpToShotgunEnd = (CombatState == ECombatState::ECS_Reloading &&
 		EquippedWeapon != nullptr &&
 		EquippedWeapon->GetWeaponType() == EWeaponType::EWT_Shotgun);
+	
 		// && CarriedAmmo == 0);
 
 	if(bJumpToShotgunEnd)
@@ -980,6 +981,7 @@ void UCombatComponent::UpdateHudGrenades()
 	if(BC_Controller == nullptr)
 	{
 		BC_Controller = Cast<ABlasterPlayerController>(Character->Controller);
+		
 	}
 	if(BC_Controller)
 	{

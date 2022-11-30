@@ -204,7 +204,7 @@ private:
 	int32 MaxGrenades = 4;
 	void UpdateHudGrenades();
 
-	
+	UPROPERTY(EditAnywhere)
 	TMap<EWeaponType, int32> CarriedAmmoMap;
 
 	UPROPERTY(EditAnywhere)
