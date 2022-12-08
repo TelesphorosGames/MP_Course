@@ -67,13 +67,19 @@ void ABlasterPlayerController::CheckPing(float DeltaSeconds)
 		}
 		if(PlayerState)
 		{
-			if((PlayerState->GetCompressedPing() * 4)  > HighPingThreshold)
+			if(PlayerState->GetCompressedPing() * 4  > HighPingThreshold)
 			{
 				int32 PingInt = PlayerState->GetCompressedPing();
 				PingInt *= 4;
 			
 				HighPingWarning(PingInt);
 				PingAnimationRunningTime = 0.f;
+
+				Server_ReportPingStatus(true);
+			}
+			else
+			{
+				Server_ReportPingStatus(false);
 			}
 		}
 		HighPingRunningTime = 0.f;
@@ -422,6 +428,11 @@ void ABlasterPlayerController::OnRep_MatchState()
 			GetWorldTimerManager().SetTimer(RemoveOverlayTimer, this, &ABlasterPlayerController::RemoveOverlay, BlasterGameMode->GetCooldownTime());
 		}
 	}
+}
+
+void ABlasterPlayerController::Server_ReportPingStatus_Implementation(bool bHighPing)
+{
+	HighPingDelegate.Broadcast(bHighPing);
 }
 
 void ABlasterPlayerController::HandleMatchHasStarted()

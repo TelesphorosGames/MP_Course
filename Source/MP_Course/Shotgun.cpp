@@ -80,9 +80,12 @@ void AShotgun::FireShotgun(const TArray<FVector_NetQuantize>& HitTargets)
 			}
 		}
 		TArray<ABlasterCharacter*> HitCharacters;
+		bool bCauseAuthDamage = !bUseServerSideRewind || BlasterOwnerCharacter->IsLocallyControlled();
+		
 		for (auto Hitpair : HitMap)
 		{
-			if(Hitpair.Key && HasAuthority() && !bUseServerSideRewind)
+			
+			if(Hitpair.Key && HasAuthority() && bCauseAuthDamage)
 			{
 				UGameplayStatics::ApplyDamage(Hitpair.Key, Damage * Hitpair.Value, GetOwner()->GetInstigatorController(), this, UDamageType::StaticClass());
 			}

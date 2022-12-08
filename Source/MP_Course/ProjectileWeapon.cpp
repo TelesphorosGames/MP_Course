@@ -45,7 +45,7 @@ void AProjectileWeapon::Fire(const FVector& HitTarget)
 				else
 				{
 					SpawnedProjectile = World->SpawnActor<AProjectile>(SSR_ProjectileClass, SocketTransform.GetLocation(), TargetRotation, SpawnParams);
-					SpawnedProjectile->bUseServerSideRewind = false;
+					SpawnedProjectile->bUseServerSideRewind = true;
 				}
 			}
 			else
