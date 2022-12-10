@@ -230,6 +230,7 @@ void ABlasterCharacter::BeginPlay()
 	if(HasAuthority())
 	{
 		OnTakeAnyDamage.AddDynamic(this, &ABlasterCharacter::ReceiveDamage);
+		
 	}
 	
 	HideElimText();
@@ -268,11 +269,11 @@ void ABlasterCharacter::Tick(float DeltaTime)
 		float gametime = BlasterPlayerController->GetServerTime();
 
 	
-	if(GEngine)
-	{
-		GEngine->AddOnScreenDebugMessage(1, -1, FColor::Blue, FString::Printf(TEXT("Current Time : %f"), gametime));
-	}
+		if(GEngine)
+		{
+			GEngine->AddOnScreenDebugMessage(1, -1, FColor::Blue, FString::Printf(TEXT("Current Time : %f"), gametime));
 		}
+	}
 	
 }
 
@@ -485,7 +486,16 @@ void ABlasterCharacter::EquipButtonPressed()
 	if(bDisableGameplay) return;
 	if(CombatComponent)
 	{
+		if(GetCombatState()==ECombatState::ECS_Unoccupied)
+		{
 			ServerEquipButtonPressed();
+		}
+		
+		if(CombatComponent->ShouldSwapWeapons() && !HasAuthority() && GetCombatState() == ECombatState::ECS_Unoccupied && OverlappingWeapon == nullptr)
+		{
+			PlaySwapWeaponMontage();
+			CombatComponent->CombatState = ECombatState::ECS_SwappingWeapons;
+		}
 	}
 }
 
@@ -747,6 +757,7 @@ void ABlasterCharacter::ServerEquipButtonPressed_Implementation()
 			if(CombatComponent->ShouldSwapWeapons())
 			{
 				CombatComponent->SwapWeapons();
+				
 			}
 		}
 		
@@ -851,6 +862,16 @@ void ABlasterCharacter::PlayThrowGrenadeMontage()
 	{
 		AnimInstance->Montage_Play(ThrowGrenadeMontage);
 		AnimInstance->Montage_JumpToSection(FName("Throw"));
+	}
+}
+
+void ABlasterCharacter::PlaySwapWeaponMontage()
+{
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if(AnimInstance && SwapWeaponMontage)
+	{
+		AnimInstance->Montage_Play(SwapWeaponMontage);
+		AnimInstance->Montage_JumpToSection(FName("Swap"));
 	}
 }
 

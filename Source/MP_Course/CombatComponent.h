@@ -38,6 +38,10 @@ public:
 	void FireButtonPressed(bool bPressed);
 
 	void SwapWeapons();
+	UFUNCTION(BlueprintCallable)
+	void FinishSwap();
+	UFUNCTION(BlueprintCallable)
+	void SwapAttachWeapons();
 	
 
 	
@@ -54,11 +58,11 @@ public:
 	void PickupAmmo(EWeaponType WeaponType, int32 AmmoAmount);
 
 
-		UFUNCTION(BlueprintPure)
-    	FORCEINLINE AWeapon* GetEquippedWeapon() const {return EquippedWeapon ;}
-    	FORCEINLINE int32 GetGrenades() const { return Grenades ;}
-		FORCEINLINE int32 GetCarriedAmmo() const { return CarriedAmmo ;}
-		FORCEINLINE bool GetIsLocallyReloading() const {return  bLocallyReloading;}
+	UFUNCTION(BlueprintPure)
+    FORCEINLINE AWeapon* GetEquippedWeapon() const {return EquippedWeapon ;}
+    FORCEINLINE int32 GetGrenades() const { return Grenades ;}
+	FORCEINLINE int32 GetCarriedAmmo() const { return CarriedAmmo ;}
+	FORCEINLINE bool GetIsLocallyReloading() const {return  bLocallyReloading;}
 
 protected:
 
@@ -212,7 +216,7 @@ private:
 	
 	void InitializeCarriedAmmo();
 
-	UPROPERTY(ReplicatedUsing=OnRep_CombatState)
+	UPROPERTY(VisibleAnywhere, ReplicatedUsing=OnRep_CombatState)
 	ECombatState CombatState = ECombatState::ECS_Unoccupied;
 	
 	UFUNCTION()

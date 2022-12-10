@@ -95,7 +95,7 @@ void UBCAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 		{
 			bLocallyControlledCharacter=true;
 			if(BlasterCharacter->GetDisableGameplay()) return;
-			if(BlasterCharacter->GetCombatState()!= ECombatState::ECS_ThrowingGrenade)
+			if(BlasterCharacter->GetCombatState() != ECombatState::ECS_ThrowingGrenade && BlasterCharacter->GetCombatState()!= ECombatState::ECS_SwappingWeapons)
 			{
 				bUseFabrik = !BlasterCharacter->IsLocallyReloading() && !bIsInAir;
 			}

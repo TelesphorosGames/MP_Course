@@ -74,7 +74,7 @@ void ABlasterPlayerController::CheckPing(float DeltaSeconds)
 			
 				HighPingWarning(PingInt);
 				PingAnimationRunningTime = 0.f;
-
+				
 				Server_ReportPingStatus(true);
 			}
 			else
@@ -366,8 +366,7 @@ void ABlasterPlayerController::OnPossess(APawn* InPawn)
 		SetHudHealth(BlasterCharacter->GetHealth(), BlasterCharacter->GetMaxHealth());
 		SetHudShields(BlasterCharacter->GetShields(), BlasterCharacter->GetMaxShields());
 		SetHudWeaponAmmo(30);
-		SetHudCarriedAmmo(50);
-		
+		SetHudCarriedAmmo(50);		
 	}
 	
 }

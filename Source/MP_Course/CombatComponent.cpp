@@ -162,7 +162,6 @@ void UCombatComponent::EquipPrimaryWeapon(AWeapon* WeaponToEquip)
 	}
 	
 	EquippedWeapon = WeaponToEquip;
-	
 	EquippedWeapon->SetWeaponState(EWeaponState::EWS_Equipped);
 	PlayWeaponEquipSound(WeaponToEquip);
 	AttachActorToRightHand(EquippedWeapon);
@@ -484,6 +483,11 @@ void UCombatComponent::OnRep_CombatState()
 			ShowAttachedGrenade(true);
 		}
 		break;
+	case ECombatState::ECS_SwappingWeapons:
+		if(Character && !Character->IsLocallyControlled())
+		{
+			Character->PlaySwapWeaponMontage();
+		}
 		
 	default: ;
 	}
@@ -606,14 +610,34 @@ void UCombatComponent::FireButtonPressed(bool bPressed)
 
 void UCombatComponent::SwapWeapons()
 {
-	if(CombatState != ECombatState::ECS_Unoccupied)
+	if(CombatState != ECombatState::ECS_Unoccupied || Character == nullptr)
 	{
 		return;
 	}
+
+	Character->PlaySwapWeaponMontage();
+	CombatState = ECombatState::ECS_SwappingWeapons;
+	
+	
+	
+}
+
+void UCombatComponent::FinishSwap()
+{
+	if(Character && Character->HasAuthority())
+	{
+		CombatState = ECombatState::ECS_Unoccupied;
+	}
+}
+
+void UCombatComponent::SwapAttachWeapons()
+{
+
+	
 	AWeapon* TempWeapon = EquippedWeapon;
 	EquippedWeapon = SecondaryWeapon;
 	SecondaryWeapon = TempWeapon;
-
+	
 	EquippedWeapon->SetWeaponState(EWeaponState::EWS_Equipped);
 	EquippedWeapon->EnableCustomDepth(false);
 	PlayWeaponEquipSound(EquippedWeapon);
@@ -624,10 +648,6 @@ void UCombatComponent::SwapWeapons()
 	SecondaryWeapon->SetWeaponState(EWeaponState::EWS_EquippedSecondary);
 	AttachActorToBackpack(SecondaryWeapon);
 
-	
-
-	
-	
 	
 }
 
@@ -946,11 +966,18 @@ void UCombatComponent::Server_Fire_Implementation(const FVector_NetQuantize& Tra
 
 bool UCombatComponent::CanFire()
 {
-	if(EquippedWeapon == nullptr || bLocallyReloading)
+	if(EquippedWeapon == nullptr)
 	{
 		return false;
 	}
-	if (!EquippedWeapon->IsEmpty() && bCanFire && CombatState == ECombatState::ECS_Reloading && EquippedWeapon->GetWeaponType() == EWeaponType::EWT_Shotgun) return true;
+	if(bLocallyReloading)
+	{
+		return false;
+	}
+	if (!EquippedWeapon->IsEmpty() && bCanFire && CombatState == ECombatState::ECS_Reloading && EquippedWeapon->GetWeaponType() == EWeaponType::EWT_Shotgun)
+	{
+		return true;
+	}
 	return !EquippedWeapon->IsEmpty() && bCanFire && CombatState==ECombatState::ECS_Unoccupied;
 }
 

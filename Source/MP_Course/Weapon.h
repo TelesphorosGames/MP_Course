@@ -100,9 +100,16 @@ public:
 	UPROPERTY(EditAnywhere)
 	EFireType FireType;
 	
+	UFUNCTION()
+	void OnPingTooHigh(bool bPingTooHigh);
+	
+	UPROPERTY()
+	class ABlasterPlayerController* BlasterPlayerController{};
+	
 protected:
 	
 	virtual void BeginPlay() override;
+	
 	virtual void OnWeaponStateSet();
 
 	UFUNCTION()
@@ -135,11 +142,6 @@ protected:
 
 	UPROPERTY()
 	class ABlasterCharacter* BlasterOwnerCharacter{};
-	UPROPERTY()
-	class ABlasterPlayerController* BlasterPlayerController{};
-
-	UFUNCTION()
-	void OnPingTooHigh(bool bPingTooHigh);
 	
 private:
 	
@@ -213,6 +215,7 @@ private:
 	// The number of unprocessed server requests for ammo
 	// Increments in SpendRound, decrements in Client_UpdateAmmo
 	int32 Sequence = 0;
+
 
 	
 

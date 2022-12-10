@@ -69,11 +69,13 @@ void AWeapon::BeginPlay()
 	}
 }
 
+
 void AWeapon::Tick(float DeltaTime)
  {
 	
  	Super::Tick(DeltaTime);
- 
+
+
  }
 
 void AWeapon::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -83,7 +85,6 @@ void AWeapon::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeP
 	DOREPLIFETIME(AWeapon, WeaponState);
 	DOREPLIFETIME(AWeapon, SphereRadius);
 	DOREPLIFETIME_CONDITION(AWeapon, bUseServerSideRewind, COND_OwnerOnly);
-
 	
 }
 
