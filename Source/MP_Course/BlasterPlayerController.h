@@ -21,6 +21,7 @@ class MP_COURSE_API ABlasterPlayerController : public APlayerController
 
 public:
 
+	
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	
 	virtual void ReceivedPlayer() override;
@@ -82,6 +83,8 @@ protected:
 
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaSeconds) override;
+
+	virtual void SetupInputComponent() override;
 	
 	void SetHudTime();
 	void PollInit();
@@ -113,9 +116,20 @@ protected:
 
 	void HighPingWarning(int32 WarningPing);
 	void StopHighPingWarning();
+
+	void ShowReturnToMainMenu();
 	
 	
 private:
+
+	UPROPERTY(EditAnywhere, Category="HUD");
+	TSubclassOf<class UUserWidget> ReturnToMainMenuWidget;
+
+	UPROPERTY()
+	class UMenuReturnWidget* ReturnWidget{};
+
+	bool bMenuWidgetOpen = false;
+	
 	
 	UPROPERTY(ReplicatedUsing=OnRep_MatchState)
 	FName BlasterMatchState{};

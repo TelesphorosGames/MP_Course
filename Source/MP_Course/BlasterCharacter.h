@@ -7,9 +7,10 @@
 #include "TurnInPlace.h"
 #include "IInteractWithCrosshairs.h"
 #include "CombatState.h"
-
-
 #include "BlasterCharacter.generated.h"
+
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnLeftGame);
 
 class ABlasterPlayerController;
 class ULagCompensationComponent;
@@ -35,11 +36,11 @@ public:
 	virtual void PostInitializeComponents() override;
 	virtual void Destroyed() override;
 	void DropOrDestroyWeapons();
-	void Elim();
+	void Elim(bool bPlayerLeftGame);
 	void HideElimText();
 	void ShowElimText();
 	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_Elim();
+	void Multicast_Elim(bool bPlayerLeftGame);
 
 	/* PUBLIC FUNCTIONS */
 	
@@ -147,7 +148,13 @@ public:
 
 	UPROPERTY()
 	TMap<FName, UBoxComponent*> HitCollisionBoxes;
+
+	UFUNCTION(Server, Reliable)
+	void Server_LeaveGame();
 	
+	FOnLeftGame OnLeftGame;
+	
+
 protected:
 
 	/** The input config that maps Input Actions to Input Tags*/
@@ -275,12 +282,15 @@ private:
 	FTimerHandle ElimTimer;
 	UFUNCTION()
 	void ElimTimerFinished();
+	
 	UPROPERTY(EditDefaultsOnly)
 	float ElimDelay={3.f};
 
 	UPROPERTY(Replicated)
 	bool bDisableGameplay{};
-	
+
+	bool bLeftGame = false;
+
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess ="true"))
 	UStaticMeshComponent* Grenade;
 	

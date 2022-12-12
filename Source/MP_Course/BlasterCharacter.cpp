@@ -7,6 +7,7 @@
 #include "Announcement.h"
 #include "BlasterGameMode.h"
 #include "BlasterPlayerController.h"
+#include "BlasterPlayerState.h"
 #include "CharacterOverlay.h"
 #include "CombatComponent.h"
 #include "Weapon.h"
@@ -325,13 +326,13 @@ void ABlasterCharacter::DropOrDestroyWeapons()
 	}
 }
 
-void ABlasterCharacter::Elim()
+void ABlasterCharacter::Elim(bool bPlayerLeftGame)
 {
 	
 	DropOrDestroyWeapons();
 	
-	Multicast_Elim();
-	GetWorldTimerManager().SetTimer(ElimTimer, this, &ABlasterCharacter::ElimTimerFinished, ElimDelay);
+	Multicast_Elim(bPlayerLeftGame);
+	
 		
 }
 
@@ -365,8 +366,11 @@ void ABlasterCharacter::ShowElimText()
 	}
 }
 
-void ABlasterCharacter::Multicast_Elim_Implementation()
+void ABlasterCharacter::Multicast_Elim_Implementation(bool bPlayerLeftGame)
 {
+	bLeftGame = bPlayerLeftGame;
+
+	
 	SetIsElimmed(true);
 	PlayElimMontage();
 	if(BlasterPlayerController)
@@ -392,17 +396,35 @@ void ABlasterCharacter::Multicast_Elim_Implementation()
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
+	GetWorldTimerManager().SetTimer(ElimTimer, this, &ABlasterCharacter::ElimTimerFinished, ElimDelay);
 		
 }
 
 void ABlasterCharacter::ElimTimerFinished()
 {
 	ABlasterGameMode* BlasterGameMode = GetWorld()->GetAuthGameMode<ABlasterGameMode>();
-	if(BlasterGameMode)
+	if(BlasterGameMode && !bLeftGame)
 	{
 		BlasterGameMode->RequestRespawn(this, Controller);
 	}
+	
+	if(bLeftGame && IsLocallyControlled())
+	{
+		OnLeftGame.Broadcast();
+	}
+	
 	HideElimText();
+}
+
+void ABlasterCharacter::Server_LeaveGame_Implementation()
+{
+	ABlasterGameMode* BlasterGameMode = GetWorld()->GetAuthGameMode<ABlasterGameMode>();
+	ABlasterPlayerState* BlasterPlayerState = GetPlayerState<ABlasterPlayerState>();
+	if(BlasterGameMode && BlasterPlayerState)
+	{
+		BlasterGameMode->PlayerLeftGame(BlasterPlayerState);
+		
+	}
 }
 
 AWeapon* ABlasterCharacter::GetEquippedWeapon()

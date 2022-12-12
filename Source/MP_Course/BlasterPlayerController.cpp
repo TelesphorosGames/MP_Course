@@ -16,6 +16,7 @@
 #include "BlasterGameState.h"
 #include "BlasterPlayerState.h"
 #include "CombatComponent.h"
+#include "MenuReturnWidget.h"
 #include "Weapon.h"
 #include "Kismet/GameplayStatics.h"
 #include "Animation/WidgetAnimation.h"
@@ -32,6 +33,19 @@ void ABlasterPlayerController::BeginPlay()
 	
 	Server_CheckMatchState();
 	
+}
+
+void ABlasterPlayerController::SetupInputComponent()
+{
+	Super::SetupInputComponent();
+
+	if(InputComponent == nullptr)
+	{
+		return;
+	}
+	InputComponent->BindAction("Quit", IE_Pressed, this, &ABlasterPlayerController::ShowReturnToMainMenu);
+
+
 }
 
 void ABlasterPlayerController::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -685,6 +699,31 @@ void ABlasterPlayerController::StopHighPingWarning()
 		BlasterHud->CharacterOverlay->PingNumberText->SetText(PingString);
 		
 	}
+}
+
+void ABlasterPlayerController::ShowReturnToMainMenu()
+{
+	if(ReturnToMainMenuWidget == nullptr)
+	{
+		return;
+	}
+	if(ReturnWidget == nullptr)
+	{
+		ReturnWidget = CreateWidget<UMenuReturnWidget>(this, ReturnToMainMenuWidget);
+	}
+	if(ReturnWidget)
+	{
+		bMenuWidgetOpen = !bMenuWidgetOpen;
+		if(bMenuWidgetOpen)
+		{
+			ReturnWidget->MenuSetup();
+		}
+		else
+		{
+			ReturnWidget->MenuTeardown();
+		}
+	}
+	
 }
 
 void ABlasterPlayerController::Server_RequestServerTime_Implementation(float TimeOfClientRequest)

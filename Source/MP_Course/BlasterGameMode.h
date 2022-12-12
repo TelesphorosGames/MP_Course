@@ -6,6 +6,7 @@
 #include "GameFramework/GameMode.h"
 #include "BlasterGameMode.generated.h"
 
+class ABlasterPlayerState;
 class ABlasterCharacter;
 
 /**
@@ -21,18 +22,23 @@ public:
 
 	virtual void Tick(float DeltaSeconds) override;
 	virtual void RequestRespawn(class ACharacter* ElimmedCharacter, AController* ElimmedController);
-
+	virtual void PlayerEliminated(ABlasterCharacter* ElimPlayer, class ABlasterPlayerController* ElimController, ABlasterPlayerController* InstigController);
+	
 	FORCEINLINE float GetWarmupTime() const {return WarmupTime ;}
 	FORCEINLINE float GetLevelStartingTime() const {return LevelStartingTime ;}
 	FORCEINLINE float GetMatchTime() const {return MatchTime ;}
 	FORCEINLINE float GetCooldownTime() const {return CooldownTime ;}
 	FORCEINLINE float GetCountdownTime() const {return CountDownTime ;}
+
 	
-	virtual void PlayerEliminated(ABlasterCharacter* ElimPlayer, class ABlasterPlayerController* ElimController, ABlasterPlayerController* InstigController);
+	
 	void FindFurthestPlayerStart(ACharacter* ElimmedCharacter, AActor*& FurthestPlayerStart);
 
 	UFUNCTION()
 	void RemoveCharacterOverlay(ABlasterPlayerController* BlasterPlayer);
+
+	void PlayerLeftGame(ABlasterPlayerState* PlayerLeaving);
+	
 protected:
 
 	virtual void BeginPlay() override;

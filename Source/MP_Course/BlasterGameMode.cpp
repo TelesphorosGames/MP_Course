@@ -77,7 +77,7 @@ void ABlasterGameMode::PlayerEliminated(ABlasterCharacter* ElimPlayer, ABlasterP
 	
 	if(ElimPlayer)
 	{
-		ElimPlayer->Elim();
+		ElimPlayer->Elim(false);
 	}
 }
 
@@ -140,6 +140,7 @@ void ABlasterGameMode::RemoveCharacterOverlay(ABlasterPlayerController* BlasterP
 	}
 }
 
+
 void ABlasterGameMode::ResetTimes()
 {
 	CountDownTime=0.f;
@@ -176,5 +177,23 @@ void ABlasterGameMode::RequestRespawn(ACharacter* ElimmedCharacter, AController*
 		AActor* LongestDistancePlayerStart;
 		FindFurthestPlayerStart(ElimmedCharacter, LongestDistancePlayerStart);
 		RestartPlayerAtPlayerStart(ElimmedController, LongestDistancePlayerStart);
+	}
+}
+
+void ABlasterGameMode::PlayerLeftGame(ABlasterPlayerState* PlayerLeftGame)
+{
+	if(PlayerLeftGame == nullptr)
+	{
+		return;
+	}
+	ABlasterGameState* BlasterGameState = GetGameState<ABlasterGameState>();
+	if(BlasterGameState && BlasterGameState->TopScoringPlayers.Contains(PlayerLeftGame))
+	{
+		BlasterGameState->TopScoringPlayers.Remove(PlayerLeftGame);
+	}
+	ABlasterCharacter* CharacterLeaving = Cast<ABlasterCharacter>(PlayerLeftGame->GetPawn());
+	if(CharacterLeaving)
+	{
+		CharacterLeaving->Elim(true);
 	}
 }
