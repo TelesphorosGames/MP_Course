@@ -26,7 +26,7 @@ public:
 	
 protected:
 	virtual void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit) override;
-	virtual void Multicast_OnHit(AActor* OtherActor) override;
+	virtual void Multicast_OnHit(AActor* OtherActor, float DamageToCause) override;
 
 	virtual void BeginPlay() override;
 	

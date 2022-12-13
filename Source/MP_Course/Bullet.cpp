@@ -43,8 +43,6 @@ void ABullet::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent
 			ProjectileMovementComponent->MaxSpeed = BulletSpeed;
 		}
 	}
-	
-	
 }
 #endif
 
@@ -59,9 +57,10 @@ void ABullet::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitive
 		bool bCauseAuthDamage = !bUseServerSideRewind || OwnerMan->IsLocallyControlled();
 		if(GetOwner()->HasAuthority() && bCauseAuthDamage)
 			{
+			float DamageToCause = Hit.BoneName.ToString() == FString("head") ? HeadshotDamage : Damage;
 				if(OtherActor)
 				{
-					Multicast_OnHit(OtherActor);
+					Multicast_OnHit(OtherActor, DamageToCause);
 				}
 				Super::OnHit(HitComp, OtherActor, OtherComp, NormalImpulse, Hit);
 				return;
@@ -79,13 +78,12 @@ void ABullet::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitive
 	
 }
 
-void ABullet::Multicast_OnHit(AActor* OtherActor)
+void ABullet::Multicast_OnHit(AActor* OtherActor, float DamageToCause)
 {
 	if(OtherActor)
 	{
-		UGameplayStatics::ApplyDamage(OtherActor, Damage, GetOwner()->GetInstigatorController(), this, UDamageType::StaticClass());
+		UGameplayStatics::ApplyDamage(OtherActor, DamageToCause, GetOwner()->GetInstigatorController(), this, UDamageType::StaticClass());
 	}
-		
 }
 
 void ABullet::BeginPlay()

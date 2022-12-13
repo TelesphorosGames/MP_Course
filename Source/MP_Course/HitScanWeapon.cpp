@@ -33,13 +33,16 @@ void AHitScanWeapon::Fire(const FVector& HitTarget)
 			bool bCauseAuthDamage = !bUseServerSideRewind || BlasterOwnerCharacter->IsLocallyControlled();
 			if(HasAuthority() && bCauseAuthDamage)
 			{
-				UGameplayStatics::ApplyDamage(BlasterCharacter, Damage, GetOwner()->GetInstigatorController(), this, UDamageType::StaticClass());
+				float DamageToCause = FireHit.BoneName.ToString() == FString("head") ? HeadshotDamage : Damage;
+				
+				
+				UGameplayStatics::ApplyDamage(BlasterCharacter, DamageToCause, GetOwner()->GetInstigatorController(), this, UDamageType::StaticClass());
 			}
 			if(!HasAuthority() && bUseServerSideRewind)
 			{
 				if(BlasterOwnerCharacter && BlasterPlayerController && BlasterOwnerCharacter->GetLagCompensationComponent()&& BlasterOwnerCharacter->IsLocallyControlled())
 				{
-					BlasterOwnerCharacter->GetLagCompensationComponent()->Server_ScoreRequest(BlasterCharacter, Start, HitTarget, BlasterPlayerController->GetServerTime() + BlasterPlayerController->SingleTripTime, this);
+					BlasterOwnerCharacter->GetLagCompensationComponent()->Server_ScoreRequest(BlasterCharacter, Start, HitTarget, BlasterPlayerController->GetServerTime() + BlasterPlayerController->SingleTripTime);
 					UE_LOG(LogTemp, Warning, TEXT("hit time : %f"), BlasterPlayerController->GetServerTime() + BlasterPlayerController->SingleTripTime);
 				}
 			}
@@ -88,7 +91,7 @@ void AHitScanWeapon::WeaponTraceHit(const FVector& TraceStart, const FVector& Hi
 		
 		if(OutHit.bBlockingHit)
 		{
-			BeamEnd=OutHit.ImpactPoint;
+			BeamEnd= OutHit.ImpactPoint;
 		}
 
 		DrawDebugSphere(GetWorld(), BeamEnd, 16.f, 12, FColor::Magenta, true);

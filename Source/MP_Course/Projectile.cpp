@@ -70,7 +70,7 @@ void AProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimi
 	Destroy();
 }
 
-void AProjectile::Multicast_OnHit(AActor* OtherActor)
+void AProjectile::Multicast_OnHit(AActor* OtherActor, float DamageToCause)
 {
 	 
 }

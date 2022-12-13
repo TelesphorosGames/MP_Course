@@ -65,7 +65,7 @@ public:
 	FORCEINLINE float GetScatterSphereRadius() const {return SphereRadius ;}
 	FORCEINLINE bool GetWeaponUsesScatter() const {return bUseScatter ;}
 	FORCEINLINE float GetDamage() const {return Damage ;}
-
+	FORCEINLINE float GetHeadshotDamage() const {return HeadshotDamage ;}
 	
 	FORCEINLINE	void SetWeaponType(EWeaponType Type){ WeaponType = Type ;}
 	FORCEINLINE void SetScatterSphereRadius(float InSphereRadius) {SphereRadius = InSphereRadius ;}
@@ -136,6 +136,9 @@ protected:
 
 	UPROPERTY(EditAnywhere)
 	float Damage = 20.f;
+
+	UPROPERTY(EditAnywhere)
+	float HeadshotDamage = 100.f;
 
 	UPROPERTY(Replicated, EditAnywhere)
 	bool bUseServerSideRewind = false;

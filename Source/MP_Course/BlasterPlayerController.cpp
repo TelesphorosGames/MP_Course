@@ -726,6 +726,47 @@ void ABlasterPlayerController::ShowReturnToMainMenu()
 	
 }
 
+void ABlasterPlayerController::Client_ElimAnnouncement_Implementation(APlayerState* Attacker, APlayerState* Victim)
+{
+	APlayerState* Self = GetPlayerState<APlayerState>();
+	if(Attacker && Victim && Self)
+	{
+		if(BlasterHud == nullptr)
+		{
+			BlasterHud = Cast<ABlasterHud>(GetHUD());
+		}
+		if(BlasterHud)
+		{
+			if(Attacker == Self && Victim != Self)
+			{
+				BlasterHud->AddElimAnnouncement("You", Victim->GetPlayerName());
+				return;
+			}
+			if(Victim == Self && Attacker != Self)
+			{
+				BlasterHud->AddElimAnnouncement(Attacker->GetPlayerName(), "You");
+				return;
+			}
+			if(Victim == Self && Attacker == Self)
+			{
+				BlasterHud->AddElimAnnouncement("Mistakes were made. You", "yourself.");
+				return;
+			}
+			if(Attacker == Victim && Attacker != Self)
+			{
+				BlasterHud->AddElimAnnouncement(Attacker->GetPlayerName(), "themselves.");
+				return;
+			}
+			BlasterHud->AddElimAnnouncement(Attacker->GetPlayerName(), Victim->GetPlayerName());
+		}
+	}
+}
+
+void ABlasterPlayerController::BroadcastEliminated(APlayerState* Attacker, APlayerState* Victim)
+{
+	Client_ElimAnnouncement(Attacker, Victim);
+}
+
 void ABlasterPlayerController::Server_RequestServerTime_Implementation(float TimeOfClientRequest)
 {
 	const float ServerTimeOfReceipt = GetWorld()->GetTimeSeconds();

@@ -5,6 +5,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
+#include "GameFramework/PlayerState.h"
 #include "BlasterPlayerController.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FHighPingDelegate, bool, bPingTooHigh);
@@ -78,6 +79,8 @@ public:
 	float SingleTripTime = 0;
 
 	FHighPingDelegate HighPingDelegate;
+
+	void BroadcastEliminated(APlayerState* Attacker, APlayerState* Victim);
 	
 protected:
 
@@ -118,8 +121,10 @@ protected:
 	void StopHighPingWarning();
 
 	void ShowReturnToMainMenu();
-	
-	
+
+	UFUNCTION(Client, Reliable)
+	void Client_ElimAnnouncement(APlayerState* Attacker, APlayerState* Victim);
+
 private:
 
 	UPROPERTY(EditAnywhere, Category="HUD");

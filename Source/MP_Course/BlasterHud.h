@@ -62,12 +62,14 @@ public:
 	UFUNCTION()
 	void RemoveCharacterOverlay();
 	
+	void AddElimAnnouncement(FString Attacker, FString Victim);
+	
 protected:
 
 	virtual void BeginPlay() override;;
 
 private:
-
+	
 	FHudPackage HudPackage{};
 	UFUNCTION()
 	void DrawCrosshairs(UTexture2D* Texture, FVector2D ViewportCenter, FVector2D Spread, FLinearColor CrosshairColor);
@@ -75,5 +77,16 @@ private:
 	float CrosshairSpreadMax = 16.f;
 	UPROPERTY()
 	ABlasterPlayerController* OwningPlayerController{};
-	
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class UElimAnnouncement> ElimAnnouncementClass;
+
+	UPROPERTY(EditAnywhere)
+	float ElimAnnounementTime = 3.5f;
+
+	UFUNCTION()
+	void ElimAnnouncementTimerFinished(UElimAnnouncement* MsgToRemove);
+
+	UPROPERTY()
+	TArray<UElimAnnouncement*> EliminationAnnouncements;
 };

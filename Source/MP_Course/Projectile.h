@@ -17,12 +17,12 @@ public:
 	AProjectile();
 
 	FORCEINLINE UStaticMeshComponent* GetProjectileMesh() const {return ProjectileMesh ;}
-	FORCEINLINE 
+
 	
 	virtual void Tick(float DeltaTime) override;
 	virtual void Destroyed() override;
 
-
+	UPROPERTY()
 	bool bUseServerSideRewind = false;
 	
 	FVector_NetQuantize TraceStart;
@@ -30,8 +30,12 @@ public:
 	
 	UPROPERTY(EditAnywhere)
 	float BulletSpeed = 15000.f;
-	
-	float Damage = {40.f};
+
+	/* ONLY SET FOR GRENADES AND ROCKETS - BULLET VALUE IS SET WHEN BULLET IS SPAWNED*/
+	UPROPERTY(EditAnywhere)
+	float Damage = {20.f};
+	UPROPERTY(EditAnywhere)
+	float HeadshotDamage = {100.f};
 
 protected:
 
@@ -42,7 +46,7 @@ protected:
 
 	UFUNCTION(NetMulticast, Reliable)
 	virtual void Multicast_OnHit(ECollisionChannel CollisionChannel);
-	virtual void Multicast_OnHit(AActor* OtherActor);
+	virtual void Multicast_OnHit(AActor* OtherActor, float DamageToCause);
 
 	void ExplodeDamage();
 	
