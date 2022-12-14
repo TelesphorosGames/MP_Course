@@ -97,7 +97,7 @@ public:
 	UFUNCTION(Server, Reliable)
 	void Server_ProjectileScoreRequest(ABlasterCharacter* HitCharacter,  const FVector_NetQuantize& TraceStart, const FVector_NetQuantize100& InitialVelocity, float HitTime);
 	
-	FHitResult ConfirmedHitResult;
+	
 
 protected:
 	

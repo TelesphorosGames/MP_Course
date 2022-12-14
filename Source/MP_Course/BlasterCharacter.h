@@ -147,7 +147,7 @@ public:
 	class UBoxComponent* FootRight{};
 
 	UPROPERTY()
-	TMap<FName, UBoxComponent*> HitCollisionBoxes;
+	TMap<FName, UBoxComponent*> HitCollisionBoxes{};
 
 	UFUNCTION(Server, Reliable)
 	void Server_LeaveGame();

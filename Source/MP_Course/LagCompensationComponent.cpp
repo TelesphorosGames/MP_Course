@@ -87,6 +87,7 @@ FServerSideRewindResult ULagCompensationComponent::ConfirmHit(const FFramePackag
 	UWorld* World = GetWorld();
 	if(World)
 	{
+		FHitResult ConfirmedHitResult;
 		World->LineTraceSingleByChannel(ConfirmedHitResult, TraceStart, TraceEnd, ECC_HitBox);
 		if(ConfirmedHitResult.GetComponent() == HeadshotBox)
 		{
@@ -139,16 +140,18 @@ FShotgunServerSideRewindResult ULagCompensationComponent::ShotgunConfirmHit(cons
 	
 	for(auto& Frame : FramePackages)
 	{
-	UBoxComponent* HeadBox = Frame.Character->HitCollisionBoxes[FName("head")];
-		HeadBox->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-		HeadBox->SetCollisionResponseToChannel(ECC_HitBox, ECR_Block);
+	    UBoxComponent* HeadBox = Frame.Character->HitCollisionBoxes[FName("head")];
+		HeadBox->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+		HeadBox->SetCollisionResponseToChannel(ECC_HitBox, ECollisionResponse::ECR_Block);
 	}
 	UWorld* World = GetWorld();
 	for(auto& HitLocation : HitLocations)
 	{
-		const FVector TraceEnd = (TraceStart + (HitLocation - TraceStart)) * 1.25f;
+		FHitResult ConfirmedHitResult;
+		const FVector TraceEnd = TraceStart + (HitLocation - TraceStart);
 		if(World)
 		{
+			
 			World->LineTraceSingleByChannel(ConfirmedHitResult, TraceStart, TraceEnd, ECC_HitBox);
 			ABlasterCharacter* BlasterCharacter = Cast<ABlasterCharacter>(ConfirmedHitResult.GetActor());
 			if(BlasterCharacter)
@@ -167,12 +170,13 @@ FShotgunServerSideRewindResult ULagCompensationComponent::ShotgunConfirmHit(cons
 
 	for(auto& Frame : FramePackages)
 	{
-		for(auto& HitBoxPair : Frame.Character->HitCollisionBoxes)
+		
+		for(auto& Hitboxes : Frame.Character->HitCollisionBoxes)
 		{
-			if(HitBoxPair.Value != nullptr)
+			if(Hitboxes.Value != nullptr)
 			{
-				HitBoxPair.Value->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-				HitBoxPair.Value->SetCollisionResponseToChannel(ECC_HitBox, ECR_Block);
+				Hitboxes.Value->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+				Hitboxes.Value->SetCollisionResponseToChannel(ECC_HitBox, ECR_Block);
 			}
 		}
 		UBoxComponent* HeadBox = Frame.Character->HitCollisionBoxes[FName("head")];
@@ -181,10 +185,11 @@ FShotgunServerSideRewindResult ULagCompensationComponent::ShotgunConfirmHit(cons
 
 	for(auto& HitLocation : HitLocations)
 	{
-		const FVector TraceEnd = TraceStart + (HitLocation - TraceStart) * 1.25f;
+		const FVector TraceEnd = TraceStart + (HitLocation - TraceStart);
 		
 		if(World)
 		{
+			FHitResult ConfirmedHitResult;
 			World->LineTraceSingleByChannel(ConfirmedHitResult, TraceStart, TraceEnd, ECC_HitBox);
 			ABlasterCharacter* BlasterCharacter = Cast<ABlasterCharacter>(ConfirmedHitResult.GetActor());
 			if(BlasterCharacter)
@@ -256,12 +261,12 @@ FServerSideRewindResult ULagCompensationComponent::ProjectileConfirmHit(const FF
 			return FServerSideRewindResult{true, true};
 		
 	}
-	for(auto& HitBoxPair : CurrentFrame.Character->HitCollisionBoxes)
+	for(auto& HitBoxes : CurrentFrame.Character->HitCollisionBoxes)
 	{
-		if(HitBoxPair.Value != nullptr)
+		if(HitBoxes.Value != nullptr)
 		{
-			HitBoxPair.Value->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-			HitBoxPair.Value->SetCollisionResponseToChannel(ECC_HitBox, ECR_Block);
+			HitBoxes.Value->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+			HitBoxes.Value->SetCollisionResponseToChannel(ECC_HitBox, ECR_Block);
 		}
 	}
 	UGameplayStatics::PredictProjectilePath(this, PathParams, PathResult);
@@ -285,16 +290,16 @@ void ULagCompensationComponent::CacheBoxPositions(ABlasterCharacter* HitCharacte
 	if(HitCharacter == nullptr) return;
 		
 
-	for(auto& HitBoxPair : HitCharacter->HitCollisionBoxes)
+	for(auto& HitBoxes : HitCharacter->HitCollisionBoxes)
 	{
-		if(HitBoxPair.Value != nullptr)
+		if(HitBoxes.Value != nullptr)
 		{
 			FBoxInformation BoxInfo;
 
-			BoxInfo.Location = HitBoxPair.Value->GetComponentLocation();
-			BoxInfo.Rotation = HitBoxPair.Value->GetComponentRotation();
-			BoxInfo.Extent = HitBoxPair.Value->GetScaledBoxExtent();
-			OutFramePackage.HitBoxInfo.Add(HitBoxPair.Key, BoxInfo);
+			BoxInfo.Location = HitBoxes.Value->GetComponentLocation();
+			BoxInfo.Rotation = HitBoxes.Value->GetComponentRotation();
+			BoxInfo.Extent = HitBoxes.Value->GetScaledBoxExtent();
+			OutFramePackage.HitBoxInfo.Add(HitBoxes.Key, BoxInfo);
 			
 		}
 	}
@@ -303,16 +308,16 @@ void ULagCompensationComponent::CacheBoxPositions(ABlasterCharacter* HitCharacte
 void ULagCompensationComponent::MoveBoxes(ABlasterCharacter* HitCharacter, const FFramePackage& Package)
 {
 	if(HitCharacter == nullptr) return;
-	for(auto& HitBoxPair : HitCharacter->HitCollisionBoxes)
+	for(auto& HitBoxes : HitCharacter->HitCollisionBoxes)
 	{
-		if(HitBoxPair.Value != nullptr)
+		if(HitBoxes.Value != nullptr)
 		{
-			HitBoxPair.Value->SetWorldLocation(Package.HitBoxInfo[HitBoxPair.Key].Location);
-			HitBoxPair.Value->SetWorldRotation(Package.HitBoxInfo[HitBoxPair.Key].Rotation);
-			HitBoxPair.Value->SetBoxExtent(Package.HitBoxInfo[HitBoxPair.Key].Extent);
+			HitBoxes.Value->SetWorldLocation(Package.HitBoxInfo[HitBoxes.Key].Location);
+			HitBoxes.Value->SetWorldRotation(Package.HitBoxInfo[HitBoxes.Key].Rotation);
+			HitBoxes.Value->SetBoxExtent(Package.HitBoxInfo[HitBoxes.Key].Extent);
 		
-			HitBoxPair.Value->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-			HitBoxPair.Value->SetCollisionResponseToChannel(ECC_HitBox, ECR_Block);
+			HitBoxes.Value->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+			HitBoxes.Value->SetCollisionResponseToChannel(ECC_HitBox, ECR_Block);
 		
 			
 		}
@@ -322,14 +327,14 @@ void ULagCompensationComponent::MoveBoxes(ABlasterCharacter* HitCharacter, const
 void ULagCompensationComponent::ResetHitBoxes(ABlasterCharacter* HitCharacter, const FFramePackage& Package)
 {
 	if(HitCharacter == nullptr) return;
-	for(auto& HitBoxPair : HitCharacter->HitCollisionBoxes)
+	for(auto& HitBoxes : HitCharacter->HitCollisionBoxes)
 	{
-		if(HitBoxPair.Value != nullptr)
+		if(HitBoxes.Value != nullptr)
 		{
-			HitBoxPair.Value->SetWorldLocation(Package.HitBoxInfo[HitBoxPair.Key].Location);
-			HitBoxPair.Value->SetWorldRotation(Package.HitBoxInfo[HitBoxPair.Key].Rotation);
-			HitBoxPair.Value->SetBoxExtent(Package.HitBoxInfo[HitBoxPair.Key].Extent);
-			HitBoxPair.Value->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+			HitBoxes.Value->SetWorldLocation(Package.HitBoxInfo[HitBoxes.Key].Location);
+			HitBoxes.Value->SetWorldRotation(Package.HitBoxInfo[HitBoxes.Key].Rotation);
+			HitBoxes.Value->SetBoxExtent(Package.HitBoxInfo[HitBoxes.Key].Extent);
+			HitBoxes.Value->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		}
 	}
 	
@@ -505,9 +510,9 @@ FServerSideRewindResult ULagCompensationComponent::ProjectileServerSideRewind(AB
 
 void ULagCompensationComponent::Server_ScoreRequest_Implementation(ABlasterCharacter* HitCharacter, const FVector_NetQuantize& TraceStart, const FVector_NetQuantize& HitLocation, float HitTime)
 {
-	FServerSideRewindResult ConfirmedResult = ServerSideRewind(HitCharacter, TraceStart, HitLocation, HitTime);
+	const FServerSideRewindResult ConfirmedResult = ServerSideRewind(HitCharacter, TraceStart, HitLocation, HitTime);
 
-	if(HitCharacter && Character->GetEquippedWeapon() && ConfirmedResult.bHitConfirmed)
+	if(Character && HitCharacter && Character->GetEquippedWeapon() && ConfirmedResult.bHitConfirmed)
 	{
 		const float DamageToCause = ConfirmedResult.bHeadshot ? Character->GetEquippedWeapon()->GetHeadshotDamage() : Character->GetEquippedWeapon()->GetDamage();
 
@@ -520,7 +525,7 @@ void ULagCompensationComponent::Server_ShotgunScoreRequest_Implementation(
 	const TArray<ABlasterCharacter*>& HitCharacters, const FVector_NetQuantize& TraceStart,
 	const TArray<FVector_NetQuantize>& HitLocations, float HitTime)
 {
-	const FShotgunServerSideRewindResult& Confirmed = ShotgunServerSideRewind(HitCharacters, TraceStart, HitLocations, HitTime);
+	const FShotgunServerSideRewindResult& ConfirmedResult = ShotgunServerSideRewind(HitCharacters, TraceStart, HitLocations, HitTime);
 
 	for(auto& HitCharacter  : HitCharacters)
 	{
@@ -530,19 +535,19 @@ void ULagCompensationComponent::Server_ShotgunScoreRequest_Implementation(
 		float HeadshotDamage{};
 		float BodyshotDamage{};
 		float TotalDamage{};
-		if(Confirmed.Headshots.Contains(HitCharacter))
+		if(ConfirmedResult.Headshots.Contains(HitCharacter))
 		{
 			
-			HeadshotDamage = Confirmed.Headshots[HitCharacter] * Character->GetEquippedWeapon()->GetHeadshotDamage();
-			UE_LOG(LogTemp,Warning,TEXT("HeadshotDamage : %d , To Character : %s"), HeadshotDamage, *HitCharacter->GetName());
+			HeadshotDamage = ConfirmedResult.Headshots[HitCharacter] * Character->GetEquippedWeapon()->GetHeadshotDamage();
+			UE_LOG(LogTemp,Warning,TEXT("HeadshotDamage : %f , To Character : %s"), HeadshotDamage, *HitCharacter->GetName());
 			TotalDamage += HeadshotDamage;
 			
 		}
 
-		if(Confirmed.Bodyshots.Contains(HitCharacter))
+		if(ConfirmedResult.Bodyshots.Contains(HitCharacter))
 		{
-			BodyshotDamage = Confirmed.Bodyshots[HitCharacter] * Character->GetEquippedWeapon()->GetDamage();
-			UE_LOG(LogTemp,Warning,TEXT("BodyshotDamage : %d , To Character : %s"), BodyshotDamage, *HitCharacter->GetName());
+			BodyshotDamage = ConfirmedResult.Bodyshots[HitCharacter] * Character->GetEquippedWeapon()->GetDamage();
+			UE_LOG(LogTemp,Warning,TEXT("BodyshotDamage : %f , To Character : %s"), BodyshotDamage, *HitCharacter->GetName());
 			TotalDamage += BodyshotDamage;
 		}
 		UGameplayStatics::ApplyDamage(HitCharacter, TotalDamage, Character->Controller, Character->GetEquippedWeapon(), UDamageType::StaticClass());
@@ -553,11 +558,14 @@ void ULagCompensationComponent::Server_ProjectileScoreRequest_Implementation(ABl
 	const FVector_NetQuantize& TraceStart, const FVector_NetQuantize100& InitialVelocity, float HitTime)
 {
 	
-	FServerSideRewindResult Confirmed = ProjectileServerSideRewind(HitCharacter, TraceStart, InitialVelocity, HitTime);
+	FServerSideRewindResult ConfirmedResult = ProjectileServerSideRewind(HitCharacter, TraceStart, InitialVelocity, HitTime);
 
-	if(Character && HitCharacter && Confirmed.bHitConfirmed)
+	const float DamageToCause = ConfirmedResult.bHeadshot ? Character->GetEquippedWeapon()->GetHeadshotDamage() : Character->GetEquippedWeapon()->GetDamage();
+
+	
+	if(Character && HitCharacter && ConfirmedResult.bHitConfirmed)
 	{
-		UGameplayStatics::ApplyDamage(HitCharacter, Character->GetEquippedWeapon()->GetDamage(), Character->Controller, Character->GetEquippedWeapon(), UDamageType::StaticClass());
+		UGameplayStatics::ApplyDamage(HitCharacter, DamageToCause, Character->Controller, Character->GetEquippedWeapon(), UDamageType::StaticClass());
 	}
 	
 }

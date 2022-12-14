@@ -98,9 +98,9 @@ void AShotgun::FireShotgun(const TArray<FVector_NetQuantize>& HitTargets)
 				UGameplayStatics::PlaySoundAtLocation(this,HitSound,FireHit.ImpactPoint, .5f, FMath::FRandRange(-.5f, .5f));
 			}
 		}
-		TArray<ABlasterCharacter*> HitCharacters;
+		TArray<ABlasterCharacter*> HitCharacters{};
 	
-		TMap<ABlasterCharacter*, float> DamageMap;
+		TMap<ABlasterCharacter*, float> DamageMap{};
 		for (auto Hitpair : HitMap)
 		{
 			

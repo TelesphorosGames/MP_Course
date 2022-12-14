@@ -57,7 +57,8 @@ void ABullet::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitive
 		bool bCauseAuthDamage = !bUseServerSideRewind || OwnerMan->IsLocallyControlled();
 		if(GetOwner()->HasAuthority() && bCauseAuthDamage)
 			{
-			float DamageToCause = Hit.BoneName.ToString() == FString("head") ? HeadshotDamage : Damage;
+				float DamageToCause = Hit.BoneName.ToString() == FString("head") ? HeadshotDamage : Damage;
+			
 				if(OtherActor)
 				{
 					Multicast_OnHit(OtherActor, DamageToCause);
