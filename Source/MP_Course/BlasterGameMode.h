@@ -23,6 +23,8 @@ public:
 	virtual void Tick(float DeltaSeconds) override;
 	virtual void RequestRespawn(class ACharacter* ElimmedCharacter, AController* ElimmedController);
 	virtual void PlayerEliminated(ABlasterCharacter* ElimPlayer, class ABlasterPlayerController* ElimController, ABlasterPlayerController* InstigController);
+
+	void BroadcastChatMessage(APlayerState* Sender, const FString& Message);
 	
 	FORCEINLINE float GetWarmupTime() const {return WarmupTime ;}
 	FORCEINLINE float GetLevelStartingTime() const {return LevelStartingTime ;}

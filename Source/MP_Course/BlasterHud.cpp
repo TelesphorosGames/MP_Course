@@ -118,11 +118,11 @@ void ABlasterHud::AddElimAnnouncement(FString Attacker, FString Victim)
 		UElimAnnouncement* ElimAnnouncementWidget = CreateWidget<UElimAnnouncement>(OwningPlayerController, ElimAnnouncementClass);
 		if(ElimAnnouncementWidget)
 		{
+			
 			ElimAnnouncementWidget->SetElimAnnounementText(Attacker, Victim);
 			ElimAnnouncementWidget->AddToViewport();
-
-
-			for(auto Msg : EliminationAnnouncements)
+			
+			for(auto Msg : Announcements)
 			{
 				if(Msg && Msg->AnnouncementBox)
 				{
@@ -133,19 +133,52 @@ void ABlasterHud::AddElimAnnouncement(FString Attacker, FString Victim)
 						const FVector2D NewPosition =  { Position.X, Position.Y - CanvasSlot->GetSize().Y};
 						CanvasSlot->SetPosition(NewPosition);
 					}
-					
 				}
 			}
-
-
-
 			
-			EliminationAnnouncements.Add(ElimAnnouncementWidget);
+			Announcements.Add(ElimAnnouncementWidget);
 
 			FTimerHandle ElimMsgTimer;
 			FTimerDelegate ElimTimerDelegate;
 
 			ElimTimerDelegate.BindUFunction(this, FName("ElimAnnouncementTimerFinished"), ElimAnnouncementWidget);
+			GetWorldTimerManager().SetTimer(ElimMsgTimer, ElimTimerDelegate, ElimAnnounementTime, false);
+		}
+		
+	}
+}
+
+void ABlasterHud::AddChatAnnouncement(APlayerState* Sender, const FString& ChatMessage)
+{
+	if(OwningPlayerController && ElimAnnouncementClass)
+	{
+		UElimAnnouncement* ChatAnnouncementWidget = CreateWidget<UElimAnnouncement>(OwningPlayerController, ElimAnnouncementClass);
+		if(ChatAnnouncementWidget)
+		{
+			
+			ChatAnnouncementWidget->SetPlayerChatText(Sender, ChatMessage);
+			ChatAnnouncementWidget->AddToViewport();
+			
+			for(auto Msg : Announcements)
+			{
+				if(Msg && Msg->AnnouncementBox)
+				{
+					UCanvasPanelSlot* CanvasSlot = UWidgetLayoutLibrary::SlotAsCanvasSlot(Msg->AnnouncementBox);
+					if(CanvasSlot)
+					{
+						const FVector2D Position = CanvasSlot->GetPosition();
+						const FVector2D NewPosition =  { Position.X, Position.Y - CanvasSlot->GetSize().Y};
+						CanvasSlot->SetPosition(NewPosition);
+					}
+				}
+			}
+			
+			Announcements.Add(ChatAnnouncementWidget);
+
+			FTimerHandle ElimMsgTimer;
+			FTimerDelegate ElimTimerDelegate;
+
+			ElimTimerDelegate.BindUFunction(this, FName("ElimAnnouncementTimerFinished"), ChatAnnouncementWidget);
 			GetWorldTimerManager().SetTimer(ElimMsgTimer, ElimTimerDelegate, ElimAnnounementTime, false);
 		}
 		
@@ -165,5 +198,6 @@ void ABlasterHud::ElimAnnouncementTimerFinished(UElimAnnouncement* MsgToRemove)
 	if(MsgToRemove)
 	{
 		MsgToRemove->RemoveFromParent();
+		
 	}
 }

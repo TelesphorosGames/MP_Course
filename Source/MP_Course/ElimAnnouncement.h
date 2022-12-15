@@ -19,7 +19,7 @@ public:
 
 	
 	void SetElimAnnounementText(FString AttackerName, FString VictimName);
-
+	void SetPlayerChatText(APlayerState* Sender, const FString& MessageToDisplay);
 	
 	UPROPERTY(meta=(BindWidget))
 	class UHorizontalBox* AnnouncementBox{};

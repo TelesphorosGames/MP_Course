@@ -25,6 +25,7 @@
 #include "MyEnhancedInputComponent.h"
 #include "MyGameplayTags.h"
 #include "Components/BoxComponent.h"
+#include "Components/EditableTextBox.h"
 #include "Components/SphereComponent.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -259,7 +260,7 @@ void ABlasterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	PlayerInputComponent->BindAction("Fire", IE_Released, this, &ABlasterCharacter::FireButtonReleased);
 	PlayerInputComponent->BindAction("Reload", IE_Pressed, this, &ABlasterCharacter::ReloadButtonPressed);
 	PlayerInputComponent->BindAction("ThrowGrenade", IE_Pressed, this, &ABlasterCharacter::GrenadeButtonPressed);
-	
+	PlayerInputComponent->BindAction("UseChatBox", IE_Pressed, this, &ABlasterCharacter::UseChatBox);
 	
 }
 
@@ -615,6 +616,25 @@ void ABlasterCharacter::ReloadButtonPressed()
 	{
 		CombatComponent->ReloadWeapon();
 	}
+}
+
+void ABlasterCharacter::UseChatBox()
+{
+	if(BlasterPlayerController == nullptr)
+	{
+		BlasterPlayerController = Cast<ABlasterPlayerController>(Controller);
+	}	
+	if(BlasterPlayerController)
+	{
+		ABlasterHud* BlasterHud = Cast<ABlasterHud>(BlasterPlayerController->GetHUD());
+		if(BlasterHud &&
+			BlasterHud->CharacterOverlay)
+		{
+			BlasterHud->CharacterOverlay->ToggleChatBox();
+		}
+	}
+	
+		
 }
 
 void ABlasterCharacter::AimOffset(float DeltaTime)

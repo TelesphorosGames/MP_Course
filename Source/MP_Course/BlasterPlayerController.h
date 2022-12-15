@@ -82,6 +82,11 @@ public:
 
 	void BroadcastEliminated(APlayerState* Attacker, APlayerState* Victim);
 	
+	void BroadcastToChat(APlayerState* Sender,const FString& Message);
+	
+	UFUNCTION(Server, Reliable)
+	void Server_BroadcastMessage(APlayerState* Sender, const FString& Message);
+
 protected:
 
 	virtual void BeginPlay() override;
@@ -124,6 +129,10 @@ protected:
 
 	UFUNCTION(Client, Reliable)
 	void Client_ElimAnnouncement(APlayerState* Attacker, APlayerState* Victim);
+
+	UFUNCTION(Client, Reliable)
+	void Client_ChatAnnouncement(APlayerState* Sender, const FString& Message);
+	
 
 private:
 
@@ -196,3 +205,5 @@ private:
 	void Server_ReportPingStatus(bool bHighPing);
 	
 };
+
+

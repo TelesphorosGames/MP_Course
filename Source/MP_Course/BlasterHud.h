@@ -63,6 +63,8 @@ public:
 	void RemoveCharacterOverlay();
 	
 	void AddElimAnnouncement(FString Attacker, FString Victim);
+
+	void AddChatAnnouncement(APlayerState* Sender, const FString& ChatMessage);
 	
 protected:
 
@@ -82,11 +84,14 @@ private:
 	TSubclassOf<class UElimAnnouncement> ElimAnnouncementClass;
 
 	UPROPERTY(EditAnywhere)
-	float ElimAnnounementTime = 3.5f;
+	float ElimAnnounementTime = 7.5f;
 
 	UFUNCTION()
 	void ElimAnnouncementTimerFinished(UElimAnnouncement* MsgToRemove);
 
 	UPROPERTY()
-	TArray<UElimAnnouncement*> EliminationAnnouncements;
+	TArray<UElimAnnouncement*> Announcements;
+
+
+	
 };

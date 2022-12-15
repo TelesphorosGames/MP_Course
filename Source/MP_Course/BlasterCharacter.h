@@ -153,6 +153,9 @@ public:
 	void Server_LeaveGame();
 	
 	FOnLeftGame OnLeftGame;
+
+	UFUNCTION()
+	void UseChatBox();
 	
 
 protected:
@@ -186,6 +189,8 @@ protected:
 	void AimButtonReleased();
 	void GrenadeButtonPressed();
 	void ReloadButtonPressed();
+
+	
 	
 
 	void AimOffset(float DeltaTime);	
@@ -300,5 +305,7 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<AWeapon> DefaultWeaponClass;
-	
+
+	UPROPERTY()
+	bool bChatBoxVisible = false;
 };

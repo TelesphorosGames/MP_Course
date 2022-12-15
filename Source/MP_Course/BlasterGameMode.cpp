@@ -90,6 +90,20 @@ void ABlasterGameMode::PlayerEliminated(ABlasterCharacter* ElimPlayer, ABlasterP
 	}
 }
 
+void ABlasterGameMode::BroadcastChatMessage(APlayerState* Sender, const FString& Message)
+{
+	
+	for(FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
+	{
+		ABlasterPlayerController* BlasterPlayer = Cast<ABlasterPlayerController>(*It);
+		if(BlasterPlayer)
+		{
+			BlasterPlayer->BroadcastToChat(Sender, Message);
+		}
+	}
+	
+}
+
 void ABlasterGameMode::FindFurthestPlayerStart(ACharacter* ElimmedCharacter, AActor*& FurthestPlayerStart)
 {
 	TArray<AActor*> PlayerStarts;

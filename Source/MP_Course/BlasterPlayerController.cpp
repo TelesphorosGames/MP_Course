@@ -726,6 +726,19 @@ void ABlasterPlayerController::ShowReturnToMainMenu()
 	
 }
 
+void ABlasterPlayerController::Client_ChatAnnouncement_Implementation(APlayerState* Sender, const FString& Message)
+{
+	if(BlasterHud == nullptr)
+	{
+		BlasterHud = Cast<ABlasterHud>(GetHUD());
+	}
+	if(BlasterHud)
+	{
+		BlasterHud->AddChatAnnouncement(Sender, Message);
+	}
+}
+
+
 void ABlasterPlayerController::Client_ElimAnnouncement_Implementation(APlayerState* Attacker, APlayerState* Victim)
 {
 	APlayerState* Self = GetPlayerState<APlayerState>();
@@ -765,6 +778,20 @@ void ABlasterPlayerController::Client_ElimAnnouncement_Implementation(APlayerSta
 void ABlasterPlayerController::BroadcastEliminated(APlayerState* Attacker, APlayerState* Victim)
 {
 	Client_ElimAnnouncement(Attacker, Victim);
+}
+
+void ABlasterPlayerController::BroadcastToChat(APlayerState* Sender, const FString& Message)
+{
+	Client_ChatAnnouncement(Sender, Message);
+}
+
+void ABlasterPlayerController::Server_BroadcastMessage_Implementation(APlayerState* Sender, const FString& Message)
+{
+	ABlasterGameMode* GameMode = GetWorld()->GetAuthGameMode<ABlasterGameMode>();
+	if(GameMode)
+	{
+		GameMode->BroadcastChatMessage(Sender, Message);
+	}
 }
 
 void ABlasterPlayerController::Server_RequestServerTime_Implementation(float TimeOfClientRequest)
