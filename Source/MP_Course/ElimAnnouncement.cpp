@@ -15,9 +15,9 @@ void UElimAnnouncement::SetElimAnnounementText(FString AttackerName, FString Vic
 	}
 }
 
-void UElimAnnouncement::SetPlayerChatText(APlayerState* Sender, const FString& MessageToDisplay)
+void UElimAnnouncement::SetPlayerChatText(const FString& SenderName, const FString& MessageToDisplay)
 {
-	const FString ChatAnnouncementText = FString::Printf(TEXT("%s : %s"), *Sender->GetName(), *MessageToDisplay );
+	const FString ChatAnnouncementText = FString::Printf(TEXT("%s : %s"), *SenderName, *MessageToDisplay );
 	if(AnnouncementText)
 	{
 		AnnouncementText->SetText(FText::FromString(ChatAnnouncementText));

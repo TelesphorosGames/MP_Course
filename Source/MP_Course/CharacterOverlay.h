@@ -56,7 +56,7 @@ public:
 	bool bChatBoxVisible = false;
 
 	UFUNCTION()
-	void OnTextComitted(const FText& Text, ETextCommit::Type CommitMethod);
+	void TextComitted(const FText& Text, ETextCommit::Type CommitMethod);
 
 	void ToggleChatBox();
 

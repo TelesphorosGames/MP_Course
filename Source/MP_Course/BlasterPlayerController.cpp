@@ -726,7 +726,7 @@ void ABlasterPlayerController::ShowReturnToMainMenu()
 	
 }
 
-void ABlasterPlayerController::Client_ChatAnnouncement_Implementation(APlayerState* Sender, const FString& Message)
+void ABlasterPlayerController::Client_ChatAnnouncement_Implementation(const FString& SenderName, const FString& Message)
 {
 	if(BlasterHud == nullptr)
 	{
@@ -734,7 +734,7 @@ void ABlasterPlayerController::Client_ChatAnnouncement_Implementation(APlayerSta
 	}
 	if(BlasterHud)
 	{
-		BlasterHud->AddChatAnnouncement(Sender, Message);
+		BlasterHud->AddChatAnnouncement(SenderName, Message);
 	}
 }
 
@@ -780,13 +780,9 @@ void ABlasterPlayerController::BroadcastEliminated(APlayerState* Attacker, APlay
 	Client_ElimAnnouncement(Attacker, Victim);
 }
 
-void ABlasterPlayerController::BroadcastToChat(APlayerState* Sender, const FString& Message)
-{
-	Client_ChatAnnouncement(Sender, Message);
-}
 
 void ABlasterPlayerController::Server_BroadcastMessage_Implementation(APlayerState* Sender, const FString& Message)
-{
+{	
 	ABlasterGameMode* GameMode = GetWorld()->GetAuthGameMode<ABlasterGameMode>();
 	if(GameMode)
 	{

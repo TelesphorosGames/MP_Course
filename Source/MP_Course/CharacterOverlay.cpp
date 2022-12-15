@@ -8,65 +8,56 @@
 #include "Components/EditableTextBox.h"
 
 
-
 void UCharacterOverlay::NativeOnInitialized()
 {
 	Super::NativeOnInitialized();
-
-	
 }
 
 void UCharacterOverlay::ToggleChatBox()
 {
-	
 	ABlasterPlayerController* BlasterPlayerController = Cast<ABlasterPlayerController>(GetOwningPlayer());
-	if(BlasterPlayerController)
+	if (BlasterPlayerController)
 	{
-		if(!bChatBoxVisible)
-        	{
+		if (!bChatBoxVisible)
+		{
+			ChatInputTextBox->OnTextCommitted.AddDynamic(this, &UCharacterOverlay::TextComitted);
+			ChatInputTextBox->SetVisibility(ESlateVisibility::Visible);
+			ChatInputTextBox->SetFocus();
+			BlasterPlayerController->SetInputMode(FInputModeGameAndUI());
+			bChatBoxVisible = true;
+		}
+		else
+		{
+			ChatInputTextBox->OnTextCommitted.RemoveDynamic(this, &UCharacterOverlay::TextComitted);
 
-				ChatInputTextBox->OnTextCommitted.AddDynamic(this, &UCharacterOverlay::OnTextComitted);
-        		ChatInputTextBox->SetVisibility(ESlateVisibility::Visible);
-        		ChatInputTextBox->SetFocus();
-        		BlasterPlayerController->SetInputMode(FInputModeGameAndUI());
-        		bChatBoxVisible=true;
-			
-        	}
-        	else
-        	{
-        		ChatInputTextBox->OnTextCommitted.RemoveDynamic(this, &UCharacterOverlay::OnTextComitted);
-	
-        		ChatInputTextBox->SetVisibility(ESlateVisibility::Collapsed);
-        		BlasterPlayerController->SetInputMode(FInputModeGameOnly());
-        		bChatBoxVisible = false;
-        	}
+			ChatInputTextBox->SetVisibility(ESlateVisibility::Collapsed);
+			BlasterPlayerController->SetInputMode(FInputModeGameOnly());
+			bChatBoxVisible = false;
+		}
 	}
-	
 }
 
-void UCharacterOverlay::OnTextComitted(const FText& Text, ETextCommit::Type CommitMethod)
+void UCharacterOverlay::TextComitted(const FText& Text, ETextCommit::Type CommitMethod)
 {
-
 	ABlasterPlayerController* BlasterPlayerController = Cast<ABlasterPlayerController>(GetOwningPlayer());
 
-	if(CommitMethod == ETextCommit::OnEnter)
+	if (CommitMethod == ETextCommit::OnEnter)
 	{
-		if(BlasterPlayerController)
+		if (BlasterPlayerController)
 		{
 			BlasterPlayerController->Server_BroadcastMessage(GetOwningPlayerState(), Text.ToString());
 			ChatInputTextBox->SetVisibility(ESlateVisibility::Collapsed);
 			BlasterPlayerController->SetInputMode(FInputModeGameOnly());
 			bChatBoxVisible = false;
 			ChatInputTextBox->SetText(FText::FromString(""));
-			ChatInputTextBox->OnTextCommitted.RemoveDynamic(this, &UCharacterOverlay::OnTextComitted);
+			ChatInputTextBox->OnTextCommitted.RemoveDynamic(this, &UCharacterOverlay::TextComitted);
 		}
 	}
 	else
-    {
-     	ChatInputTextBox->SetVisibility(ESlateVisibility::Collapsed);
-     	BlasterPlayerController->SetInputMode(FInputModeGameOnly());
-     	bChatBoxVisible = false;
-		ChatInputTextBox->OnTextCommitted.RemoveDynamic(this, &UCharacterOverlay::OnTextComitted);
-    }
-	
+	{
+		ChatInputTextBox->SetVisibility(ESlateVisibility::Collapsed);
+		BlasterPlayerController->SetInputMode(FInputModeGameOnly());
+		bChatBoxVisible = false;
+		ChatInputTextBox->OnTextCommitted.RemoveDynamic(this, &UCharacterOverlay::TextComitted);
+	}
 }

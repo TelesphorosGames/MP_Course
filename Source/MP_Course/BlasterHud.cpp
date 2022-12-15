@@ -148,7 +148,7 @@ void ABlasterHud::AddElimAnnouncement(FString Attacker, FString Victim)
 	}
 }
 
-void ABlasterHud::AddChatAnnouncement(APlayerState* Sender, const FString& ChatMessage)
+void ABlasterHud::AddChatAnnouncement(const FString& SenderName, const FString& ChatMessage)
 {
 	if(OwningPlayerController && ElimAnnouncementClass)
 	{
@@ -156,7 +156,7 @@ void ABlasterHud::AddChatAnnouncement(APlayerState* Sender, const FString& ChatM
 		if(ChatAnnouncementWidget)
 		{
 			
-			ChatAnnouncementWidget->SetPlayerChatText(Sender, ChatMessage);
+			ChatAnnouncementWidget->SetPlayerChatText(SenderName, ChatMessage);
 			ChatAnnouncementWidget->AddToViewport();
 			
 			for(auto Msg : Announcements)

@@ -93,13 +93,18 @@ void ABlasterGameMode::PlayerEliminated(ABlasterCharacter* ElimPlayer, ABlasterP
 void ABlasterGameMode::BroadcastChatMessage(APlayerState* Sender, const FString& Message)
 {
 	
+	// CHAT CHECKS, CHAT SAFETY 
+	
 	for(FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
 	{
+		
 		ABlasterPlayerController* BlasterPlayer = Cast<ABlasterPlayerController>(*It);
 		if(BlasterPlayer)
 		{
-			BlasterPlayer->BroadcastToChat(Sender, Message);
+			FString SenderName = Sender->GetPlayerName();
+			BlasterPlayer->Client_ChatAnnouncement(SenderName, Message);
 		}
+		
 	}
 	
 }

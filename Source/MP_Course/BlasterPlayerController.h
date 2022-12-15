@@ -82,10 +82,12 @@ public:
 
 	void BroadcastEliminated(APlayerState* Attacker, APlayerState* Victim);
 	
-	void BroadcastToChat(APlayerState* Sender,const FString& Message);
-	
 	UFUNCTION(Server, Reliable)
 	void Server_BroadcastMessage(APlayerState* Sender, const FString& Message);
+
+	UFUNCTION(Client, Reliable)
+	void Client_ChatAnnouncement(const FString& SenderName, const FString& Message);
+	
 
 protected:
 
@@ -130,10 +132,7 @@ protected:
 	UFUNCTION(Client, Reliable)
 	void Client_ElimAnnouncement(APlayerState* Attacker, APlayerState* Victim);
 
-	UFUNCTION(Client, Reliable)
-	void Client_ChatAnnouncement(APlayerState* Sender, const FString& Message);
 	
-
 private:
 
 	UPROPERTY(EditAnywhere, Category="HUD");

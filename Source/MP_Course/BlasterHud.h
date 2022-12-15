@@ -64,7 +64,7 @@ public:
 	
 	void AddElimAnnouncement(FString Attacker, FString Victim);
 
-	void AddChatAnnouncement(APlayerState* Sender, const FString& ChatMessage);
+	void AddChatAnnouncement(const FString& SenderName, const FString& ChatMessage);
 	
 protected:
 
