@@ -12,7 +12,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
-#include "DrawDebugHelpers.h"
+// #include "DrawDebugHelpers.h"
 #include "Projectile.h"
 #include "Camera/CameraComponent.h"
 #include "Sound/SoundCue.h"
@@ -756,7 +756,7 @@ void UCombatComponent::TraceUnderCrosshairs(FHitResult& TraceHitResult)
 		{
 			const float DistanceToCharacter = (Character->GetActorLocation() - Start).Size();
 			Start+=CrosshairWorldDirection * (DistanceToCharacter + 30.f);
-			DrawDebugSphere(GetWorld(),Start, 16.f, 12, FColor::Red);
+			// DrawDebugSphere(GetWorld(),Start, 16.f, 12, FColor::Red);
 		}
 		
 		const FVector End = Start + CrosshairWorldDirection * 5'000;
@@ -792,7 +792,7 @@ void UCombatComponent::TraceUnderCrosshairs(FHitResult& TraceHitResult)
 	}
 	else
 	{
-		Debug("Nope");
+		
 	}
 }
 

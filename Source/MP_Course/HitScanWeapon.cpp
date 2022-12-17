@@ -8,7 +8,7 @@
 #include "Engine/SkeletalMeshSocket.h"
 #include "Kismet/GameplayStatics.h"
 #include "Particles/ParticleSystemComponent.h"
-#include "DrawDebugHelpers.h"
+// #include "DrawDebugHelpers.h"
 #include "LagCompensationComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Sound/SoundCue.h"
@@ -93,8 +93,8 @@ void AHitScanWeapon::WeaponTraceHit(const FVector& TraceStart, const FVector& Hi
 		{
 			BeamEnd= OutHit.ImpactPoint;
 		}
-
-		DrawDebugSphere(GetWorld(), BeamEnd, 16.f, 12, FColor::Magenta, true);
+		
+		// DrawDebugSphere(GetWorld(), BeamEnd, 16.f, 12, FColor::Magenta, true);
 
 		
 		if(BeamParticles)

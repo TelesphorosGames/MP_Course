@@ -380,7 +380,12 @@ void ABlasterPlayerController::OnPossess(APawn* InPawn)
 		SetHudHealth(BlasterCharacter->GetHealth(), BlasterCharacter->GetMaxHealth());
 		SetHudShields(BlasterCharacter->GetShields(), BlasterCharacter->GetMaxShields());
 		SetHudWeaponAmmo(30);
-		SetHudCarriedAmmo(50);		
+		SetHudCarriedAmmo(50);
+		const ABlasterPlayerState* BlasterPlayerState = BlasterCharacter->GetPlayerState<ABlasterPlayerState>();
+		if(BlasterPlayerState)
+		{
+			BlasterCharacter->SetTeamColor(BlasterPlayerState->GetTeam());
+		}
 	}
 	
 }
@@ -632,6 +637,7 @@ void ABlasterPlayerController::PollInit()
 				if(BlasterCharacter && BlasterCharacter->GetCombatComponent())
 				{
 					SetHudGrenades(BlasterCharacter->GetCombatComponent()->GetGrenades());
+					
 				}
 			}
 		}

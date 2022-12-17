@@ -240,8 +240,8 @@ FServerSideRewindResult ULagCompensationComponent::ProjectileConfirmHit(const FF
 	
 	PathParams.bTraceWithChannel = true;
 	PathParams.bTraceWithCollision = true;
-	PathParams.DrawDebugTime = 5.f;
-	PathParams.DrawDebugType = EDrawDebugTrace::ForDuration;
+	// PathParams.DrawDebugTime = 5.f;
+	// PathParams.DrawDebugType = EDrawDebugTrace::ForDuration;
 	PathParams.LaunchVelocity = InitialVelocity;
 	PathParams.MaxSimTime = MaxRecordFrameHistoryTime;
 	PathParams.ProjectileRadius = 5.f;

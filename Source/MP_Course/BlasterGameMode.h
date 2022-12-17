@@ -40,7 +40,8 @@ public:
 	void RemoveCharacterOverlay(ABlasterPlayerController* BlasterPlayer);
 
 	void PlayerLeftGame(ABlasterPlayerState* PlayerLeaving);
-	
+
+	virtual float CalculateDamage(AController* Attacker, AController* Victim, float BaseDamage);
 protected:
 
 	virtual void BeginPlay() override;

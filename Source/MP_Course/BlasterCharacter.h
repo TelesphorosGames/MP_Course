@@ -7,6 +7,7 @@
 #include "TurnInPlace.h"
 #include "IInteractWithCrosshairs.h"
 #include "CombatState.h"
+#include "TeamTypes.h"
 #include "BlasterCharacter.generated.h"
 
 
@@ -157,7 +158,7 @@ public:
 	UFUNCTION()
 	void UseChatBox();
 	
-
+	void SetTeamColor(ETeam Team);
 protected:
 
 	/** The input config that maps Input Actions to Input Tags*/
@@ -206,6 +207,9 @@ protected:
 	void ReceiveDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatorController, AActor* DamageCauser);
 	
 	void SpawnDefaultWeapon();
+
+	UPROPERTY()
+	USkeletalMeshComponent* TorsoComponent{};
 
 private:
 
@@ -308,4 +312,20 @@ private:
 
 	UPROPERTY()
 	bool bChatBoxVisible = false;
+
+
+	/* Team Colors 
+	*/
+
+	UPROPERTY(EditAnywhere)
+	class UMaterialInstance* TeamDefaultMaterial;
+
+	UPROPERTY(EditAnywhere)
+	class UMaterialInstance* TeamOneMaterial;
+	UPROPERTY(EditAnywhere)
+	UMaterialInstance* TeamTwoMaterial;
+
+	UPROPERTY()
+	class ABlasterGameMode* BlasterGameMode;
+	
 };

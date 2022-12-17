@@ -17,12 +17,31 @@ class MP_COURSE_API ABlasterGameState : public AGameState
 
 public:
 
-	UPROPERTY(Replicated)
-	TArray<ABlasterPlayerState*> TopScoringPlayers;
+	
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
+	
 	void UpdateTopScore(ABlasterPlayerState* ScoringPlayer);
+	
+	UPROPERTY(Replicated)
+	TArray<ABlasterPlayerState*> TopScoringPlayers;
+
+	
+	TArray<ABlasterPlayerState*> TeamOne;
+	TArray<ABlasterPlayerState*> TeamTwo;
+
+	void TeamOneScores();
+	void TeamTwoScores();
+	
+	UPROPERTY(ReplicatedUsing = OnRep_TeamOneScore)
+	float TeamOneScore = 0.f;
+	UFUNCTION()
+	void OnRep_TeamOneScore();
+	UPROPERTY(ReplicatedUsing = OnRep_TeamTwoScore)
+	float TeamTwoScore = 0.f;
+	UFUNCTION()
+	void OnRep_TeamTwoScore();
 	
 protected:
 
