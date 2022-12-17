@@ -86,6 +86,7 @@ void ABlasterGameMode::PlayerEliminated(ABlasterCharacter* ElimPlayer, ABlasterP
 		if(BlasterPlayer && AttackerPlayerState && VictimPlayerState)
 		{
 			BlasterPlayer->BroadcastEliminated(AttackerPlayerState, VictimPlayerState);
+			
 		}
 	}
 }
@@ -104,9 +105,7 @@ void ABlasterGameMode::BroadcastChatMessage(APlayerState* Sender, const FString&
 			FString SenderName = Sender->GetPlayerName();
 			BlasterPlayer->Client_ChatAnnouncement(SenderName, Message);
 		}
-		
 	}
-	
 }
 
 void ABlasterGameMode::FindFurthestPlayerStart(ACharacter* ElimmedCharacter, AActor*& FurthestPlayerStart)
@@ -137,28 +136,27 @@ void ABlasterGameMode::OnMatchStateSet()
 {
 	Super::OnMatchStateSet();
 	
-	// for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
-	for(ABlasterPlayerController*  BlasterPlayer : TActorRange<ABlasterPlayerController>(GetWorld()))
+	
+	for(ABlasterPlayerController* BlasterPlayer : TActorRange<ABlasterPlayerController>(GetWorld()))
 	{
-		// ABlasterPlayerController* BlasterPlayer = Cast<ABlasterPlayerController>(*It);
 		if(BlasterPlayer)
 		{
 			UE_LOG(LogTemp,Warning, TEXT("%s"), *BlasterPlayer->GetName());
-			BlasterPlayer->OnMatchStateSet(MatchState);
+			BlasterPlayer->OnMatchStateSet(MatchState, bTeamMatch);
+			
 		}
-		
 	}
 }
 
 void ABlasterGameMode::RemoveCharacterOverlay(ABlasterPlayerController* BlasterPlayer)
 {
 	if(BlasterPlayer &&
-		BlasterPlayer->BlasterHud &&
-		BlasterPlayer->BlasterHud->CharacterOverlay
-		)
-		{
+	BlasterPlayer->BlasterHud &&
+	BlasterPlayer->BlasterHud->CharacterOverlay
+	)
+	{
 		BlasterPlayer->BlasterHud->RemoveCharacterOverlay();
-		}
+	}
 	
 	if(BlasterPlayer &&
 		BlasterPlayer->BlasterHud &&

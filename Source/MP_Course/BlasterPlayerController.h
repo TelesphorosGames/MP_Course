@@ -43,10 +43,16 @@ public:
 	void SetHUDAnnouncementCountdown(float Time);
 	void OnPossess(APawn* InPawn) override;
 
-	void OnMatchStateSet(FName State);
+	void OnMatchStateSet(FName State, bool bTeamMatch = false);
 	void RemoveOverlay();
-	void HandleMatchHasStarted();
+	void HandleMatchHasStarted(bool bTeamMatch = false);
 	void HandleCooldown();
+
+	void HideTeamScores();
+	void InitTeamsScores();
+
+	void SetHudTeamOneScore(int32 TeamOneScore);
+	void SetHudTeamTwoScore(int32 TeamTwoScore);
 
 	
 	// Synced with server world clock
@@ -88,7 +94,11 @@ public:
 	UFUNCTION(Client, Reliable)
 	void Client_ChatAnnouncement(const FString& SenderName, const FString& Message);
 	
+	UFUNCTION(Client, Reliable)
+	void Client_ElimAnnouncement(APlayerState* Attacker, APlayerState* Victim);
 
+
+	
 protected:
 
 	virtual void BeginPlay() override;
@@ -97,6 +107,11 @@ protected:
 	virtual void SetupInputComponent() override;
 	
 	void SetHudTime();
+	void InitializeTeamScores();
+
+	UPROPERTY()
+	bool bTeamScoresInitialized = false;
+	
 	void PollInit();
 	
 	// Sync time between Client and Server :
@@ -129,10 +144,12 @@ protected:
 
 	void ShowReturnToMainMenu();
 
-	UFUNCTION(Client, Reliable)
-	void Client_ElimAnnouncement(APlayerState* Attacker, APlayerState* Victim);
 
-	
+	UPROPERTY(ReplicatedUsing=OnRep_ShowTeamScores)
+	bool bShowTeamScores = false;
+
+	UFUNCTION()
+	void OnRep_ShowTeamScores();
 private:
 
 	UPROPERTY(EditAnywhere, Category="HUD");

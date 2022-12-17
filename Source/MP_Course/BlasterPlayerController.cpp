@@ -53,6 +53,7 @@ void ABlasterPlayerController::GetLifetimeReplicatedProps(TArray<FLifetimeProper
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(ABlasterPlayerController, BlasterMatchState);
+	DOREPLIFETIME(ABlasterPlayerController, bShowTeamScores);
 }
 
 void ABlasterPlayerController::ReceivedPlayer()
@@ -123,7 +124,8 @@ void ABlasterPlayerController::Tick(float DeltaSeconds)
 									bScoreInitialized &&
 									bShieldInitialized &&
 									bHudCarriedAmmoInitialized &&
-									bHudWeaponAmmoInitizalized);
+									bHudWeaponAmmoInitizalized &&
+									bTeamScoresInitialized);
 	
 	
 	PollInit();
@@ -381,6 +383,7 @@ void ABlasterPlayerController::OnPossess(APawn* InPawn)
 		SetHudShields(BlasterCharacter->GetShields(), BlasterCharacter->GetMaxShields());
 		SetHudWeaponAmmo(30);
 		SetHudCarriedAmmo(50);
+		
 		const ABlasterPlayerState* BlasterPlayerState = BlasterCharacter->GetPlayerState<ABlasterPlayerState>();
 		if(BlasterPlayerState)
 		{
@@ -390,17 +393,18 @@ void ABlasterPlayerController::OnPossess(APawn* InPawn)
 	
 }
 
-void ABlasterPlayerController::OnMatchStateSet(FName State)
+void ABlasterPlayerController::OnMatchStateSet(FName State, bool bTeamMatch)
 {
 	BlasterMatchState = State;
 
 	if(BlasterMatchState == MatchState::WaitingToStart)
 	{
+		
 	}
 	
 	if(BlasterMatchState == MatchState::InProgress)
 	{
-		HandleMatchHasStarted();
+		HandleMatchHasStarted(bTeamMatch);
 	}
 	else if(BlasterMatchState==MatchState::WaitingPostMatch)
 	{
@@ -453,8 +457,13 @@ void ABlasterPlayerController::Server_ReportPingStatus_Implementation(bool bHigh
 	HighPingDelegate.Broadcast(bHighPing);
 }
 
-void ABlasterPlayerController::HandleMatchHasStarted()
+void ABlasterPlayerController::HandleMatchHasStarted(bool bTeamMatch)
 {
+	if(HasAuthority())
+	{
+		bShowTeamScores = bTeamMatch;
+	}
+	
 	if(BlasterHud == nullptr)
 	{
 		BlasterHud = Cast<ABlasterHud>(GetHUD());
@@ -466,7 +475,16 @@ void ABlasterPlayerController::HandleMatchHasStarted()
 		if(BlasterHud->AnnouncementWidget)
 		{
 			BlasterHud->AnnouncementWidget->SetVisibility(ESlateVisibility::Hidden);
-			
+		}
+
+		if(!HasAuthority()) return;
+		if(bTeamMatch)
+		{
+			InitTeamsScores();
+		}
+		else
+		{
+			HideTeamScores();
 		}
 	}
 }
@@ -524,6 +542,90 @@ void ABlasterPlayerController::HandleCooldown()
 	}
 }
 
+void ABlasterPlayerController::HideTeamScores()
+{
+	if(BlasterHud == nullptr)
+	{
+		BlasterHud = Cast<ABlasterHud>(GetHUD());
+	}
+	if(BlasterHud)
+	{
+		if(BlasterHud->CharacterOverlay &&
+			BlasterHud->CharacterOverlay->TeamOneScore &&
+			BlasterHud->CharacterOverlay->TeamTwoScore)
+		{
+			BlasterHud->CharacterOverlay->TeamOneScore->SetText(FText());
+			BlasterHud->CharacterOverlay->TeamTwoScore->SetText(FText());
+			BlasterHud->CharacterOverlay->TeamTwoScoreText->SetVisibility(ESlateVisibility::Hidden);
+			BlasterHud->CharacterOverlay->TeamOneScoreText->SetVisibility(ESlateVisibility::Hidden);
+			bTeamScoresInitialized = true;
+		}
+	}
+}
+
+void ABlasterPlayerController::InitTeamsScores()
+{
+	if(BlasterHud == nullptr)
+	{
+		BlasterHud = Cast<ABlasterHud>(GetHUD());
+	}
+	if(BlasterHud)
+	{
+		if(BlasterHud->CharacterOverlay &&
+			BlasterHud->CharacterOverlay->TeamOneScore &&
+			BlasterHud->CharacterOverlay->TeamTwoScore &&
+			BlasterHud->CharacterOverlay->TeamOneScoreText &&
+			BlasterHud->CharacterOverlay->TeamTwoScoreText)
+		{
+			const FString Zero("0");
+			
+			BlasterHud->CharacterOverlay->TeamOneScore->SetText(FText::FromString(Zero));
+			BlasterHud->CharacterOverlay->TeamTwoScore->SetText(FText::FromString(Zero));
+			BlasterHud->CharacterOverlay->TeamTwoScoreText->SetVisibility(ESlateVisibility::Visible);
+			BlasterHud->CharacterOverlay->TeamOneScoreText->SetVisibility(ESlateVisibility::Visible);
+			bTeamScoresInitialized = true;
+		}
+	}
+}
+
+void ABlasterPlayerController::SetHudTeamOneScore(int32 TeamOneScore)
+{
+	if(BlasterHud == nullptr)
+	{
+		BlasterHud = Cast<ABlasterHud>(GetHUD());
+	}
+	if(BlasterHud)
+	{
+		if(BlasterHud->CharacterOverlay &&
+			BlasterHud->CharacterOverlay->TeamOneScore)
+		{
+			const FString ScoreText = FString::Printf(TEXT("%d"), TeamOneScore);
+			
+			BlasterHud->CharacterOverlay->TeamOneScore->SetText(FText::FromString(ScoreText));
+			
+		}
+	}
+}
+
+void ABlasterPlayerController::SetHudTeamTwoScore(int32 TeamTwoScore)
+{
+	if(BlasterHud == nullptr)
+	{
+		BlasterHud = Cast<ABlasterHud>(GetHUD());
+	}
+	if(BlasterHud)
+	{
+		if(BlasterHud->CharacterOverlay &&
+			BlasterHud->CharacterOverlay->TeamTwoScore)
+		{
+			const FString ScoreText = FString::Printf(TEXT("%d"), TeamTwoScore);
+			
+			BlasterHud->CharacterOverlay->TeamTwoScore->SetText(FText::FromString(ScoreText));
+			
+		}
+	}
+}
+
 void ABlasterPlayerController::Server_CheckMatchState_Implementation()
 {
 	if(BlasterGameMode == nullptr)
@@ -538,6 +640,7 @@ void ABlasterPlayerController::Server_CheckMatchState_Implementation()
 		CoolDownTime = BlasterGameMode->GetCooldownTime();
 		BlasterMatchState = BlasterGameMode->GetMatchState();
 		Client_JoinMidGame(BlasterMatchState, WarmupTime, MatchTime, LevelStartingTime, CoolDownTime);
+	
 	}
 }
 
@@ -558,6 +661,7 @@ void ABlasterPlayerController::Client_JoinMidGame_Implementation(FName StateOfMa
 	{
 		BlasterHud->AddAnnouncement();
 	}
+	
 }
 
 void ABlasterPlayerController::SetHudTime()
@@ -617,6 +721,26 @@ if(BlasterMatchState == MatchState::InProgress)
 	CountDownInt = SecondsLeft;
 }
 
+void ABlasterPlayerController::InitializeTeamScores()
+{
+	
+	if(BlasterGameMode == nullptr)
+	{
+		BlasterGameMode = Cast<ABlasterGameMode>(UGameplayStatics::GetGameMode(this));
+	}
+	if(!BlasterGameMode) return;
+
+	if(BlasterGameMode->bTeamMatch)
+	{
+		InitTeamsScores();
+	}
+	else
+	{
+		HideTeamScores();
+	}
+
+}
+
 void ABlasterPlayerController::PollInit()
 {
 	if(bInitializeCharacterOverlay) return;
@@ -632,12 +756,12 @@ void ABlasterPlayerController::PollInit()
 				SetHudDefeats(HudDefeats);
 				SetHudCarriedAmmo(HudCarriedAmmo);
 				SetHudWeaponAmmo(HudWeaponAmmo);
+				InitializeTeamScores();
 				
 				ABlasterCharacter* BlasterCharacter = Cast<ABlasterCharacter>(GetPawn());
 				if(BlasterCharacter && BlasterCharacter->GetCombatComponent())
 				{
 					SetHudGrenades(BlasterCharacter->GetCombatComponent()->GetGrenades());
-					
 				}
 			}
 		}
@@ -645,6 +769,7 @@ void ABlasterPlayerController::PollInit()
 	{
 		BlasterHud->AddAnnouncement();
 	}
+	
 	
 }
 
@@ -732,6 +857,18 @@ void ABlasterPlayerController::ShowReturnToMainMenu()
 	
 }
 
+void ABlasterPlayerController::OnRep_ShowTeamScores()
+{
+	if(bShowTeamScores)
+	{
+		InitTeamsScores();
+	}
+	else
+	{
+		HideTeamScores();
+	}
+}
+
 void ABlasterPlayerController::Client_ChatAnnouncement_Implementation(const FString& SenderName, const FString& Message)
 {
 	if(BlasterHud == nullptr)
@@ -783,7 +920,9 @@ void ABlasterPlayerController::Client_ElimAnnouncement_Implementation(APlayerSta
 
 void ABlasterPlayerController::BroadcastEliminated(APlayerState* Attacker, APlayerState* Victim)
 {
+	
 	Client_ElimAnnouncement(Attacker, Victim);
+	
 }
 
 

@@ -8,6 +8,11 @@
 #include "MP_Course/BlasterPlayerState.h"
 
 
+ATeamGameMode::ATeamGameMode()
+{
+	bTeamMatch = true;
+}
+
 void ATeamGameMode::PostLogin(APlayerController* NewPlayer)
 {
 	Super::PostLogin(NewPlayer);

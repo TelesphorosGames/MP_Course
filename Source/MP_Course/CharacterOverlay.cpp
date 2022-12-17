@@ -29,7 +29,6 @@ void UCharacterOverlay::ToggleChatBox()
 		else
 		{
 			ChatInputTextBox->OnTextCommitted.RemoveDynamic(this, &UCharacterOverlay::TextComitted);
-
 			ChatInputTextBox->SetVisibility(ESlateVisibility::Collapsed);
 			BlasterPlayerController->SetInputMode(FInputModeGameOnly());
 			bChatBoxVisible = false;

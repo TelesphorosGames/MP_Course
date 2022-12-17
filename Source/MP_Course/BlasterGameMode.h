@@ -42,6 +42,8 @@ public:
 	void PlayerLeftGame(ABlasterPlayerState* PlayerLeaving);
 
 	virtual float CalculateDamage(AController* Attacker, AController* Victim, float BaseDamage);
+
+	bool bTeamMatch = false;
 protected:
 
 	virtual void BeginPlay() override;
