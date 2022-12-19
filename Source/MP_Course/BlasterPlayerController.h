@@ -107,10 +107,6 @@ protected:
 	virtual void SetupInputComponent() override;
 	
 	void SetHudTime();
-	void InitializeTeamScores();
-
-	UPROPERTY()
-	bool bTeamScoresInitialized = false;
 	
 	void PollInit();
 	
@@ -143,8 +139,7 @@ protected:
 	void StopHighPingWarning();
 
 	void ShowReturnToMainMenu();
-
-
+	
 	UPROPERTY(ReplicatedUsing=OnRep_ShowTeamScores)
 	bool bShowTeamScores = false;
 

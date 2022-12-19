@@ -124,8 +124,8 @@ void ABlasterPlayerController::Tick(float DeltaSeconds)
 									bScoreInitialized &&
 									bShieldInitialized &&
 									bHudCarriedAmmoInitialized &&
-									bHudWeaponAmmoInitizalized &&
-									bTeamScoresInitialized);
+									bHudWeaponAmmoInitizalized
+									);
 	
 	
 	PollInit();
@@ -440,6 +440,7 @@ void ABlasterPlayerController::OnRep_MatchState()
 	if(BlasterMatchState == MatchState::InProgress)
 	{
 		HandleMatchHasStarted();
+		
 	}
 	else if(BlasterMatchState==MatchState::WaitingPostMatch)
 	{
@@ -476,8 +477,9 @@ void ABlasterPlayerController::HandleMatchHasStarted(bool bTeamMatch)
 		{
 			BlasterHud->AnnouncementWidget->SetVisibility(ESlateVisibility::Hidden);
 		}
-
+		
 		if(!HasAuthority()) return;
+		
 		if(bTeamMatch)
 		{
 			InitTeamsScores();
@@ -558,7 +560,7 @@ void ABlasterPlayerController::HideTeamScores()
 			BlasterHud->CharacterOverlay->TeamTwoScore->SetText(FText());
 			BlasterHud->CharacterOverlay->TeamTwoScoreText->SetVisibility(ESlateVisibility::Hidden);
 			BlasterHud->CharacterOverlay->TeamOneScoreText->SetVisibility(ESlateVisibility::Hidden);
-			bTeamScoresInitialized = true;
+		
 		}
 	}
 }
@@ -583,7 +585,7 @@ void ABlasterPlayerController::InitTeamsScores()
 			BlasterHud->CharacterOverlay->TeamTwoScore->SetText(FText::FromString(Zero));
 			BlasterHud->CharacterOverlay->TeamTwoScoreText->SetVisibility(ESlateVisibility::Visible);
 			BlasterHud->CharacterOverlay->TeamOneScoreText->SetVisibility(ESlateVisibility::Visible);
-			bTeamScoresInitialized = true;
+		
 		}
 	}
 }
@@ -721,26 +723,6 @@ if(BlasterMatchState == MatchState::InProgress)
 	CountDownInt = SecondsLeft;
 }
 
-void ABlasterPlayerController::InitializeTeamScores()
-{
-	
-	if(BlasterGameMode == nullptr)
-	{
-		BlasterGameMode = Cast<ABlasterGameMode>(UGameplayStatics::GetGameMode(this));
-	}
-	if(!BlasterGameMode) return;
-
-	if(BlasterGameMode->bTeamMatch)
-	{
-		InitTeamsScores();
-	}
-	else
-	{
-		HideTeamScores();
-	}
-
-}
-
 void ABlasterPlayerController::PollInit()
 {
 	if(bInitializeCharacterOverlay) return;
@@ -756,7 +738,7 @@ void ABlasterPlayerController::PollInit()
 				SetHudDefeats(HudDefeats);
 				SetHudCarriedAmmo(HudCarriedAmmo);
 				SetHudWeaponAmmo(HudWeaponAmmo);
-				InitializeTeamScores();
+				
 				
 				ABlasterCharacter* BlasterCharacter = Cast<ABlasterCharacter>(GetPawn());
 				if(BlasterCharacter && BlasterCharacter->GetCombatComponent())
